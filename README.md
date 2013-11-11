@@ -1,12 +1,10 @@
 iTag
 ====
 
-Automatically tag a geographical footprint against Land Cover and OSM data. Check running instance [here] (http://mapshup.info/itag).
+Automatically tag a geographical footprint against Land Cover and OSM data.
+Check running instance [here] (http://mapshup.info/itag).
 
-Example : tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output
-    
-        http://mapshup/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
-
+Check a [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597) and access trough [mapshup] (http://mapshup.info)
 
 Installation
 ============
@@ -117,6 +115,12 @@ Available parameters for Web service are :
 * &landcover=true
 
 You can check this [running instance] (http://mapshup/itag/) - (note : landcover is disabled on this server)
+
+
+Example : tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output
+    
+        http://mapshup/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
+
 
 About data
 ==========
