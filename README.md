@@ -4,7 +4,7 @@ iTag
 Automatically tag a geographical footprint against Land Cover and OSM data.
 Check running instance [here] (http://mapshup.info/itag).
 
-Check a [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597) and access trough [mapshup] (http://mapshup.info)
+See [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597) and access trough [mapshup] (http://mapshup.info)
 
 Installation
 ============
