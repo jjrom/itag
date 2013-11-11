@@ -1,7 +1,12 @@
 iTag
 ====
 
-Automatically tag a geographical footprint against Land Cover and OSM data
+Automatically tag a geographical footprint against Land Cover and OSM data. Check running instance [here] (http://mapshup.info/itag).
+
+Example : tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output
+    
+        http://mapshup/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
+
 
 Installation
 ============
@@ -34,7 +39,7 @@ Step by step
 3. Populate database
 
         cd $ITAG_HOME/installation/
-        ./itagPopulateDB.sh -d data
+        ./itagPopulateDB.sh -D data
 
 4. Configure
 
@@ -103,6 +108,15 @@ To tag footprint on Toulouse with geophysical information and all cities with a 
     
         http://localhost/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
 
+Available parameters for Web service are :
+* &countries=true
+* &cities=main (or &cities=all)
+* &population=true
+* &geophysical=true
+* &regions=true
+* &landcover=true
+
+You can check running instance at http://mapshup/itag/ (note landcover is disabled on this server)
 
 About data
 ==========
