@@ -229,6 +229,21 @@ if ($dbInfos) {
                     tostdin($result["identifier"], $arr["cities"], "CITY", $tableName, $identifierColumn, $hstoreColumn, $output);
                 }
             }
+            
+            if ($hasGeophysical) {
+                $arr = getGeophysical($dbh, $isShell, $result["footprint"]);
+                tostdin($result["identifier"], $arr["volcanoes"], "VOLCANO", $tableName, $identifierColumn, $hstoreColumn, $output);
+            }
+
+            if ($hasLandCover) {
+                $arr = getLandCover($dbh, $isShell, $result["footprint"]);
+                $landUse = split(LIST_SEPARATOR, $arr["landUse"]);
+                for ($i = 0, $l = count($landUse); $i < $l; $i++) {
+                    
+                    tostdin($result["identifier"], $landUse[$i], "LANDCOVER_".($i+1), $tableName, $identifierColumn, $hstoreColumn, $output);
+                }
+                
+            }
         }
         
     }
