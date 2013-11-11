@@ -218,29 +218,34 @@ if ($dbInfos) {
                 
                 $arr = getPolitical($dbh, $isShell, $result["footprint"], $citiesType, $hasRegions);
                 
-                // Continents
-                tostdin($result["identifier"], $arr["continents"], "CONTINENT", $tableName, $identifierColumn, $hstoreColumn, $output);
-                
-                // Countries
-                tostdin($result["identifier"], $arr["countries"], "COUNTRY", $tableName, $identifierColumn, $hstoreColumn, $output);
-                
-                // Cities
-                if (isset($arr["cities"])) {
-                    tostdin($result["identifier"], $arr["cities"], "CITY", $tableName, $identifierColumn, $hstoreColumn, $output);
+                if ($arr) {
+                    // Continents
+                    tostdin($result["identifier"], $arr["continents"], "CONTINENT", $tableName, $identifierColumn, $hstoreColumn, $output);
+
+                    // Countries
+                    tostdin($result["identifier"], $arr["countries"], "COUNTRY", $tableName, $identifierColumn, $hstoreColumn, $output);
+
+                    // Cities
+                    if (isset($arr["cities"])) {
+                        tostdin($result["identifier"], $arr["cities"], "CITY", $tableName, $identifierColumn, $hstoreColumn, $output);
+                    }
                 }
             }
             
             if ($hasGeophysical) {
                 $arr = getGeophysical($dbh, $isShell, $result["footprint"]);
-                tostdin($result["identifier"], $arr["volcanoes"], "VOLCANO", $tableName, $identifierColumn, $hstoreColumn, $output);
+                if ($arr) {
+                    tostdin($result["identifier"], $arr["volcanoes"], "VOLCANO", $tableName, $identifierColumn, $hstoreColumn, $output);
+                }
             }
 
             if ($hasLandCover) {
                 $arr = getLandCover($dbh, $isShell, $result["footprint"]);
-                $landUse = split(LIST_SEPARATOR, $arr["landUse"]);
-                for ($i = 0, $l = count($landUse); $i < $l; $i++) {
-                    
-                    tostdin($result["identifier"], $landUse[$i], "LANDCOVER_".($i+1), $tableName, $identifierColumn, $hstoreColumn, $output);
+                if ($arr) {
+                    $landUse = split(LIST_SEPARATOR, $arr["landUse"]);
+                    for ($i = 0, $l = count($landUse); $i < $l; $i++) {
+                        tostdin($result["identifier"], $landUse[$i], "LANDCOVER_".($i+1), $tableName, $identifierColumn, $hstoreColumn, $output);
+                    }
                 }
                 
             }
