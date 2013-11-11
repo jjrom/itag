@@ -89,17 +89,6 @@ psql -U $SUPERUSER -d $DB << EOF
 GRANT ALL ON geometry_columns to $USER;
 GRANT ALL ON geography_columns to $USER;
 GRANT SELECT on spatial_ref_sys to $USER;
-GRANT SELECT on airports to $USER;
-GRANT SELECT on cities to $USER;
-GRANT SELECT on geoname to $USER;
-GRANT SELECT on deptsfrance to $USER;
-GRANT SELECT on continents to $USER;
-GRANT SELECT on countries to $USER;
-GRANT SELECT on earthquakes to $USER;
-GRANT SELECT on glaciers to $USER;
-GRANT SELECT on plates to $USER;
-GRANT SELECT on faults to $USER;
-GRANT SELECT on volcanoes to $USER;
 EOF
 
 
