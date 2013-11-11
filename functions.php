@@ -418,7 +418,9 @@ function getLandCover($dbh, $isShell, $footprint) {
     $query = "SELECT dn as dn, st_area($geom) as totalarea, st_area(st_intersection(wkb_geometry, $geom)) as area FROM $tmpTable WHERE st_intersects(wkb_geometry, $geom)";
     $results = pg_query($dbh, $query);
     if (!$results) {
-        error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+        echo "-- Error for $footprint - skip\n";
+        return null;
+        //error($dbh, $isShell, "\nFATAL : database connection error\n\n");
     }
 
     // Store results in $out array
