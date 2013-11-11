@@ -116,7 +116,7 @@ Available parameters for Web service are :
 * &regions=true
 * &landcover=true
 
-You can check this [running instance (http://mapshup/itag/) - (note : landcover is disabled on this server)
+You can check this [running instance] (http://mapshup/itag/) - (note : landcover is disabled on this server)
 
 About data
 ==========
