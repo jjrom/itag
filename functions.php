@@ -391,13 +391,16 @@ function getLandCover($dbh, $isShell, $footprint) {
 
     // Crop GLC2000 raster
     $cropOrigin = cropOriginGLC2000(bbox($footprint));
+       
     $srcWin = $cropOrigin['x'] . ' ' . $cropOrigin['y'] . ' ' . $cropOrigin['xsize'] . ' ' . $cropOrigin['ysize'];
 
     // Avoid crashing the machine with big crops (2x2 square degrees)
-    if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
-        error($dbh, $isShell, "\nFATAL : input footprint should be smaller than 2x2 square degrees\n\n");
+    if (!isShell) {
+        if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
+            error($dbh, $isShell, "\nFATAL : input footprint should be smaller than 2x2 square degrees\n\n");
+        }
     }
-
+    
     // Crop GLC2000 raster to $srcWin 
     exec(GDAL_TRANSLATE_PATH . " -of GTiff -srcwin " . $srcWin . " -a_srs EPSG:4326 " . GLC2000_TIFF . " /tmp/" . $tmpTable . ".tif");
 
