@@ -160,7 +160,11 @@ if ($dbInfos) {
     $identifierColumn = $dbInfos[6];
     $geometryColumn = $dbInfos[7];
     $hstoreColumn = "keywords";
-    
+    // hstore is the default output !
+    if (!isset($output) || $output !== 'copy' || $output !== 'insert') {
+       $output = 'hstore';
+    }
+            
     /*
      * HSTORE
      */
