@@ -92,8 +92,7 @@ UPDATE countries set name='South Sudan' WHERE iso_a3 = 'SSD';
 UPDATE countries set name='Solomon Islands' WHERE iso_a3 = 'SLB';
 UPDATE countries set name='Western Sahara' WHERE iso_a3 = 'ESH';
 UPDATE countries set name='Ivory Coast' WHERE iso_a3 = 'CIV';
-
-
+UPDATE countries set name='Laos' WHERE iso_a3 = 'LAO';
 
 CREATE INDEX idx_countries_name ON public.countries (name);
 CREATE INDEX idx_countries_geom ON public.countries USING gist(geom);
