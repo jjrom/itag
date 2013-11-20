@@ -139,6 +139,8 @@ ALTER TABLE geoname ADD COLUMN searchname VARCHAR(200);
 UPDATE geoname SET searchname = lower(replace(replace(asciiname, '-', ''), ' ', ''));
 UPDATE geoname SET searchname = replace(searchname, '`', '');
 CREATE INDEX idx_geoname_searchname ON public.geoname (searchname);
+ALTER TABLE geoname ADD COLUMN countryname VARCHAR(200);
+UPDATE geoname SET countryname=(SELECT name FROM countries WHERE geoname.country = countries.iso_a2 LIMIT 1);
 EOF
 
 ## French departments
