@@ -135,6 +135,10 @@ SELECT AddGeometryColumn ('public','geoname','geom',4326,'POINT',2);
 UPDATE geoname SET geom = ST_PointFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
 CREATE INDEX idx_geoname_geom ON public.geoname USING gist(geom);
 CREATE INDEX idx_geoname_name ON public.geoname (name);
+ALTER TABLE geoname ADD COLUMN searchname VARCHAR(200);
+UPDATE geoname SET searchname = lower(replace(replace(asciiname, '-', ''), ' ', ''));
+UPDATE geoname SET searchname = replace(searchname, '`', '');
+CREATE INDEX idx_geoname_searchname ON public.geoname (searchname);
 EOF
 
 ## French departments
