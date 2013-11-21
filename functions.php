@@ -513,33 +513,40 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
  * @param {DatabaseConnection} $dbh
  * 
  */
-function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions) {
+function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $continentOnly) {
 
     $result = array();
     
-    // Continents and countries
-    $query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
-    $results = pg_query($dbh, $query);
-    $countries = array();
-    $continents = array();
-    if (!$results) {
-        error($dbh, $isShell, "\nFATAL : database connection error\n\n");
-    }
-    while ($element = pg_fetch_assoc($results)) {
-        if (isset($element['continent']) && $element['continent']) {
-            array_push($continents, $element['continent']);
-        }
-        if (isset($element['continent']) && $element['continent']) {
-            array_push($countries, $element['name']);
+    if ($continentOnly) {
+        $continents = getKeywords($dbh, $isShell, "continents", "continent", $footprint, "continent");
+        if (count($continents) > 0) {
+            $result['continents'] = join(LIST_SEPARATOR, $continents);
         }
     }
-    if (count($countries) > 0) {
-        $result['countries'] = join(LIST_SEPARATOR, $countries);
+    else {
+        // Continents and countries
+        $query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+        $results = pg_query($dbh, $query);
+        $countries = array();
+        $continents = array();
+        if (!$results) {
+            error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+        }
+        while ($element = pg_fetch_assoc($results)) {
+            if (isset($element['continent']) && $element['continent']) {
+                array_push($continents, $element['continent']);
+            }
+            if (isset($element['continent']) && $element['continent']) {
+                array_push($countries, $element['name']);
+            }
+        }
+        if (count($countries) > 0) {
+            $result['countries'] = join(LIST_SEPARATOR, $countries);
+        }
+        if (count($continents) > 0) {
+            $result['continents'] = join(LIST_SEPARATOR, $continents);
+        }
     }
-    if (count($continents) > 0) {
-        $result['continents'] = join(LIST_SEPARATOR, $continents);
-    }
-    
     // Regions
     if ($hasRegions) {
         $regions = getKeywords($dbh, $isShell, "deptsfrance", "nom_region", $footprint, "nom_region");
