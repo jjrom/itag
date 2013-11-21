@@ -51,6 +51,7 @@ $isShell = !empty($_SERVER['SHELL']);
 // What to compute
 $output = 'json';
 $hasCountries = false;
+$continentsOnly = false;
 $citiesType = null;
 $hasGeophysical = false;
 $hasPopulation = false;
@@ -63,6 +64,7 @@ if ($isShell) {
     $help .= "OPTIONS:\n";
     $help .= "   -o [type] : output (json|pretty|insert|copy|hstore) - Note : if -d is choosen only 'hstore', 'insert' and 'copy' are used \n";
     $help .= "   -c : Countries\n";
+    $help .= "   -x : If true only continents are intersected without countries\n";
     $help .= "   -C : Cities (main|all)\n";
     $help .= "   -R : French Regions and departements\n";
     $help .= "   -p : Compute population\n";
@@ -70,7 +72,7 @@ if ($isShell) {
     $help .= "   -l : compute land cover (i.e. Thematical content - forest, water, urban, etc.\n";
     $help .= "   -d : DB connection info - dbhost:dbname:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n";
     $help .= "\n\n";
-    $options = getopt("cC:Rpgld:f:o:h");
+    $options = getopt("cxC:Rpgld:f:o:h");
     foreach ($options as $option => $value) {
         if ($option === "f") {
             $footprint = $value;
@@ -83,6 +85,9 @@ if ($isShell) {
         }
         if ($option === "c") {
             $hasCountries = true;
+        }
+        if ($option === "c") {
+            $continentsOnly = true;
         }
         if ($option === "C") {
             $citiesType = $value;
@@ -218,9 +223,9 @@ if ($dbInfos) {
         }
 
         while ($result = pg_fetch_assoc($results)) {
-            if ($hasCountries || $citiesType || $hasRegions) {
+            if ($hasCountries || $citiesType || $hasRegions || $continentsOnly) {
                 
-                $arr = getPolitical($dbh, $isShell, $result["footprint"], $citiesType, $hasRegions);
+                $arr = getPolitical($dbh, $isShell, $result["footprint"], $citiesType, $hasRegions, $continentsOnly);
                 
                 if ($arr) {
                     // Continents
@@ -291,8 +296,8 @@ else {
         'properties' => array()
     );
 
-    if ($hasCountries || $citiesType || $hasRegions) {
-        $feature['properties']['political'] = getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions);
+    if ($hasCountries || $citiesType || $hasRegions || $continentsOnly) {
+        $feature['properties']['political'] = getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $continentsOnly);
     }
 
     if ($hasGeophysical) {
