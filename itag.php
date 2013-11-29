@@ -86,7 +86,7 @@ if ($isShell) {
         if ($option === "c") {
             $hasCountries = true;
         }
-        if ($option === "c") {
+        if ($option === "x") {
             $continentsOnly = true;
         }
         if ($option === "C") {
