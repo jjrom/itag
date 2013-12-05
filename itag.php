@@ -177,7 +177,7 @@ if ($dbInfos) {
         echo "-- Enable hstore in database \n";
         echo "CREATE EXTENSION hstore;\n\n";
         echo "-- Add keywords column to table " . $tableName . " \n";
-        echo "ALTER TABLE " . $tableName . " ADD COLUMN keywords hstore;\n";
+        echo "ALTER TABLE " . $tableName . " ADD COLUMN keywords hstore DEFAULT '';\n";
         echo "\n";
     }
     
