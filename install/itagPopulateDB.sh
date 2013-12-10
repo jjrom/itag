@@ -39,13 +39,15 @@
 SUPERUSER=postgres
 DB=itag
 USER=itag
-usage="## iTag populate installation\n\n  Usage $0 -D <data directory> [-d <database name> -s <database SUPERUSER> -u <database USER> -F]\n\n  -D : absolute path to the data directory containing countries,continents,etc.\n  -s : database SUPERUSER (default "postgres")\n  -u : database USER (default "itag")\n  -d : database nam (default "itag")\n"
+HOSTNAME=localhost
+usage="## iTag populate installation\n\n  Usage $0 -D <data directory> [-d <database name> -s <database SUPERUSER> -u <database USER> -F -H <server HOSTNAME>]\n\n  -D : absolute path to the data directory containing countries,continents,etc.\n  -s : database SUPERUSER (default "postgres")\n  -u : database USER (default "itag")\n  -d : database name (default "itag")\n  -H : postgres server hostname (default localhost)"
 while getopts "D:d:s:u:hF" options; do
     case $options in
         D ) DATADIR=`echo $OPTARG`;;
         d ) DB=`echo $OPTARG`;;
         u ) USER=`echo $OPTARG`;;
         s ) SUPERUSER=`echo $OPTARG`;;
+        H ) HOSTNAME=`echo $OPTARG`;;
         h ) echo -e $usage;;
         \? ) echo -e $usage
             exit 1;;
@@ -61,14 +63,14 @@ fi
 
 # ================== POLITICAL =====================
 ## Insert Continents
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp continents | psql -d $DB -U $SUPERUSER
-psql -d itag  -U $SUPERUSER << EOF
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp continents | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+psql -d itag  -U $SUPERUSER -h $HOSTNAME<< EOF
 CREATE INDEX idx_continents_name ON public.continents (continent);
 EOF
 
 ## Insert Countries
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp countries | psql -d $DB -U $SUPERUSER
-psql -d $DB  -U $SUPERUSER << EOF
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp countries | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+psql -d $DB  -U $SUPERUSER -h $HOSTNAME << EOF
 --
 -- This is for WorldCountries not for ne_110m_admin_0_countries
 -- UPDATE countries set name='Congo' WHERE iso_3166_3='ZAR';
@@ -99,15 +101,15 @@ CREATE INDEX idx_countries_geom ON public.countries USING gist(geom);
 EOF
 
 ## Insert Cities
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/cities/cities.shp cities | psql -d $DB -U $SUPERUSER
-psql -d $DB -U $SUPERUSER << EOF
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/cities/cities.shp cities | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
 UPDATE cities set country='The Gambia' WHERE country='Gambia';
 CREATE INDEX idx_cities_name ON public.cities (name);
 EOF
 
 ## Insert Cities from Geonames
 # See https://github.com/colemanm/gazetteer/blob/master/docs/geonames_postgis_import.md
-psql -d $DB -U $SUPERUSER << EOF
+psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
 CREATE TABLE geoname (
     geonameid   int,
     name varchar(200),
@@ -137,7 +139,7 @@ CREATE INDEX idx_geoname_geom ON public.geoname USING gist(geom);
 CREATE INDEX idx_geoname_name ON public.geoname (name);
 ALTER TABLE geoname ADD COLUMN searchname VARCHAR(200);
 UPDATE geoname SET searchname = lower(replace(replace(asciiname, '-', ''), ' ', ''));
-UPDATE geoname SET searchname = replace(searchname, '`', '');
+##UPDATE geoname SET searchname = replace(searchname, '`', '');
 CREATE INDEX idx_geoname_searchname ON public.geoname (searchname);
 ALTER TABLE geoname ADD COLUMN countryname VARCHAR(200);
 UPDATE geoname SET countryname=(SELECT name FROM countries WHERE geoname.country = countries.iso_a2 LIMIT 1);
@@ -145,8 +147,8 @@ CREATE INDEX idx_geoname_countryname ON public.geoname ((lower(countryname)));
 EOF
 
 ## French departments
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/deptsfrance.shp deptsfrance | psql -d $DB -U $SUPERUSER
-psql -d $DB -U $SUPERUSER << EOF
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/deptsfrance.shp deptsfrance | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
 UPDATE deptsfrance set nom_dept=initcap(nom_dept);
 UPDATE deptsfrance set nom_dept=replace(nom_dept, '-De-', '-de-');
 UPDATE deptsfrance set nom_dept=replace(nom_dept, ' De ', ' de ');
@@ -161,13 +163,28 @@ CREATE INDEX idx_deptsfrance_dept ON public.deptsfrance (nom_dept);
 CREATE INDEX idx_deptsfrance_region ON public.deptsfrance (nom_region);
 EOF
 
+## French communes
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/commfrance.shp commfrance | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
+UPDATE commfrance set nom_comm=initcap(nom_comm);
+UPDATE commfrance set nom_comm=replace(nom_comm, '-Sur-', '-sur-');
+UPDATE commfrance set nom_comm=replace(nom_comm, '-De-', '-de-');
+UPDATE commfrance set nom_comm=replace(nom_comm, ' De ', ' de ');
+UPDATE commfrance set nom_comm=replace(nom_comm, 'D''', 'd''');
+UPDATE commfrance set nom_comm=replace(nom_comm, '-Et-', '-et-');
+UPDATE commfrance set nom_comm=replace(nom_comm, '-Le-', '-le-');
+UPDATE commfrance set nom_comm=replace(nom_comm, '-La-', '-la-');
+UPDATE commfrance set nom_comm=replace(nom_comm, '-Les-', '-les-');
+CREATE INDEX idx_commfrance_comm ON public.commfrance (nom_comm);
+EOF
+
 # =================== GEOPHYSICAL ==================
 ## Insert plates
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp plates | psql -d $DB -U $SUPERUSER
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp plates | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 
 ## Insert faults
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP faults | psql -d $DB -U $SUPERUSER
-psql -d $DB  -U $SUPERUSER << EOF
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP faults | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+psql -d $DB  -U $SUPERUSER -h $HOSTNAME << EOF
 DELETE FROM faults WHERE type IS NULL;
 UPDATE faults set type='Thrust fault' WHERE type='thrust-fault';
 UPDATE faults set type='step' WHERE type='Step';
@@ -176,23 +193,23 @@ UPDATE faults set type='Rift' WHERE type='rift';
 EOF
 
 ## Insert volcanoes
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP volcanoes | psql -d $DB -U $SUPERUSER
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP volcanoes | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 
 # ===== UNUSUED ======
 ## Insert glaciers
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp glaciers | psql -d $DB -U $SUPERUSER
-// DOWNLOAD THIS INSTEAD - http://nsidc.org/data/docs/noaa/g01130_glacier_inventory/#data_descriptions
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp glaciers | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+## DOWNLOAD THIS INSTEAD - http://nsidc.org/data/docs/noaa/g01130_glacier_inventory/#data_descriptions
 
 ## Major earthquakes since 1900
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp earthquakes | psql -d $DB -U $SUPERUSER
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp earthquakes | psql -d $DB -U $SUPERUSER -h $HOSTNAME
  
 
 # ==================== AMENITIES ===================== 
 ## Insert airport
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 
 # GRANT RIGHTS TO itag USER
-psql -U $SUPERUSER -d $DB << EOF
+psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 GRANT SELECT on airports to $USER;
 GRANT SELECT on cities to $USER;
 GRANT SELECT on geoname to $USER;
