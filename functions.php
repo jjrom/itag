@@ -506,6 +506,28 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
 }
 
 /**
+ *
+ * Get french communes ordered by intersected area
+ * 
+ * @param {DatabaseConnection} $dbh
+ *
+ */
+function getCommunes($dbh, $isShell, $footprint) {
+	$query = "SELECT record.nom_comm from (SELECT distinct nom_comm, ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area from commfrance order by area desc) as record where record.area > 0";
+	$results = pg_query($dbh, $query);
+	$keywords = array();
+	if(!results) {
+		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+	}
+	while ($result = pg_fetch_assoc($results)) {
+		array_push($keywords, $result['nom_comm']);
+	}
+	
+	return $keywords;
+
+}
+
+/**
  * 
  * Compute intersected politicals information (i.e. continent, countries, cities)
  * from input WKT footprint
@@ -556,6 +578,10 @@ function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $con
         $depts = getKeywords($dbh, $isShell, "deptsfrance", "nom_dept", $footprint, "nom_dept");
         if (count($depts) > 0) {
             $result['departements'] = join(LIST_SEPARATOR, $depts);
+        }
+        $communes = getCommunes($dbh, $isShell, $footprint);
+        if (count($communes) > 0) {
+        	$result['communes'] = join(LIST_SEPARATOR, $communes);
         }
     }
     

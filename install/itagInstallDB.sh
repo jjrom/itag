@@ -40,12 +40,14 @@ SUPERUSER=postgres
 DROPFIRST=NO
 DB=itag
 USER=itag
-usage="## iTag database installation\n\n  Usage $0 -d <PostGIS directory> -p [itag user password] [-s <database SUPERUSER> -F]\n\n  -d : absolute path to the directory containing postgis.sql\n  -s : dabase SUPERUSER (default "postgres")\n  -F : WARNING - suppress existing itag database\n"
+HOSTNAME=localhost
+usage="## iTag database installation\n\n  Usage $0 -d <PostGIS directory> -p [itag user password] [-s <database SUPERUSER> -F -H <server HOSTNAME>]\n\n  -d : absolute path to the directory containing postgis.sql\n  -s : database SUPERUSER (default "postgres")\n  -F : WARNING - suppress existing itag database\n  -H : postgres server hostname (default localhost)"
 while getopts "d:s:p:hF" options; do
     case $options in
         d ) ROOTDIR=`echo $OPTARG`;;
         s ) SUPERUSER=`echo $OPTARG`;;
         p ) PASSWORD=`echo $OPTARG`;;
+        H ) HOSTNAME=`echo $OPTARG`;;
         F ) DROPFIRST=YES;;
         h ) echo -e $usage;;
         \? ) echo -e $usage
@@ -61,7 +63,7 @@ then
 fi
 if [ "$DROPFIRST" = "YES" ]
 then
-    dropdb -U $SUPERUSER $DB
+    dropdb -U $SUPERUSER $DB -h $HOSTNAME
 fi
 if [ "$PASSWORD" = "" ]
 then
@@ -74,18 +76,18 @@ postgis=`echo $ROOTDIR/postgis.sql`
 projections=`echo $ROOTDIR/spatial_ref_sys.sql`
 
 # Make db POSTGIS compliant
-createdb $DB -U $SUPERUSER
-createlang -U $SUPERUSER plpgsql $DB
-psql -d $DB -U $SUPERUSER -f $postgis
-psql -d $DB -U $SUPERUSER -f $projections
+createdb $DB -U $SUPERUSER -h $HOSTNAME
+createlang -U $SUPERUSER plpgsql $DB -h $HOSTNAME
+psql -d $DB -U $SUPERUSER -f $postgis -h $HOSTNAME
+psql -d $DB -U $SUPERUSER -f $projections -h $HOSTNAME
 
 ###### ADMIN ACCOUNT CREATION ######
-psql -U $SUPERUSER -d template1 << EOF
+psql -U $SUPERUSER -d template1 -h $HOSTNAME << EOF
 CREATE USER $USER WITH PASSWORD '$PASSWORD' NOCREATEDB
 EOF
 
 # Rights
-psql -U $SUPERUSER -d $DB << EOF
+psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 GRANT ALL ON geometry_columns to $USER;
 GRANT ALL ON geography_columns to $USER;
 GRANT SELECT on spatial_ref_sys to $USER;

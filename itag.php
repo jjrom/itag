@@ -66,7 +66,7 @@ if ($isShell) {
     $help .= "   -c : Countries\n";
     $help .= "   -x : If true only continents are intersected without countries\n";
     $help .= "   -C : Cities (main|all)\n";
-    $help .= "   -R : French Regions and departements\n";
+    $help .= "   -R : French Regions, departements and communes\n";
     $help .= "   -p : Compute population\n";
     $help .= "   -g : Geophysical information (i.e. plates, volcanoes)\n";
     $help .= "   -l : compute land cover (i.e. Thematical content - forest, water, urban, etc.\n";
