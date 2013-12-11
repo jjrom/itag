@@ -129,7 +129,7 @@ iTag can tag footprint with the following information :
 * continents
 * countries
 * cities
-* french regions and departments
+* french regions, departments and communes (communes are sorted ascendingly by intersected area) 
 * geophysical plates
 * volcanoes
 * land cover (i.e. forest, water, urban, cultivated, herbaceous, desert, snow, flooded)

@@ -130,8 +130,8 @@ CREATE TABLE geoname (
     gtopo30 int,
     timezone varchar(40),
     moddate date
- );
-COPY geoname (geonameid,name,asciiname,alternatenames,latitude,longitude,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,gtopo30,timezone,moddate) FROM '$DATADIR/geonames/cities1000.txt' NULL AS '' ENCODING 'UTF8';
+);
+\COPY geoname (geonameid,name,asciiname,alternatenames,latitude,longitude,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,gtopo30,timezone,moddate) FROM '$DATADIR/geonames/cities1000.txt' NULL AS '' ENCODING 'UTF8';
 ALTER TABLE ONLY geoname ADD CONSTRAINT pk_geonameid PRIMARY KEY (geonameid);
 SELECT AddGeometryColumn ('public','geoname','geom',4326,'POINT',2);
 UPDATE geoname SET geom = ST_PointFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
@@ -139,7 +139,6 @@ CREATE INDEX idx_geoname_geom ON public.geoname USING gist(geom);
 CREATE INDEX idx_geoname_name ON public.geoname (name);
 ALTER TABLE geoname ADD COLUMN searchname VARCHAR(200);
 UPDATE geoname SET searchname = lower(replace(replace(asciiname, '-', ''), ' ', ''));
-##UPDATE geoname SET searchname = replace(searchname, '`', '');
 CREATE INDEX idx_geoname_searchname ON public.geoname (searchname);
 ALTER TABLE geoname ADD COLUMN countryname VARCHAR(200);
 UPDATE geoname SET countryname=(SELECT name FROM countries WHERE geoname.country = countries.iso_a2 LIMIT 1);
