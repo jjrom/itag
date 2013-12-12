@@ -66,13 +66,13 @@ if ($isShell) {
     $help .= "   -c : Countries\n";
     $help .= "   -x : If true only continents are intersected without countries\n";
     $help .= "   -C : Cities (main|all)\n";
-    $help .= "   -R : French Regions, departements and communes\n";
+    $help .= "   -R : French Regions, departements and communes (main|all)\n";
     $help .= "   -p : Compute population\n";
     $help .= "   -g : Geophysical information (i.e. plates, volcanoes)\n";
     $help .= "   -l : compute land cover (i.e. Thematical content - forest, water, urban, etc.\n";
     $help .= "   -d : DB connection info - dbhost:dbname:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n";
     $help .= "\n\n";
-    $options = getopt("cxC:Rpgld:f:o:h");
+    $options = getopt("cxC:R:pgld:f:o:h");
     foreach ($options as $option => $value) {
         if ($option === "f") {
             $footprint = $value;
@@ -93,7 +93,7 @@ if ($isShell) {
             $citiesType = $value;
         }
         if ($option === "R") {
-            $hasRegions = true;
+            $hasRegions = $value;
         }
         if ($option === "g") {
             $hasGeophysical = true;
@@ -125,7 +125,7 @@ else {
     $footprint = isset($_REQUEST['footprint']) ? $_REQUEST['footprint'] : null;
     $hasCountries = isset($_REQUEST['countries']) ? true : false;
     $citiesType = isset($_REQUEST['cities']) ? $_REQUEST['cities'] : null;
-    $hasRegions = isset($_REQUEST['regions']) ? true : false;
+    $hasRegions = isset($_REQUEST['regions']) ? $_REQUEST['regions'] : null;
     $hasGeophysical = isset($_REQUEST['geophysical']) ? true : false;
     $hasLandCover = isset($_REQUEST['landcover']) ? true : false;
     $hasPopulation = isset($_REQUEST['population']) ? true : false;
