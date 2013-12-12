@@ -507,24 +507,59 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
 
 /**
  *
- * Get french communes ordered by intersected area
+ * Get french communes namees and intersected ratio
  * 
  * @param {DatabaseConnection} $dbh
  *
  */
 function getCommunes($dbh, $isShell, $footprint) {
-	$query = "SELECT record.nom_comm from (SELECT distinct nom_comm, ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area from commfrance order by area desc) as record where record.area > 0";
+	$query = "SELECT record.nom_comm, record.coverageratio from (SELECT distinct nom_comm, round((ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326)))/ST_Area(geom))::numeric, 2) as coverageratio from commfrance order by coverageratio desc) as record where record.coverageratio > 0.1";
 	$results = pg_query($dbh, $query);
-	$keywords = array();
-	if(!results) {
+	if(!$results) {
 		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
 	}
-	while ($result = pg_fetch_assoc($results)) {
-		array_push($keywords, $result['nom_comm']);
-	}
+	$result = pg_fetch_all($results);
 	
-	return $keywords;
+	return $result;
 
+}
+
+/**
+ *
+ * Get french departements with codes
+ *
+ * @param {DatabaseConnection} $dbh
+ *
+ */
+function getDepartements($dbh, $isShell, $footprint) {
+	$query = "SELECT r.nom_dept, r.code_dept from deptsfrance as r where st_intersects(r.geom, ST_GeomFromText('" . $footprint . "', 4326))";
+	$results = pg_query($dbh, $query);
+	if(!$results) {
+		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+	}
+	$result = pg_fetch_all($results);
+	
+	return $result;
+	
+}
+
+/**
+ *
+ * Get french regions with codes
+ *
+ * @param {DatabaseConnection} $dbh
+ *
+ */
+function getRegions($dbh, $isShell, $footprint) {
+	$query = "SELECT distinct(r.nom_region), r.code_reg from deptsfrance as r where st_intersects(r.geom, ST_GeomFromText('" . $footprint . "', 4326))";
+	$results = pg_query($dbh, $query);
+	if(!$results) {
+		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+	}
+	$result = pg_fetch_all($results);
+	
+	return $result;
+	
 }
 
 /**
@@ -571,18 +606,31 @@ function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $con
     }
     // Regions
     if ($hasRegions) {
-        $regions = getKeywords($dbh, $isShell, "deptsfrance", "nom_region", $footprint, "nom_region");
-        if (count($regions) > 0) {
-            $result['regions'] = join(LIST_SEPARATOR, $regions);
-        }
-        $depts = getKeywords($dbh, $isShell, "deptsfrance", "nom_dept", $footprint, "nom_dept");
-        if (count($depts) > 0) {
-            $result['departements'] = join(LIST_SEPARATOR, $depts);
-        }
-        $communes = getCommunes($dbh, $isShell, $footprint);
-        if (count($communes) > 0) {
-        	$result['communes'] = join(LIST_SEPARATOR, $communes);
-        }
+    	if($hasRegions === "all") {
+			$regions = getRegions($dbh, $isShell, $footprint);
+			if (count($regions) > 0) {
+				$result['regions'] = $regions;
+			}
+			$depts = getDepartements($dbh, $isShell, $footprint);
+			if (count($depts) > 0) {
+				$result['departements'] = $depts;
+			}
+		
+			$communes = getCommunes($dbh, $isShell, $footprint);
+			if (count($communes) > 0) {
+				$result['communes'] = $communes;
+			}
+		}
+		else {
+			$regions = getKeywords($dbh, $isShell, "deptsfrance", "nom_region", $footprint, "nom_region");
+			if (count($regions) > 0) {
+				$result['regions'] = join(LIST_SEPARATOR, $regions);
+			}
+			$depts = getKeywords($dbh, $isShell, "deptsfrance", "nom_dept", $footprint, "nom_dept");
+			if (count($depts) > 0) {
+				$result['departements'] = join(LIST_SEPARATOR, $depts);
+			}
+		}
     }
     
     // Cities
