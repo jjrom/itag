@@ -569,6 +569,31 @@ function getRegions($dbh, $isShell, $footprint) {
 }
 
 /**
+ *
+ * Get french arrondissements with codes
+ *
+ * @param {DatabaseConnection} $dbh
+ *
+ */
+function getArrondissements($dbh, $isShell, $footprint) {
+	$query = "SELECT record.nom_chf, record.code_arr, record.area, record.coverageratio from (SELECT distinct nom_chf, code_arr, ST_Area(geom) as area, round((ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326)))/ST_Area(geom))::numeric, 2) as coverageratio from arrsfrance order by coverageratio desc, area desc) as record where coverageratio > 0";
+	$results = pg_query($dbh, $query);
+    $keywords = array();
+	if(!$results) {
+		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+	}
+	while ($result = pg_fetch_assoc($results)) {
+		// temporary variable to display only nom_comm and coverageration fields
+		$resulttmp['nom_chf'] = $result['nom_chf'];
+		$resulttmp['code_arr'] = $result['code_arr'];
+		array_push($keywords, $resulttmp);
+	}
+	
+	return $keywords;
+	
+}
+
+/**
  * 
  * Compute intersected politicals information (i.e. continent, countries, cities)
  * from input WKT footprint
@@ -621,7 +646,10 @@ function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $con
 			if (count($depts) > 0) {
 				$result['departements'] = $depts;
 			}
-		
+			$arrs = getArrondissements($dbh, $isShell, $footprint);
+			if (count($arrs) > 0) {
+				$result['arrondissements'] = $arrs;
+			}
 			$communes = getCommunes($dbh, $isShell, $footprint);
 			if (count($communes) > 0) {
 				$result['communes'] = $communes;
