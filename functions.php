@@ -513,14 +513,20 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
  *
  */
 function getCommunes($dbh, $isShell, $footprint) {
-	$query = "SELECT record.nom_comm, record.coverageratio from (SELECT distinct nom_comm, round((ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326)))/ST_Area(geom))::numeric, 2) as coverageratio from commfrance order by coverageratio desc) as record where record.coverageratio > 0.1";
+	$query = "SELECT record.nom_comm, record.area, record.coverageratio from (SELECT distinct nom_comm, ST_Area(geom) as area, round((ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326)))/ST_Area(geom))::numeric, 2) as coverageratio from commfrance order by coverageratio desc, area desc) as record where record.coverageratio > 0.1";
 	$results = pg_query($dbh, $query);
+    $keywords = array();
 	if(!$results) {
 		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
 	}
-	$result = pg_fetch_all($results);
+	while ($result = pg_fetch_assoc($results)) {
+		// temporary variable to display only nom_comm and coverageration fields
+		$resulttmp['nom_comm'] = $result['nom_comm'];
+		$resulttmp['coverageratio'] = $result['coverageratio'];
+		array_push($keywords, $resulttmp);
+	}
 	
-	return $result;
+	return $keywords;
 
 }
 
