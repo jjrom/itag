@@ -177,6 +177,14 @@ UPDATE commfrance set nom_comm=replace(nom_comm, '-Les-', '-les-');
 CREATE INDEX idx_commfrance_comm ON public.commfrance (nom_comm);
 EOF
 
+## French arrondissements
+shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/arrsfrance.shp arrsfrance | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
+UPDATE arrsfrance set nom_chf=initcap(nom_chf);
+CREATE INDEX idx_arrsfrance_arrs ON public.arrsfrance (nom_chf);
+EOF
+
+
 # =================== GEOPHYSICAL ==================
 ## Insert plates
 shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp plates | psql -d $DB -U $SUPERUSER -h $HOSTNAME
