@@ -70,7 +70,7 @@ if ($isShell) {
     $help .= "   -p : Compute population\n";
     $help .= "   -g : Geophysical information (i.e. plates, volcanoes)\n";
     $help .= "   -l : compute land cover (i.e. Thematical content - forest, water, urban, etc.\n";
-    $help .= "   -d : DB connection info - dbhost:dbname:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n";
+    $help .= "   -d : DB connection info - dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n";
     $help .= "\n\n";
     $options = getopt("cxC:Rpgld:f:o:h");
     foreach ($options as $option => $value) {
@@ -149,11 +149,11 @@ if (!$dbh) {
  */
 if ($dbInfos) {
             
-    if (count($dbInfos) !== 8) {
-        error($dbh, $isShell, "\nFATAL : -d option format is dbhost:dbname:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n\n");
+    if (count($dbInfos) !== 9) {
+        error($dbh, $isShell, "\nFATAL : -d option format is dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n\n");
     }
 
-    $dbhSource = getPgDB("host=" . $dbInfos[0] . " dbname=" . $dbInfos[1] . " user=" . $dbInfos[2] . " password=" . $dbInfos[3]. " port=" . $dbInfos[4]);
+    $dbhSource = getPgDB("host=" . $dbInfos[0] . " dbname=" . $dbInfos[1] . " user=" . $dbInfos[3] . " password=" . $dbInfos[4]. " port=" . $dbInfos[5]);
     if (!$dbhSource) {
         error($dbhSource, $isShell, "\nFATAL : No connection to database $dbInfos[1]\n\n");
     }
@@ -161,9 +161,9 @@ if ($dbInfos) {
     /*
      * Usefull constants !
      */
-    $tableName = $dbInfos[5];
-    $identifierColumn = $dbInfos[6];
-    $geometryColumn = $dbInfos[7];
+    $tableName = $dbInfos[2] . '.' . $dbInfos[6];
+    $identifierColumn = $dbInfos[7];
+    $geometryColumn = $dbInfos[8];
     $hstoreColumn = "keywords";
     // hstore is the default output !
     if (!isset($output) || $output !== 'copy' || $output !== 'insert') {
@@ -271,8 +271,9 @@ if ($dbInfos) {
      * HSTORE
      */
     if (isset($output) && $output === 'hstore') {
+        list($schema, $table) = explode('.', $tableName);
         echo "-- Create GIN index in database \n";
-        echo "CREATE INDEX " . $tableName . "_" . $hstoreColumn . "_idx ON " . $tableName . " USING GIN (" . $hstoreColumn . ");\n";
+        echo "CREATE INDEX " . $table . "_" . $hstoreColumn . "_idx ON " . $tableName . " USING GIN (" . $hstoreColumn . ");\n";
         echo "\n";
     }
     
