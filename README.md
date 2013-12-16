@@ -64,7 +64,7 @@ From the command line
         #    -p : Compute population
         #    -g : Geophysical information (i.e. plates, volcanoes)
         #    -l : compute land cover (i.e. Thematical content - forest, water, urban, etc.
-        #    -d : DB connection info - dbhost:dbname:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName
+        #    -d : DB connection info - dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName
         #
 
         #
@@ -94,7 +94,7 @@ From the command line
         #
         # Note : Output is set to hstore and redirect to /tmp/hstore.sql
         #
-        php itagTag.php -d localhost:test:postgres:postgres:5432:products:identifier:footprint -c -o hstore > /tmp/hstore.sql
+        php itagTag.php -d localhost:test:public:postgres:postgres:5432:products:identifier:footprint -c -o hstore > /tmp/hstore.sql
 
 
 From Web service
