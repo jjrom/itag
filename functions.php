@@ -493,6 +493,7 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
     }
     
     $query = "SELECT distinct(" . $columnName . ") FROM " . $tableName . " WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))" . $orderBy;
+    
     $results = pg_query($dbh, $query);
     $keywords = array();
     if (!$results) {
@@ -511,21 +512,51 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
  * from input WKT footprint
  * 
  * @param {DatabaseConnection} $dbh
+ * @param {boolean} $isShell - true if launch by shell script, false is launch from webserver
+ * @param {string} $footprint - WKT POLYGON
+ * @param {array} $keywords - list of keywords class to produce
+ * @param {array} $options - processing options
+ *                  {
+ *                      'hierarchical' => // if true return keywords by descending area of intersection
+ *                  }
  * 
  */
-function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $continentOnly) {
-
+function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
+    
     $result = array();
     
-    if ($continentOnly) {
-        $continents = getKeywords($dbh, $isShell, "continents", "continent", $footprint, "continent");
+    // Continents
+    if ($keywords['continents'] && !$keywords['countries']) {
+        if ($options['ordered']) {
+            $query = "SELECT continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM continents WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+            $results = pg_query($dbh, $query);
+            $continents = array();
+            if (!$results) {
+                error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+            }
+            while ($element = pg_fetch_assoc($results)) {
+                array_push($continents, $element['continent']);
+            }
+        }
+        else {
+            $continents = getKeywords($dbh, $isShell, "continents", "continent", $footprint, "continent");
+        }
         if (count($continents) > 0) {
             $result['continents'] = join(LIST_SEPARATOR, $continents);
         }
     }
-    else {
+    
+    // Countries
+    if ($keywords['countries']) {
+        
         // Continents and countries
-        $query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+        if ($options['ordered']) {
+            $query = "SELECT name as name, continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+        }
+        else {
+            $query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+        }
+        echo $query;
         $results = pg_query($dbh, $query);
         $countries = array();
         $continents = array();
@@ -547,21 +578,36 @@ function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $con
             $result['continents'] = join(LIST_SEPARATOR, $continents);
         }
     }
+    
     // Regions
-    if ($hasRegions) {
-        $regions = getKeywords($dbh, $isShell, "deptsfrance", "nom_region", $footprint, "nom_region");
+    if ($keywords['regions']) {
+        if ($options['ordered']) {
+            $query = "SELECT nom_region as region, nom_dept as departement, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM deptsfrance WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+        }
+        else {
+            $query = "SELECT nom_region as region, nom_dept as departement FROM deptsfrance WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY nom_region";
+        }
+        $results = pg_query($dbh, $query);
+        $regions = array();
+        $departements = array();
+        if (!$results) {
+            error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+        }
+        while ($element = pg_fetch_assoc($results)) {
+            array_push($regions, $element['region']);
+            array_push($departements, $element['departement']);
+        }
         if (count($regions) > 0) {
             $result['regions'] = join(LIST_SEPARATOR, $regions);
         }
-        $depts = getKeywords($dbh, $isShell, "deptsfrance", "nom_dept", $footprint, "nom_dept");
-        if (count($depts) > 0) {
-            $result['departements'] = join(LIST_SEPARATOR, $depts);
+        if (count($departements) > 0) {
+            $result['departements'] = join(LIST_SEPARATOR, $departements);
         }
     }
     
     // Cities
-    if ($citiesType) {
-        $cities = getKeywords($dbh, $isShell, $citiesType === "all" ? "geoname" : "cities", "name", $footprint, "name");
+    if ($keywords['cities']) {
+        $cities = getKeywords($dbh, $isShell, $keywords['cities'] === "all" ? "geoname" : "cities", "name", $footprint, "name");
         if (count($cities) > 0) {
             $result['cities'] = join(LIST_SEPARATOR, $cities);
         }

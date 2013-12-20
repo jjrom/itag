@@ -39,7 +39,7 @@
  */
 
 // Remove PHP NOTICE
-error_reporting(E_PARSE);
+//error_reporting(E_PARSE);
 
 // Includes
 include_once 'config/config.php';
@@ -48,31 +48,43 @@ include_once 'functions.php';
 // This application can be called either from a shell or from an HTTP GET request
 $isShell = !empty($_SERVER['SHELL']);
 
-// What to compute
+// Output format
 $output = 'json';
-$hasCountries = false;
-$continentsOnly = false;
-$citiesType = null;
-$hasGeophysical = false;
-$hasPopulation = false;
-$hasLandCover = false;
 
+// What to compute
+$keywords = array(
+    'countries' => false,
+    'continents' => false,
+    'cities' => null,
+    'geophysical' => false,
+    'population' => false,
+    'landcover' => false,
+    'regions' => false
+);
+
+// Options
+$modifiers = array(
+    'hierarchical' => false,
+    'ordered' => false
+);
 
 // Case 1 - Shell command line parameters
 if ($isShell) {
     $help  = "\nUSAGE : php itag.php [options] -f <footprint in WKT> (or -d <db connection info>)\n";
     $help .= "OPTIONS:\n";
     $help .= "   -o [type] : output (json|pretty|insert|copy|hstore) - Note : if -d is choosen only 'hstore', 'insert' and 'copy' are used \n";
+    //$help .= "   -H : display hierarchical continents/countries/regions/cities (otherwise keywords are \"flat\") \n";
+    $help .= "   -O : display political keywords (i.e. continents, countries and regions) ordered by decreasing intersected area\n";
     $help .= "   -c : Countries\n";
-    $help .= "   -x : If true only continents are intersected without countries\n";
+    $help .= "   -x : Continents\n";
     $help .= "   -C : Cities (main|all)\n";
     $help .= "   -R : French Regions and departements\n";
-    $help .= "   -p : Compute population\n";
+    $help .= "   -p : Population\n";
     $help .= "   -g : Geophysical information (i.e. plates, volcanoes)\n";
-    $help .= "   -l : compute land cover (i.e. Thematical content - forest, water, urban, etc.\n";
+    $help .= "   -l : Land Cover (i.e. Thematical content - forest, water, urban, etc.\n";
     $help .= "   -d : DB connection info - dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n";
     $help .= "\n\n";
-    $options = getopt("cxC:Rpgld:f:o:h");
+    $options = getopt("cxC:Rpgld:f:o:OHh");
     foreach ($options as $option => $value) {
         if ($option === "f") {
             $footprint = $value;
@@ -84,25 +96,31 @@ if ($isShell) {
             $output = $value;
         }
         if ($option === "c") {
-            $hasCountries = true;
+            $keywords['countries'] = true;
         }
         if ($option === "x") {
-            $continentsOnly = true;
+            $keywords['continents'] = true;
         }
         if ($option === "C") {
-            $citiesType = $value;
+            $keywords['cities'] = $value;
         }
         if ($option === "R") {
-            $hasRegions = true;
+            $keywords['regions'] = true;
         }
         if ($option === "g") {
-            $hasGeophysical = true;
+            $keywords['geophysical'] = true;
         }
         if ($option === "l") {
-            $hasLandCover = true;
+            $keywords['landcover'] = true;
         }
         if ($option === "p") {
-            $hasPopulation = true;
+            $keywords['population'] = true;
+        }
+        if ($option === "H") {
+            $modifiers['hierarchical'] = true;
+        }
+        if ($option === "O") {
+            $modifiers['ordered'] = true;
         }
         if ($option === "h") {
             echo $help;
@@ -122,13 +140,24 @@ if ($isShell) {
  *  Note : -d option is not possible from Webservice
  */
 else {
+    
+    $keywords = array(
+        'countries' => isset($_REQUEST['countries']) ? true : false,
+        'continents' => isset($_REQUEST['continents']) ? true : false,
+        'cities' => isset($_REQUEST['cities']) ? $_REQUEST['cities'] : null,
+        'geophysical' => isset($_REQUEST['geophysical']) ? true : false,
+        'population' => isset($_REQUEST['population']) ? true : false,
+        'landCover' => isset($_REQUEST['landcover']) ? true : false,
+        'regions' => isset($_REQUEST['regions']) ? true : false
+    );
+
+    // Options
+    $modifiers = array(
+        'hierarchical' => isset($_REQUEST['hierarchical']) ? true : false,
+        'ordered' => isset($_REQUEST['ordered']) ? true : false,
+    );
+    
     $footprint = isset($_REQUEST['footprint']) ? $_REQUEST['footprint'] : null;
-    $hasCountries = isset($_REQUEST['countries']) ? true : false;
-    $citiesType = isset($_REQUEST['cities']) ? $_REQUEST['cities'] : null;
-    $hasRegions = isset($_REQUEST['regions']) ? true : false;
-    $hasGeophysical = isset($_REQUEST['geophysical']) ? true : false;
-    $hasLandCover = isset($_REQUEST['landcover']) ? true : false;
-    $hasPopulation = isset($_REQUEST['population']) ? true : false;
     $output = isset($_REQUEST['output']) ? $_REQUEST['output'] : $output;
     if (!$footprint) {
         echo "footprint is mandatory";
@@ -223,37 +252,37 @@ if ($dbInfos) {
         }
 
         while ($result = pg_fetch_assoc($results)) {
-            if ($hasCountries || $citiesType || $hasRegions || $continentsOnly) {
-                
-                $arr = getPolitical($dbh, $isShell, $result["footprint"], $citiesType, $hasRegions, $continentsOnly);
+            if ($keywords['countries'] || $keywords['cities'] || $keywords['regions'] || $keywords['continents']) {
+               
+                $arr = getPolitical($dbh, $isShell, $result["footprint"], $keywords, $modifiers);
                 
                 if ($arr) {
                     // Continents
-                    tostdin($result["identifier"], $arr["continents"], "CONTINENT", $tableName, $identifierColumn, $hstoreColumn, $output);
+                    tostdin($result["identifier"], $arr["continents"], "continent", $tableName, $identifierColumn, $hstoreColumn, $output);
 
                     // Countries
-                    tostdin($result["identifier"], $arr["countries"], "COUNTRY", $tableName, $identifierColumn, $hstoreColumn, $output);
+                    tostdin($result["identifier"], $arr["countries"], "country", $tableName, $identifierColumn, $hstoreColumn, $output);
 
                     // Cities
                     if (isset($arr["cities"])) {
-                        tostdin($result["identifier"], $arr["cities"], "CITY", $tableName, $identifierColumn, $hstoreColumn, $output);
+                        tostdin($result["identifier"], $arr["cities"], "city", $tableName, $identifierColumn, $hstoreColumn, $output);
                     }
                 }
             }
             
-            if ($hasGeophysical) {
+            if ($keywords['geophysical']) {
                 $arr = getGeophysical($dbh, $isShell, $result["footprint"]);
                 if ($arr) {
-                    tostdin($result["identifier"], $arr["volcanoes"], "VOLCANO", $tableName, $identifierColumn, $hstoreColumn, $output);
+                    tostdin($result["identifier"], $arr["volcanoes"], "volcano", $tableName, $identifierColumn, $hstoreColumn, $output);
                 }
             }
 
-            if ($hasLandCover) {
+            if ($keywords['landcover']) {
                 $arr = getLandCover($dbh, $isShell, $result["footprint"]);
                 if ($arr) {
                     $landUse = split(LIST_SEPARATOR, $arr["landUse"]);
                     for ($i = 0, $l = count($landUse); $i < $l; $i++) {
-                        tostdin($result["identifier"], $landUse[$i], "LANDCOVER_".($i+1), $tableName, $identifierColumn, $hstoreColumn, $output);
+                        tostdin($result["identifier"], $landUse[$i], "landcover_".($i+1), $tableName, $identifierColumn, $hstoreColumn, $output);
                     }
                 }
                 
@@ -297,19 +326,19 @@ else {
         'properties' => array()
     );
 
-    if ($hasCountries || $citiesType || $hasRegions || $continentsOnly) {
-        $feature['properties']['political'] = getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $continentsOnly);
+    if ($keywords['countries'] || $keywords['cities'] || $keywords['regions'] || $keywords['continents']) {
+        $feature['properties']['political'] = getPolitical($dbh, $isShell, $footprint, $keywords, $modifiers);
     }
 
-    if ($hasGeophysical) {
+    if ($keywords['geophysical']) {
         $feature['properties']['geophysical'] = getGeophysical($dbh, $isShell, $footprint);
     }
 
-    if ($hasLandCover) {
+    if ($keywords['landcover']) {
         $feature['properties']['landCover'] = getLandCover($dbh, $isShell, $footprint);
     }
 
-    if ($hasPopulation && GPW2PGSQL_URL) {
+    if ($keywords['population'] && GPW2PGSQL_URL) {
         $gpwResult = getRemoteData(GPW2PGSQL_URL . urlencode($footprint), null);
         if ($gpwResult !== "") {
             $feature['properties']['population'] = trim($gpwResult);
@@ -338,7 +367,9 @@ else {
     else {
         echo json_encode($geojson);
     }
-
+    if ($isShell) {
+        echo "\n";
+    }
 }
 
 // Clean exit
