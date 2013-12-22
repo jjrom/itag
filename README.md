@@ -53,18 +53,22 @@ From the command line
     
         cd $ITAG_HOME
 
-        # php itag.php -h
+        php itag.php -h
+
         #
-        # USAGE : php itag.php [options] -f <footprint in WKT> (or -d <db connection info>)
-        # OPTIONS:
-        #    -o [type] : output (json|pretty|insert|copy|hstore) - Note : if -d is choosen only 'hstore', 'insert' and 'copy' are used 
-        #    -c : Countries
-        #    -C : Cities (main|all)
-        #    -R : French Regions and departements
-        #    -p : Compute population
-        #    -g : Geophysical information (i.e. plates, volcanoes)
-        #    -l : compute land cover (i.e. Thematical content - forest, water, urban, etc.
-        #    -d : DB connection info - dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName
+        #   USAGE : php itag.php [options] -f <footprint in WKT> (or -d <db connection info>)
+        #   OPTIONS:
+        #       -o [type] : output (json|pretty|insert|copy|hstore) - Note : if -d is choosen only 'hstore', 'insert' and 'copy' are used 
+        #       -H : display hierarchical continents/countries/regions/cities (otherwise keywords are "flat") 
+        #       -O : compute and order result by area of intersection
+        #       -c : Countries
+        #       -x : Continents
+        #       -C : Cities (main|all)
+        #       -R : French Regions and departements
+        #       -p : Population
+        #       -g : Geophysical information (i.e. plates, volcanoes)
+        #       -l : Land Cover (i.e. Thematical content - forest, water, urban, etc.
+        #       -d : DB connection info - dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName
         #
 
         #
