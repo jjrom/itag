@@ -76,7 +76,7 @@ if ($isShell) {
     $help .= "OPTIONS:\n";
     $help .= "   -o [type] : output (json|pretty|insert|copy|hstore) - Note : if -d is choosen only 'hstore', 'insert' and 'copy' are used \n";
     $help .= "   -H : display hierarchical continents/countries/regions/cities (otherwise keywords are \"flat\") \n";
-    $help .= "   -O : display political keywords (i.e. continents, countries and regions) ordered by decreasing intersected area\n";
+    $help .= "   -O : compute and order result by area of intersection\n";
     $help .= "   -c : Countries\n";
     $help .= "   -x : Continents\n";
     $help .= "   -C : Cities (main|all)\n";
@@ -280,13 +280,10 @@ if ($dbInfos) {
             }
 
             if ($keywords['landcover']) {
-                $arr = getLandCover($dbh, $isShell, $result["footprint"]);
+                $arr = getLandCover($dbh, $isShell, $result["footprint"], $modifiers);
                 if ($arr) {
-                    for ($i = 0, $l = count($arr["landUse"]); $i < $l; $i++) {
-                        tostdin($result["identifier"], $arr["landUse"][$i], "landcover_".($i+1), $tableName, $identifierColumn, $hstoreColumn, $output);
-                    }
+                    tostdin($result["identifier"], $arr["landUse"], "landcover", $tableName, $identifierColumn, $hstoreColumn, $output);
                 }
-                
             }
         }
         
@@ -338,7 +335,7 @@ else {
     }
 
     if ($keywords['landcover']) {
-        $feature['properties']['landCover'] = getLandCover($dbh, $isShell, $footprint);
+        $feature['properties']['landCover'] = getLandCover($dbh, $isShell, $footprint, $modifiers);
     }
 
     if ($keywords['population'] && GPW2PGSQL_URL) {
