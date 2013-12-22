@@ -125,12 +125,19 @@ Available parameters for Web service are :
 * &regions=true
 * &landcover=true
 
-You can check this [running instance] (http://mapshup/itag/) - (note : landcover is disabled on this server)
+You can check this [running instance] (http://mapshup.info/itag/) - (note : landcover is disabled on this server)
 
 
-Example : tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output
+Examples :
+
+    Tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output
     
-        http://mapshup/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
+        http://mapshup.info/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
+
+
+    Tag footprint intersecting France, Italy and Switzerland with cities, France regions and France departments. Hierarchical result as pretty GeoJSON output
+    
+        http://mapshup.info/itag/?hierachical=true&ordered=true&countries=true&cities=all&output=pretty&footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))
 
 
 About data
