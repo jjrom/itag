@@ -137,7 +137,7 @@ Examples :
 
     Tag footprint intersecting France, Italy and Switzerland with cities, France regions and France departments. Hierarchical result as pretty GeoJSON output
     
-        http://mapshup.info/itag/?hierachical=true&ordered=true&countries=true&cities=all&output=pretty&footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))
+        http://mapshup.info/itag/?hierarchical=true&ordered=true&countries=true&cities=all&output=pretty&footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))
 
 
 About data
