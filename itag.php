@@ -39,7 +39,7 @@
  */
 
 // Remove PHP NOTICE
-//error_reporting(E_PARSE);
+error_reporting(E_PARSE);
 
 // Includes
 include_once 'config/config.php';
@@ -50,6 +50,8 @@ $isShell = !empty($_SERVER['SHELL']);
 
 // Output format
 $output = 'json';
+
+$dbInfos = null;
 
 // What to compute
 $keywords = array(
@@ -73,7 +75,7 @@ if ($isShell) {
     $help  = "\nUSAGE : php itag.php [options] -f <footprint in WKT> (or -d <db connection info>)\n";
     $help .= "OPTIONS:\n";
     $help .= "   -o [type] : output (json|pretty|insert|copy|hstore) - Note : if -d is choosen only 'hstore', 'insert' and 'copy' are used \n";
-    //$help .= "   -H : display hierarchical continents/countries/regions/cities (otherwise keywords are \"flat\") \n";
+    $help .= "   -H : display hierarchical continents/countries/regions/cities (otherwise keywords are \"flat\") \n";
     $help .= "   -O : display political keywords (i.e. continents, countries and regions) ordered by decreasing intersected area\n";
     $help .= "   -c : Countries\n";
     $help .= "   -x : Continents\n";
@@ -280,9 +282,8 @@ if ($dbInfos) {
             if ($keywords['landcover']) {
                 $arr = getLandCover($dbh, $isShell, $result["footprint"]);
                 if ($arr) {
-                    $landUse = split(LIST_SEPARATOR, $arr["landUse"]);
-                    for ($i = 0, $l = count($landUse); $i < $l; $i++) {
-                        tostdin($result["identifier"], $landUse[$i], "landcover_".($i+1), $tableName, $identifierColumn, $hstoreColumn, $output);
+                    for ($i = 0, $l = count($arr["landUse"]); $i < $l; $i++) {
+                        tostdin($result["identifier"], $arr["landUse"][$i], "landcover_".($i+1), $tableName, $identifierColumn, $hstoreColumn, $output);
                     }
                 }
                 
@@ -290,6 +291,8 @@ if ($dbInfos) {
         }
         
     }
+    
+    pg_close($dbhSource);
     
     // Close COPY
     if (isset($output) && $output === 'copy') {
@@ -375,9 +378,6 @@ else {
 // Clean exit
 if ($dbh) {
     pg_close($dbh);
-}
-if ($dbhSource) {
-    pg_close($dbhSource);
 }
 
 exit(0);
