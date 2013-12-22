@@ -877,7 +877,12 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
                         'departements' => array()
                     );
                 }
-                array_push($regions[$element['region']]['departements'], array('name' => $element['departement'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+                if ($options['ordered']) {
+                    array_push($regions[$element['region']]['departements'], array('name' => $element['departement'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+                }
+                else {
+                    array_push($regions[$element['region']]['departements'], array('name' => $element['departement']));
+                }
             } else {
                 $regions[$element['region']] = $element['region'];
                 array_push($departements, $element['departement']);
@@ -885,8 +890,21 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
         }
         if (count($regions) > 0) {
             if ($options['hierarchical']) {
-                $result['regions'] = $regions;
-            } else {
+                
+                // Set regions under France
+                if ($keywords['countries']) {
+                    foreach (array_keys($result['continents']['Europe']['countries']) as $country) {
+                        if ($result['continents']['Europe']['countries'][$country]['name'] === 'France') {
+                            $result['continents']['Europe']['countries'][$country]['regions'] = $regions;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    $result['regions'] = $regions;
+                }
+            }
+            else {
                 $result['regions'] = array_keys($regions);
                 $result['departements'] = $departements;
             }
