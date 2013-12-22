@@ -78,10 +78,10 @@ From the command line
         php itag.php -Rgp -f "POLYGON((1.350360 43.532822,1.350360 43.668522,1.515350 43.668522,1.515350 43.532822,1.350360 43.532822))"
 
         #
-        # Tag footprint intersecting France, Italy and Switzerland unordered and ordered
+        # Hierarchized Tag footprint intersecting France, Italy and Switzerland unordered and ordered 
         #
-        php itag.php -c -f "POLYGON((6.487426757812523 45.76081241294796,6.487426757812523 46.06798615804025,7.80578613281244 46.06798615804025,7.80578613281244 45.76081241294796, 6.487426757812523 45.76081241294796))"
-        php itag.php -c -O -f "POLYGON((6.487426757812523 45.76081241294796,6.487426757812523 46.06798615804025,7.80578613281244 46.06798615804025,7.80578613281244 45.76081241294796, 6.487426757812523 45.76081241294796))"
+        php itag.php -c -H -f "POLYGON((6.487426757812523 45.76081241294796,6.487426757812523 46.06798615804025,7.80578613281244 46.06798615804025,7.80578613281244 45.76081241294796, 6.487426757812523 45.76081241294796))"
+        php itag.php -c -H -O -f "POLYGON((6.487426757812523 45.76081241294796,6.487426757812523 46.06798615804025,7.80578613281244 46.06798615804025,7.80578613281244 45.76081241294796, 6.487426757812523 45.76081241294796))"
 
 
         #
@@ -90,6 +90,7 @@ From the command line
         # With the following parameters:
         #       - dbhost : localhost
         #       - dbname : test
+        #       - dbschema : public
         #       - dbuser : postgres
         #       - dbpassword : postgres
         #       - dbport : 5432
@@ -100,7 +101,7 @@ From the command line
         #
         # Note : Output is set to hstore and redirect to /tmp/hstore.sql
         #
-        php itagTag.php -d localhost:test:public:postgres:postgres:5432:products:identifier:footprint -c -o hstore > /tmp/hstore.sql
+        php itag.php -d localhost:test:public:postgres:postgres:5432:products:identifier:footprint -c -o hstore > /tmp/hstore.sql
 
 
 From Web service

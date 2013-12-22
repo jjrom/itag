@@ -466,7 +466,7 @@ function getLandCover($dbh, $isShell, $footprint) {
      */
     $result = array(
         'area' => $totalarea,
-        'landUse' => join(LIST_SEPARATOR, $landUse),
+        'landUse' => $landUse,
         'landUseDetails' => array()
     );
 
@@ -542,7 +542,7 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
             $continents = getKeywords($dbh, $isShell, "continents", "continent", $footprint, "continent");
         }
         if (count($continents) > 0) {
-            $result['continents'] = join(LIST_SEPARATOR, $continents);
+            $result['continents'] = $continents;
         }
     }
     
@@ -551,12 +551,11 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
         
         // Continents and countries
         if ($options['ordered']) {
-            $query = "SELECT name as name, continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+            $query = "SELECT name as name, continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
         }
         else {
             $query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
         }
-        echo $query;
         $results = pg_query($dbh, $query);
         $countries = array();
         $continents = array();
@@ -564,25 +563,34 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
             error($dbh, $isShell, "\nFATAL : database connection error\n\n");
         }
         while ($element = pg_fetch_assoc($results)) {
-            if (isset($element['continent']) && $element['continent']) {
-                array_push($continents, $element['continent']);
+            if ($options['hierarchical']) {
+                if (!$continents[$element['continent']]) {
+                    $continents[$element['continent']] = array(
+                        'countries' => array()
+                    );
+                }
+                array_push($continents[$element['continent']]['countries'], array('name' => $element['name'], 'percentage' => percentage($element['area'],$element['totalarea'])));
             }
-            if (isset($element['continent']) && $element['continent']) {
+            else {
+                $continents[$element['continent']] = $element['continent'];
                 array_push($countries, $element['name']);
             }
         }
-        if (count($countries) > 0) {
-            $result['countries'] = join(LIST_SEPARATOR, $countries);
-        }
         if (count($continents) > 0) {
-            $result['continents'] = join(LIST_SEPARATOR, $continents);
+            if ($options['hierarchical']) {
+                $result['continents'] = $continents;
+            }
+            else {
+                $result['countries'] = $countries;
+                $result['continents'] = array_keys($continents);
+            }
         }
     }
     
     // Regions
     if ($keywords['regions']) {
         if ($options['ordered']) {
-            $query = "SELECT nom_region as region, nom_dept as departement, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM deptsfrance WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+            $query = "SELECT nom_region as region, nom_dept as departement, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM deptsfrance WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
         }
         else {
             $query = "SELECT nom_region as region, nom_dept as departement FROM deptsfrance WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY nom_region";
@@ -594,22 +602,63 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
             error($dbh, $isShell, "\nFATAL : database connection error\n\n");
         }
         while ($element = pg_fetch_assoc($results)) {
-            array_push($regions, $element['region']);
-            array_push($departements, $element['departement']);
+            if ($options['hierarchical']) {
+                if (!$regions[$element['region']]) {
+                    $regions[$element['region']] = array(
+                        'departements' => array()
+                    );
+                }
+                array_push($regions[$element['region']]['departements'], array('name' => $element['departement'], 'percentage' => percentage($element['area'],$element['totalarea'])));
+            }
+            else {
+                $regions[$element['region']] = $element['region'];
+                array_push($departements, $element['departement']);
+            }
         }
         if (count($regions) > 0) {
-            $result['regions'] = join(LIST_SEPARATOR, $regions);
-        }
-        if (count($departements) > 0) {
-            $result['departements'] = join(LIST_SEPARATOR, $departements);
+            if ($options['hierarchical']) {
+                $result['regions'] = $regions;
+            }
+            else {
+                $result['regions'] = array_keys($regions);
+                $result['departements'] = $departements;
+            }
         }
     }
     
     // Cities
     if ($keywords['cities']) {
-        $cities = getKeywords($dbh, $isShell, $keywords['cities'] === "all" ? "geoname" : "cities", "name", $footprint, "name");
+        if ($keywords['cities'] === "all") {
+            $query = "SELECT name, countryname as country FROM geoname WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY name";
+        }
+        else {
+            $query = "SELECT name, country FROM cities WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY name";
+        }
+        $results = pg_query($dbh, $query);
+        $cities = array();
+        if (!$results) {
+            error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+        }
+        while ($element = pg_fetch_assoc($results)) {
+            if ($keywords['countries'] && $options['hierarchical']) {
+                foreach(array_keys($result['continents']) as $continent) {
+                    foreach(array_keys($result['continents'][$continent]['countries']) as $country) {
+                        if ($result['continents'][$continent]['countries'][$country]['name'] === $element['country']) {
+                            if (!$result['continents'][$continent]['countries'][$country]['cities']) {
+                                $result['continents'][$continent]['countries'][$country]['cities'] = array();
+                            }
+                            array_push($result['continents'][$continent]['countries'][$country]['cities'], $element['name']);
+                        }
+                    }
+                }
+            }
+            else {
+                array_push($cities, $element['name']);
+            }
+        }
+       
         if (count($cities) > 0) {
-            $result['cities'] = join(LIST_SEPARATOR, $cities);
+            $result['cities'] = $cities;
         }
     }
     
@@ -631,19 +680,19 @@ function getGeophysical($dbh, $isShell, $footprint) {
     // Plates
     $plates = getKeywords($dbh, $isShell, "plates", "name", $footprint);
     if (count($plates) > 0) {
-        $result['plates'] = join(LIST_SEPARATOR, $plates);
+        $result['plates'] = $plates;
     }
     
     // Faults
     $faults = getKeywords($dbh, $isShell, "faults", "type", $footprint);
     if (count($faults) > 0) {
-        $result['faults'] = join(LIST_SEPARATOR, $faults);
+        $result['faults'] = $faults;
     }
     
     // Volcanoes
     $volcanoes = getKeywords($dbh, $isShell, "volcanoes", "name", $footprint);
     if (count($volcanoes) > 0) {
-       $result['volcanoes'] = join(LIST_SEPARATOR, $volcanoes);
+       $result['volcanoes'] = $volcanoes;
     }
     
     // Glaciers
@@ -664,20 +713,18 @@ function json_encode_utf8($struct) {
  */
 function tostdin($identifier, $properties, $type, $tableName, $identifierColumn, $hstoreColumn, $output) {
     
-    $arr2 = split(LIST_SEPARATOR, $properties);
-    
-    for ($i = 0, $l = count($arr2); $i < $l; $i++) {
-        if ($arr2[$i]) {
+    for ($i = 0, $l = count($properties); $i < $l; $i++) {
+        if ($properties[$i]) {
             if (isset($output) && $output === 'copy') {
-                echo $identifier . "\t" . $arr2[$i] . "\t" . $type ."\n";
+                echo $identifier . "\t" . $properties[$i] . "\t" . $type ."\n";
             } else if (isset($output) && $output === 'hstore') {
-                $key = trim($arr2[$i]);
+                $key = trim($properties[$i]);
                 $splitted = split(' ', $key);
                 $quote = count($splitted) > 1 ? '"' : '';
                 $hstore = "'" . $quote . strtolower($key) . $quote . " => " . $type . "'";
                 echo "UPDATE " . $tableName . " SET " . $hstoreColumn . " = " . $hstoreColumn . " || " . $hstore . " WHERE " . $identifierColumn . "='" . $identifier . "';\n";
             } else {
-                echo "INSERT INTO " . $hstoreColumn . " VALUES ('" . $identifier . "','" . $arr2[$i] . "','" . $type . "');\n";
+                echo "INSERT INTO " . $hstoreColumn . " VALUES ('" . $identifier . "','" . $properties[$i] . "','" . $type . "');\n";
             }
         }
     }
