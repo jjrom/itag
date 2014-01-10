@@ -149,7 +149,7 @@ else {
         'cities' => isset($_REQUEST['cities']) ? $_REQUEST['cities'] : null,
         'geophysical' => isset($_REQUEST['geophysical']) ? true : false,
         'population' => isset($_REQUEST['population']) ? true : false,
-        'landCover' => isset($_REQUEST['landcover']) ? true : false,
+        'landcover' => isset($_REQUEST['landcover']) ? true : false,
         'regions' => isset($_REQUEST['regions']) ? true : false
     );
 
