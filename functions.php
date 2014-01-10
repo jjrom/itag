@@ -671,7 +671,7 @@ function getLandCover($dbh, $isShell, $footprint, $options) {
     }
 
     // Polygonize extracted raster within temporary table $tmpTable
-    exec(GDAL_POLYGONIZE_PATH . ' /tmp/' . $tmpTable . '.tif -f "PostgreSQL" PG:"host=' . DB_HOST . ' user=' . DB_USER . ' password=' . DB_PASSWORD . ' dbname=' . DB_NAME . '" ' . $tmpTable . ' 2>&1');
+    exec(GDAL_POLYGONIZE_PATH . ' /tmp/' . $tmpTable . '.tif -f "PostgreSQL" PG:"host=' . DB_HOST . ' user=' . DB_USER . ' password=' . DB_PASSWORD . ' dbname=' . DB_NAME . '" ' . $tmpTable . ' 2>&1'); 
     unlink("/tmp/" . $tmpTable . ".tif");
 
     // Crop data
