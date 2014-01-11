@@ -177,7 +177,7 @@ function percentage($part, $total) {
  *
  * 8 Global landuse created from above GLC2000 classes
  *
-  100=>Artificial (22)
+  100=>Urban (22)
   200=>Cultivated (15 + 16 + 17 + 18)
   310=>Forests (1 + 2 + 3 + 4 + 5 + 6)
   320=>Herbaceous (9 + 11 + 12 + 13)
@@ -190,6 +190,7 @@ function percentage($part, $total) {
 /**
  *
  * Return a random table name
+ * 
  *
  * @param <integer> $length : length of the table name
  * @return string : random table name
@@ -361,7 +362,7 @@ function getGLCClassName($code) {
         20 => "Water Bodies",
         21 => "Snow and Ice",
         22 => "Artificial surfaces and associated areas",
-        100 => "Artificial",
+        100 => "Urban",
         200 => "Cultivated",
         310 => "Forests",
         320 => "Herbaceous",
@@ -647,41 +648,13 @@ function getCountryName($code) {
  */
 function getLandCover($dbh, $isShell, $footprint, $options) {
 
-    // Create temporary name for processing
-    $tmpTable = getTableName(6);
-
-    // Crop GLC2000 raster
-    $cropOrigin = cropOriginGLC2000(bbox($footprint));
-
-    $srcWin = $cropOrigin['x'] . ' ' . $cropOrigin['y'] . ' ' . $cropOrigin['xsize'] . ' ' . $cropOrigin['ysize'];
-
-    // Avoid crashing the machine with big crops (2x2 square degrees)
-    if (!isShell) {
-        if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
-            error($dbh, $isShell, "\nFATAL : input footprint should be smaller than 2x2 square degrees\n\n");
-        }
-    }
-
-    // Crop GLC2000 raster to $srcWin 
-    exec(GDAL_TRANSLATE_PATH . " -of GTiff -srcwin " . $srcWin . " -a_srs EPSG:4326 " . GLC2000_TIFF . " /tmp/" . $tmpTable . ".tif");
-
-    // In case of crashing crop - polygon is outside bounds for example
-    if (!file_exists("/tmp/" . $tmpTable . ".tif")) {
-        error($dbh, $isShell, "\nFATAL : glc2000 crop error\n\n");
-    }
-
-    // Polygonize extracted raster within temporary table $tmpTable
-    exec(GDAL_POLYGONIZE_PATH . ' /tmp/' . $tmpTable . '.tif -f "PostgreSQL" PG:"host=' . DB_HOST . ' user=' . DB_USER . ' password=' . DB_PASSWORD . ' dbname=' . DB_NAME . '" ' . $tmpTable . ' 2>&1'); 
-    unlink("/tmp/" . $tmpTable . ".tif");
-
     // Crop data
     $geom = "ST_GeomFromText('" . $footprint . "', 4326)";
-    $query = "SELECT dn as dn, st_area($geom) as totalarea, st_area(st_intersection(wkb_geometry, $geom)) as area FROM $tmpTable WHERE st_intersects(wkb_geometry, $geom)";
+    $query = "SELECT dn as dn, st_area($geom) as totalarea, st_area(st_intersection(wkb_geometry, $geom)) as area FROM landcover WHERE st_intersects(wkb_geometry, $geom)";
     $results = pg_query($dbh, $query);
     if (!$results) {
         echo "-- Error for $footprint - skip\n";
         return null;
-        //error($dbh, $isShell, "\nFATAL : database connection error\n\n");
     }
 
     // Store results in $out array
@@ -693,9 +666,6 @@ function getLandCover($dbh, $isShell, $footprint, $options) {
         $out[$product['dn']] += $product['area'];
         $totalarea = $product['totalarea'];
     }
-
-    // Remove temporary table
-    pg_query($dbh, "DROP TABLE $tmpTable");
 
     // Compute parent classes
     $parent = array();
@@ -738,7 +708,7 @@ function getLandCover($dbh, $isShell, $footprint, $options) {
 
     foreach ($out as $key => $val) {
         if ($val !== 0) {
-            array_push($result['landUseDetails'], array('type' => getGLCClassName($key), 'code' => $key, 'pcover' => percentage($val, $totalarea)));
+            array_push($result['landUseDetails'], array('type' => getGLCClassName($key), 'code' => $key, 'pcover' => min(100, percentage($val, $totalarea))));
         }
     }
 
