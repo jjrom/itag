@@ -44,11 +44,15 @@
 include_once realpath(dirname(__FILE__)) . '/../config/config.php';
 include_once realpath(dirname(__FILE__)) . '/../functions.php';
 
-function polygonize($footprint, $tableName = 'landcover') {
-
+function polygonize($footprint, $dbh) {
+    
     echo ' --> Polygonize ' . $footprint . "\n";
-
+        
     $tifName = '/tmp/' . md5(microtime()) . '.tif';
+    $tmpTable = 'tmptable';
+    
+    // Drop tmpTable - bug in gdla_polygonize.py ?
+    pg_query($dbh, 'DROP TABLE ' . $tmpTable);    
 
     // Crop GLC2000 raster
     $cropOrigin = cropOriginGLC2000(bbox($footprint));
@@ -64,10 +68,16 @@ function polygonize($footprint, $tableName = 'landcover') {
     }
 
     // Polygonize extracted raster within temporary table $tmpTable
-    exec(GDAL_POLYGONIZE_PATH . ' ' . $tifName . ' -f "PostgreSQL" PG:"host=' . DB_HOST . ' user=' . DB_USER . ' password=' . DB_PASSWORD . ' dbname=' . DB_NAME . '" ' . $tableName . ' 2>&1');
-
+    exec(GDAL_POLYGONIZE_PATH . ' ' . $tifName . ' -f "PostgreSQL" PG:"host=' . DB_HOST . ' user=' . DB_USER . ' password=' . DB_PASSWORD . ' dbname=' . DB_NAME . '" ' . $tmpTable . ' 2>&1');
+    
+    pg_query($dbh, 'INSERT INTO landcover(wkb_geometry,dn) SELECT wkb_geometry,dn FROM ' . $tmpTable);
     unlink($tifName);
+    
 }
+
+// Get db connection
+$dbh = getPgDB("host=" . DB_HOST . " dbname=" . DB_NAME . " user=" . DB_USER . " password=" . DB_PASSWORD);
+pg_set_client_encoding($dbh, "UTF8");
 
 // Produce the grid
 $gridSize = 2;
@@ -78,6 +88,6 @@ for ($lon = -180; $lon <= 180; $lon = $lon + $gridSize) {
         $lat2 = $lat + $gridSize;
         $lon2 = $lon + $gridSize;
         $str = $lon . " " . $lat . "," . $lon . " " . $lat2 . "," . $lon2 . " " . $lat2 . "," . $lon2 . " " . $lat . "," . $lon . " " . $lat;
-        polygonize("POLYGON((" . $str . "))");
+        polygonize("POLYGON((" . $str . "))", $dbh);
     }
 }

@@ -45,6 +45,11 @@ Edit $ITAG_HOME/config/config.php (just follow the comments !)
 
 Note : "GLC2000_TIFF" constant should point to the ["Global Land Cover 2000" global product] (http://bioval.jrc.ec.europa.eu/products/glc2000/products.php)  in GeoTIFF format.
 
+5. Precompute landcover
+
+        cd $ITAG_HOME/scripts/
+        ./prepareLandCover.php
+
 Using iTag
 ==========
 

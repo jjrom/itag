@@ -206,3 +206,12 @@ GRANT SELECT on faults to $USER;
 GRANT SELECT on volcanoes to $USER;
 EOF
 
+# ==================== LANDCOVER =====================
+psql -U $SUPERUSER -d $DB << EOF
+CREATE TABLE landcover (
+    ogc_fid         SERIAL,
+    dn              INTEGER
+);
+SELECT AddGeometryColumn ('public','landcover','wkb_geometry',4326,'POINT',2);
+CREATE INDEX landcover_geometry_idx ON landcover USING gist (wkb_geometry);
+EOF
