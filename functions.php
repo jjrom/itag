@@ -708,7 +708,7 @@ function getLandCover($dbh, $isShell, $footprint, $options) {
 
     foreach ($out as $key => $val) {
         if ($val !== 0) {
-            array_push($result['landUseDetails'], array('type' => getGLCClassName($key), 'code' => $key, 'pcover' => min(100, percentage($val, $totalarea))));
+            array_push($result['landUseDetails'], array('name' => getGLCClassName($key), 'code' => $key, 'pcover' => min(100, percentage($val, $totalarea))));
         }
     }
 
