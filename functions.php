@@ -364,9 +364,9 @@ function getGLCClassName($code) {
         22 => "Artificial surfaces and associated areas",
         100 => "Urban",
         200 => "Cultivated",
-        310 => "Forests",
+        310 => "Forest",
         320 => "Herbaceous",
-        330 => "Deserts",
+        330 => "Desert",
         335 => "Snow and ice",
         400 => "Flooded",
         500 => "Water"
