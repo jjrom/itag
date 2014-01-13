@@ -212,6 +212,6 @@ CREATE TABLE landcover (
     ogc_fid         SERIAL,
     dn              INTEGER
 );
-SELECT AddGeometryColumn ('public','landcover','wkb_geometry',4326,'POINT',2);
+SELECT AddGeometryColumn ('public','landcover','wkb_geometry',4326,'POLYGON',2);
 CREATE INDEX landcover_geometry_idx ON landcover USING gist (wkb_geometry);
 EOF
