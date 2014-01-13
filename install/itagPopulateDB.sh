@@ -191,6 +191,16 @@ shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthqua
 ## Insert airport
 shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER
 
+# ==================== LANDCOVER =====================
+psql -U $SUPERUSER -d $DB << EOF
+CREATE TABLE landcover (
+    ogc_fid         SERIAL,
+    dn              INTEGER
+);
+SELECT AddGeometryColumn ('public','landcover','wkb_geometry',4326,'POLYGON',2);
+CREATE INDEX landcover_geometry_idx ON landcover USING gist (wkb_geometry);
+EOF
+
 # GRANT RIGHTS TO itag USER
 psql -U $SUPERUSER -d $DB << EOF
 GRANT SELECT on airports to $USER;
@@ -204,14 +214,5 @@ GRANT SELECT on glaciers to $USER;
 GRANT SELECT on plates to $USER;
 GRANT SELECT on faults to $USER;
 GRANT SELECT on volcanoes to $USER;
-EOF
-
-# ==================== LANDCOVER =====================
-psql -U $SUPERUSER -d $DB << EOF
-CREATE TABLE landcover (
-    ogc_fid         SERIAL,
-    dn              INTEGER
-);
-SELECT AddGeometryColumn ('public','landcover','wkb_geometry',4326,'POLYGON',2);
-CREATE INDEX landcover_geometry_idx ON landcover USING gist (wkb_geometry);
+GRANT SELECT on landcover to $USER;
 EOF
