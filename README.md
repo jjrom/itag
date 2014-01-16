@@ -13,7 +13,7 @@ iTag can tag a footprint with the following information :
 * land cover (i.e. forest, water, urban, cultivated, herbaceous, desert, snow, flooded)
 * population count
 
-Check running instance [here] (http://mapshup.info/itag).
+You can access an online instance [here] (http://mapshup.info/itag) as a web service.
 
 See [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597) and access trough [mapshup] (http://mapshup.info)
 
