@@ -1,10 +1,23 @@
 iTag
 ====
 
-Automatically tag a geographical footprint against Land Cover and OSM data.
+Automatically tag a geographical footprint against location, land cover, etc.
+
+iTag can tag a footprint with the following information :
+* continents
+* countries
+* cities
+* french regions and departments
+* geophysical plates
+* volcanoes
+* land cover (i.e. forest, water, urban, cultivated, herbaceous, desert, snow, flooded)
+* population count
+
 Check running instance [here] (http://mapshup.info/itag).
 
 See [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597) and access trough [mapshup] (http://mapshup.info)
+
+iTag is extensively used by [RESTo - REstful Semantic search Tool for geOspatial] (http://github.com/jjrom/resto)
 
 Installation
 ============
@@ -14,9 +27,13 @@ We suppose that $ITAG_HOME is the directory containing this file
 Prerequesites
 -------------
 
-* PHP (v5.3.6+) command line
-* PostgreSQL (v8.4+)
+* PHP (v5.3+) command line
+* PostgreSQL (v9.0+)
 * PostGIS (v1.5.1+)
+* GDAL (v1.8+) with python support (for land cover preparation)
+
+Note: iTag could work with lower version of the specified requirements.
+However there is no guaranty of success and unwanted result may occured !
 
 Step by step
 ------------
@@ -32,23 +49,28 @@ Step by step
         # the value of DB_PASSWORD key in $ITAG_HOME/config/config.php
         
         cd $ITAG_HOME/installation
-        ./itagInstallDB.sh -F -d path_to_postgis_directory -p password
+        ./itagInstallDB.sh -F -d <path_to_postgis_directory> -p password
 
 3. Populate database
 
         cd $ITAG_HOME/installation/
         ./itagPopulateDB.sh -D data
 
-4. Configure
+4. Download Global Land Cover 2000
+
+Go to ["Global Land Cover 2000" global product] (http://bioval.jrc.ec.europa.eu/products/glc2000/products.php) and download glc2000 GeoTIFF file.
+
+5. Configure
 
 Edit $ITAG_HOME/config/config.php (just follow the comments !)
-
-Note : "GLC2000_TIFF" constant should point to the ["Global Land Cover 2000" global product] (http://bioval.jrc.ec.europa.eu/products/glc2000/products.php)  in GeoTIFF format.
 
 5. Precompute landcover
 
         cd $ITAG_HOME/scripts/
         ./prepareLandCover.php
+
+Note : depending on your server performance, the landcover computation can take a long time (more than two hours)
+
 
 Using iTag
 ==========
@@ -143,17 +165,3 @@ Examples :
     Tag footprint intersecting France, Italy and Switzerland with cities, France regions and France departments. Hierarchical result as pretty GeoJSON output
     
         http://mapshup.info/itag/?hierarchical=true&ordered=true&countries=true&cities=all&output=pretty&footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))
-
-
-About data
-==========
-
-iTag can tag footprint with the following information :
-* continents
-* countries
-* cities
-* french regions and departments
-* geophysical plates
-* volcanoes
-* land cover (i.e. forest, water, urban, cultivated, herbaceous, desert, snow, flooded)
-* population count
