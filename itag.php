@@ -144,19 +144,19 @@ if ($isShell) {
 else {
     
     $keywords = array(
-        'countries' => isset($_REQUEST['countries']) ? true : false,
-        'continents' => isset($_REQUEST['continents']) ? true : false,
+        'countries' => isset($_REQUEST['countries']) && $_REQUEST['countries'] ? true : false,
+        'continents' => isset($_REQUEST['continents']) && $_REQUEST['continents'] ? true : false,
         'cities' => isset($_REQUEST['cities']) ? $_REQUEST['cities'] : null,
-        'geophysical' => isset($_REQUEST['geophysical']) ? true : false,
-        'population' => isset($_REQUEST['population']) ? true : false,
-        'landcover' => isset($_REQUEST['landcover']) ? true : false,
-        'regions' => isset($_REQUEST['regions']) ? true : false
+        'geophysical' => isset($_REQUEST['geophysical']) && $_REQUEST['geophysical'] ? true : false,
+        'population' => isset($_REQUEST['population']) && $_REQUEST['population'] ? true : false,
+        'landcover' => isset($_REQUEST['landcover']) && $_REQUEST['landcover'] = true ? true : false,
+        'regions' => isset($_REQUEST['regions']) && $_REQUEST['regions'] ? true : false
     );
 
     // Options
     $modifiers = array(
-        'hierarchical' => isset($_REQUEST['hierarchical']) ? true : false,
-        'ordered' => isset($_REQUEST['ordered']) ? true : false,
+        'hierarchical' => isset($_REQUEST['hierarchical']) && $_REQUEST['hierarchical'] ? true : false,
+        'ordered' => isset($_REQUEST['ordered']) && $_REQUEST['ordered'] ? true : false,
     );
     
     $footprint = isset($_REQUEST['footprint']) ? $_REQUEST['footprint'] : null;
