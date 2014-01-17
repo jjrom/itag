@@ -648,6 +648,14 @@ function getCountryName($code) {
  */
 function getLandCover($dbh, $isShell, $footprint, $options) {
 
+    /*
+     * Do not process if $footprint is more than 2x2 degrees
+     */
+    $cropOrigin = cropOriginGLC2000(bbox($footprint));
+    if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
+        return null;
+    }
+    
     // Crop data
     $geom = "ST_GeomFromText('" . $footprint . "', 4326)";
     $query = "SELECT dn as dn, st_area($geom) as totalarea, st_area(st_intersection(wkb_geometry, $geom)) as area FROM landcover WHERE st_intersects(wkb_geometry, $geom)";
@@ -884,6 +892,14 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
     // Cities
     if ($keywords['cities']) {
         if ($keywords['cities'] === "all") {
+
+            /*
+             * Do not process if $footprint is more than 2x2 degrees
+             */
+            $cropOrigin = cropOriginGLC2000(bbox($footprint));
+            if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
+                return $result;
+            }
             $query = "SELECT name, countryname as country FROM geoname WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY name";
         } else {
             $query = "SELECT name, country FROM cities WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY name";
