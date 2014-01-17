@@ -147,9 +147,9 @@ else {
         'countries' => trueOrFalse($_REQUEST['countries']),
         'continents' => trueOrFalse($_REQUEST['continents']),
         'cities' => isset($_REQUEST['cities']) ? $_REQUEST['cities'] : null,
-        'geophysical' => trueOrFalse(['geophysical']),
+        'geophysical' => trueOrFalse($_REQUEST['geophysical']),
         'population' => trueOrFalse($_REQUEST['population']),
-        'landcover' => trueOrFalse(['landcover']),
+        'landcover' => trueOrFalse($_REQUEST['landcover']),
         'regions' => trueOrFalse($_REQUEST['regions'])
     );
 
