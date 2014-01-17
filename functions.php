@@ -992,3 +992,23 @@ function tostdin($identifier, $properties, $type, $tableName, $identifierColumn,
         }
     }
 }
+
+/**
+ * Return true if $str value is true, 1 or yes
+ * Return false otherwise
+ * 
+ * @param string $str
+ */
+function trueOrFalse($str) {
+    
+    if (!$str) {
+        return false;
+    }
+    
+    if (strtolower($str) === 'true' || strtolower($str) === 'yes') {
+        return true;
+    }
+    
+    return false;
+    
+}
