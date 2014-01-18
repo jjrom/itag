@@ -282,7 +282,7 @@ if ($dbInfos) {
             if ($keywords['landcover']) {
                 $arr = getLandCover($dbh, $isShell, $result["footprint"], $modifiers);
                 if ($arr) {
-                    tostdin($result["identifier"], $arr["landUse"], "landcover", $tableName, $identifierColumn, $hstoreColumn, $output);
+                    tostdin($result["identifier"], $arr["landUse"], "landuse", $tableName, $identifierColumn, $hstoreColumn, $output);
                 }
             }
         }
@@ -359,7 +359,7 @@ else {
     }
 
     if ($output === 'pretty') {
-        print_r($geojson);
+        echo json_format($geojson, true);
     }
     else if ($output === 'sql') {
         echo "SQL output is not yet implemented ! Use 'pretty' or 'json' instead\n";
