@@ -129,7 +129,8 @@ CREATE TABLE geoname (
     timezone varchar(40),
     moddate date
  );
-COPY geoname (geonameid,name,asciiname,alternatenames,latitude,longitude,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,gtopo30,timezone,moddate) FROM '$DATADIR/geonames/cities1000.txt' NULL AS '' ENCODING 'UTF8';
+SET client_encoding = 'UTF8'; 
+COPY geoname (geonameid,name,asciiname,alternatenames,latitude,longitude,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,gtopo30,timezone,moddate) FROM '$DATADIR/geonames/cities1000.txt' NULL AS '';
 ALTER TABLE ONLY geoname ADD CONSTRAINT pk_geonameid PRIMARY KEY (geonameid);
 SELECT AddGeometryColumn ('public','geoname','geom',4326,'POINT',2);
 UPDATE geoname SET geom = ST_PointFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
