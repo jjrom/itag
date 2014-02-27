@@ -61,13 +61,13 @@ fi
 
 # ================== POLITICAL =====================
 ## Insert Continents
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp continents | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp continents | psql -d $DB -U $SUPERUSER
 psql -d itag  -U $SUPERUSER << EOF
 CREATE INDEX idx_continents_name ON public.continents (continent);
 EOF
 
 ## Insert Countries
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp countries | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp countries | psql -d $DB -U $SUPERUSER
 psql -d $DB  -U $SUPERUSER << EOF
 --
 -- This is for WorldCountries not for ne_110m_admin_0_countries
@@ -99,7 +99,7 @@ CREATE INDEX idx_countries_geom ON public.countries USING gist(geom);
 EOF
 
 ## Insert Cities
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/cities/cities.shp cities | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/cities/cities.shp cities | psql -d $DB -U $SUPERUSER
 psql -d $DB -U $SUPERUSER << EOF
 UPDATE cities set country='The Gambia' WHERE country='Gambia';
 CREATE INDEX idx_cities_name ON public.cities (name);
@@ -145,7 +145,7 @@ CREATE INDEX idx_geoname_countryname ON public.geoname ((lower(countryname)));
 EOF
 
 ## French departments
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/deptsfrance.shp deptsfrance | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/france/deptsfrance.shp deptsfrance | psql -d $DB -U $SUPERUSER
 psql -d $DB -U $SUPERUSER << EOF
 UPDATE deptsfrance set nom_dept=initcap(nom_dept);
 UPDATE deptsfrance set nom_dept=replace(nom_dept, '-De-', '-de-');
@@ -163,10 +163,10 @@ EOF
 
 # =================== GEOPHYSICAL ==================
 ## Insert plates
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp plates | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp plates | psql -d $DB -U $SUPERUSER
 
 ## Insert faults
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP faults | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP faults | psql -d $DB -U $SUPERUSER
 psql -d $DB  -U $SUPERUSER << EOF
 DELETE FROM faults WHERE type IS NULL;
 UPDATE faults set type='Thrust fault' WHERE type='thrust-fault';
@@ -176,20 +176,20 @@ UPDATE faults set type='Rift' WHERE type='rift';
 EOF
 
 ## Insert volcanoes
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP volcanoes | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP volcanoes | psql -d $DB -U $SUPERUSER
 
 # ===== UNUSUED ======
 ## Insert glaciers
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp glaciers | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp glaciers | psql -d $DB -U $SUPERUSER
 // DOWNLOAD THIS INSTEAD - http://nsidc.org/data/docs/noaa/g01130_glacier_inventory/#data_descriptions
 
 ## Major earthquakes since 1900
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp earthquakes | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp earthquakes | psql -d $DB -U $SUPERUSER
  
 
 # ==================== AMENITIES ===================== 
 ## Insert airport
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER
 
 # ==================== LANDCOVER =====================
 psql -U $SUPERUSER -d $DB << EOF
