@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Itag : iTag - tag a geographical footprint with various data sources (country names, land cover, population count, etc.)  " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Itag</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/jjrom/itag">View on GitHub</a>
+
+          <h1 id="project_title">Itag</h1>
+          <h2 id="project_tagline">iTag - tag a geographical footprint with various data sources (country names, land cover, population count, etc.)  </h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/jjrom/itag/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/jjrom/itag/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="itag" class="anchor" href="#itag"><span class="octicon octicon-link"></span></a>iTag</h1>
+
+<p>Automatically tag a geographical footprint against location, land cover, etc.</p>
+
+<p>iTag can tag a footprint with the following information :</p>
+
+<ul>
+<li>continents</li>
+<li>countries</li>
+<li>cities</li>
+<li>french regions and departments</li>
+<li>geophysical plates</li>
+<li>volcanoes</li>
+<li>land cover (i.e. forest, water, urban, cultivated, herbaceous, desert, snow, flooded)</li>
+<li>population count</li>
+</ul><p>You can access an online instance <a href="http://mapshup.info/itag">here</a> as a web service.</p>
+
+<p>See <a href="http://vimeo.com/51045597">video capture of itag applied to Pleiades HR and Spot5 images database</a> and access trough <a href="http://mapshup.info">mapshup</a></p>
+
+<p>iTag is extensively used by <a href="http://github.com/jjrom/resto">RESTo - REstful Semantic search Tool for geOspatial</a></p>
+
+<h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>We suppose that $ITAG_HOME is the directory containing this file</p>
+
+<h2>
+<a name="prerequesites" class="anchor" href="#prerequesites"><span class="octicon octicon-link"></span></a>Prerequesites</h2>
+
+<ul>
+<li>PHP (v5.3+) command line</li>
+<li>PostgreSQL (v9.0+)</li>
+<li>PostGIS (v1.5.1+)</li>
+<li>GDAL (v1.8+) with python support (for land cover preparation)</li>
+</ul><p>Note: iTag could work with lower version of the specified requirements.
+However there is no guaranty of success and unwanted result may occured !</p>
+
+<h2>
+<a name="step-by-step" class="anchor" href="#step-by-step"><span class="octicon octicon-link"></span></a>Step by step</h2>
+
+<ol>
+<li>
+<p>Unzip data</p>
+
+<pre><code>cd $ITAG_HOME/installation
+unzip data.zip
+</code></pre>
+</li>
+<li>
+<p>Install database</p>
+
+<pre><code># Note : "password" must be the same as 
+# the value of DB_PASSWORD key in $ITAG_HOME/config/config.php
+
+cd $ITAG_HOME/installation
+./itagInstallDB.sh -F -d &lt;path_to_postgis_directory&gt; -p password
+</code></pre>
+</li>
+<li>
+<p>Populate database</p>
+
+<pre><code>cd $ITAG_HOME/installation/
+./itagPopulateDB.sh -D data
+</code></pre>
+</li>
+<li><p>Download Global Land Cover 2000</p></li>
+</ol><p>Go to <a href="http://bioval.jrc.ec.europa.eu/products/glc2000/products.php">"Global Land Cover 2000" global product</a> and download glc2000 GeoTIFF file.</p>
+
+<ol>
+<li>Configure</li>
+</ol><p>Edit $ITAG_HOME/config/config.php (just follow the comments !)</p>
+
+<ol>
+<li>
+<p>Precompute landcover</p>
+
+<pre><code>cd $ITAG_HOME/scripts/
+./prepareLandCover.php
+</code></pre>
+</li>
+</ol><p>Note : depending on your server performance, the landcover computation can take a long time (more than two hours)</p>
+
+<h1>
+<a name="using-itag" class="anchor" href="#using-itag"><span class="octicon octicon-link"></span></a>Using iTag</h1>
+
+<h2>
+<a name="from-the-command-line" class="anchor" href="#from-the-command-line"><span class="octicon octicon-link"></span></a>From the command line</h2>
+
+<pre><code>    cd $ITAG_HOME
+
+    php itag.php -h
+
+    #
+    #   USAGE : php itag.php [options] -f &lt;footprint in WKT&gt; (or -d &lt;db connection info&gt;)
+    #   OPTIONS:
+    #       -o [type] : output (json|pretty|insert|copy|hstore) - Note : if -d is choosen only 'hstore', 'insert' and 'copy' are used 
+    #       -H : display hierarchical continents/countries/regions/cities (otherwise keywords are "flat") 
+    #       -O : compute and order result by area of intersection
+    #       -c : Countries
+    #       -x : Continents
+    #       -C : Cities (main|all)
+    #       -R : French Regions and departements
+    #       -p : Population
+    #       -g : Geophysical information (i.e. plates, volcanoes)
+    #       -l : Land Cover (i.e. Thematical content - forest, water, urban, etc.
+    #       -d : DB connection info - dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName
+    #
+
+    #
+    # Tag footprint on Sicilia with countries, all cities and geophysical information
+    #
+    php itag.php -cg -C all -f "POLYGON((13.304225 37.47162,13.304225 38.433184,17.259303 38.433184,17.259303 37.47162,13.304225 37.47162))"
+
+    #
+    # Tag footprint on Toulouse with French region, land cover and population
+    #
+    php itag.php -Rgp -f "POLYGON((1.350360 43.532822,1.350360 43.668522,1.515350 43.668522,1.515350 43.532822,1.350360 43.532822))"
+
+    #
+    # Hierarchized Tag footprint intersecting France, Italy and Switzerland unordered and ordered 
+    #
+    php itag.php -c -H -f "POLYGON((6.487426757812523 45.76081241294796,6.487426757812523 46.06798615804025,7.80578613281244 46.06798615804025,7.80578613281244 45.76081241294796, 6.487426757812523 45.76081241294796))"
+    php itag.php -c -H -O -f "POLYGON((6.487426757812523 45.76081241294796,6.487426757812523 46.06798615804025,7.80578613281244 46.06798615804025,7.80578613281244 45.76081241294796, 6.487426757812523 45.76081241294796))"
+
+
+    #
+    # Tag footprints from table "products" of database "test"
+    #
+    # With the following parameters:
+    #       - dbhost : localhost
+    #       - dbname : test
+    #       - dbschema : public
+    #       - dbuser : postgres
+    #       - dbpassword : postgres
+    #       - dbport : 5432
+    #       - tableName : products
+    #       - identifierColumnName : identifier
+    #       - geometryColumnName : footprint
+    #
+    #
+    # Note : Output is set to hstore and redirect to /tmp/hstore.sql
+    #
+    php itag.php -d localhost:test:public:postgres:postgres:5432:products:identifier:footprint -c -o hstore &gt; /tmp/hstore.sql
+</code></pre>
+
+<h2>
+<a name="from-web-service" class="anchor" href="#from-web-service"><span class="octicon octicon-link"></span></a>From Web service</h2>
+
+<p>We suppose that $ITAG_HOME is accessible to http://localhost/itag/ in Apache.</p>
+
+<p>To tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output, open this url within you browser</p>
+
+<pre><code>    http://localhost/itag/?geophysical=true&amp;countries=true&amp;cities=all&amp;output=pretty&amp;footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
+</code></pre>
+
+<p>Available parameters for Web service are :</p>
+
+<ul>
+<li>&amp;countries=true</li>
+<li>&amp;cities=main (or &amp;cities=all)</li>
+<li>&amp;population=true</li>
+<li>&amp;geophysical=true</li>
+<li>&amp;regions=true</li>
+<li>&amp;landcover=true</li>
+</ul><p>You can check this <a href="http://mapshup.info/itag/">running instance</a> - (note : landcover is disabled on this server)</p>
+
+<p>Examples :</p>
+
+<pre><code>Tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output
+
+    http://mapshup.info/itag/?geophysical=true&amp;countries=true&amp;cities=all&amp;output=pretty&amp;footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
+
+
+Tag footprint intersecting France, Italy and Switzerland with cities, France regions and France departments. Hierarchical result as pretty GeoJSON output
+
+    http://mapshup.info/itag/?hierarchical=true&amp;ordered=true&amp;countries=true&amp;cities=all&amp;output=pretty&amp;footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Itag maintained by <a href="https://github.com/jjrom">jjrom</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-1386506-7");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
