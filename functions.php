@@ -900,9 +900,9 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
             if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
                 return $result;
             }
-            $query = "SELECT name, countryname as country FROM geoname WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY name";
+            $query = "SELECT g.name, g.countryname as country, d.nom_region as region, d.nom_dept as departement FROM geoname g LEFT OUTER JOIN deptsfrance d ON g.admin2 = d.code_dept WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY g.name";
         } else {
-            $query = "SELECT name, country FROM cities WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY name";
+			$query = "SELECT g.name, g.countryname as country, d.nom_region as region, d.nom_dept as departement FROM geoname g LEFT OUTER JOIN deptsfrance d ON g.admin2 = d.code_dept WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) and g.fcode in ('PPLA','PPLC') ORDER BY g.name";
         }
         $results = pg_query($dbh, $query);
         $cities = array();
@@ -911,16 +911,40 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
         }
         while ($element = pg_fetch_assoc($results)) {
             if ($keywords['countries'] && $options['hierarchical']) {
-                foreach (array_keys($result['continents']) as $continent) {
-                    foreach (array_keys($result['continents'][$continent]['countries']) as $country) {
-                        if ($result['continents'][$continent]['countries'][$country]['name'] === $element['country']) {
-                            if (!$result['continents'][$continent]['countries'][$country]['cities']) {
-                                $result['continents'][$continent]['countries'][$country]['cities'] = array();
-                            }
-                            array_push($result['continents'][$continent]['countries'][$country]['cities'], $element['name']);
-                        }
-                    }
-                }
+				if (!$keywords['regions'] ){
+					foreach (array_keys($result['continents']) as $continent) {
+						foreach (array_keys($result['continents'][$continent]['countries']) as $country) {
+							if ($result['continents'][$continent]['countries'][$country]['name'] === $element['country']) {
+								if (!$result['continents'][$continent]['countries'][$country]['cities']) {
+									$result['continents'][$continent]['countries'][$country]['cities'] = array();
+								}
+								array_push($result['continents'][$continent]['countries'][$country]['cities'], $element['name']);
+							}
+						}
+					}
+				} else {
+					foreach (array_keys($result['continents']) as $continent) {
+						foreach (array_keys($result['continents'][$continent]['countries']) as $country) {
+							if ($result['continents'][$continent]['countries'][$country]['name'] === $element['country']) {
+								if ($result['continents'][$continent]['countries'][$country]['name']!== 'France'){
+									if (!$result['continents'][$continent]['countries'][$country]['cities']) {
+										$result['continents'][$continent]['countries'][$country]['cities'] = array();
+									}
+									array_push($result['continents'][$continent]['countries'][$country]['cities'], $element['name']);
+								} else {
+									foreach (array_keys($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['departements']) as $departement) {
+										if ($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['departements'][$departement]['name'] === $element['departement']){
+											if (!$result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['departements'][$departement]['cities']) {
+												$result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['departements'][$departement]['cities'] = array();
+											}
+											array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['departements'][$departement]['cities'], $element['name']);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
             } else {
                 array_push($cities, $element['name']);
             }
