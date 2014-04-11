@@ -39,7 +39,7 @@
  */
 
 // Remove PHP NOTICE
-error_reporting(E_PARSE);
+//error_reporting(E_PARSE);
 
 // Includes
 include_once 'config/config.php';
@@ -52,6 +52,7 @@ $isShell = !empty($_SERVER['SHELL']);
 $output = 'json';
 
 $dbInfos = null;
+$dbLimit = null;
 
 // What to compute
 $keywords = array(
@@ -84,15 +85,19 @@ if ($isShell) {
     $help .= "   -p : Population\n";
     $help .= "   -g : Geophysical information (i.e. plates, volcanoes)\n";
     $help .= "   -l : Land Cover (i.e. Thematical content - forest, water, urban, etc.\n";
+    $help .= "   -t : (For DB connection only) Format is 'modifieddate,2014-10-10' : limit update to date'modifieddate' greater than 2014-10-10.\n";
     $help .= "   -d : DB connection info - dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n";
     $help .= "\n\n";
-    $options = getopt("cxC:Rpgld:f:o:OHh");
+    $options = getopt("cxC:Rpgld:f:o:OHt:h");
     foreach ($options as $option => $value) {
         if ($option === "f") {
             $footprint = $value;
         }
         if ($option === "d") {
             $dbInfos = split(':', $value);
+        }
+        if ($option === "t") {
+            $dbLimit = split(',', $value);
         }
         if ($option === "o") {
             $output = $value;
@@ -215,7 +220,11 @@ if ($dbInfos) {
     /*
      * Count number of elements to process
      */
-    $query = "SELECT count(*) as total FROM " . $tableName;
+    $where = "";
+    if ($dbLimit) {
+        $where .= pg_escape_string($dbLimit[0]) . " > '" . pg_escape_string($dbLimit[1]) . "'";
+    }
+    $query = "SELECT count(*) as total FROM " . $tableName . ($where ? " WHERE " . $where : "");
     $results = pg_query($dbhSource, $query);
     if (!$results) {
         error($dbhSource, $isShell, "\nFATAL : $dbInfos[1] database connection error\n\n");
@@ -236,7 +245,7 @@ if ($dbInfos) {
     /*
      * Seems like pagination is quicker !
      */
-    $baseQuery = "SELECT " . $identifierColumn . " as identifier, st_AsText(" . $geometryColumn . ") as footprint FROM " . $tableName . " WHERE ST_IsValid(footprint) = 't' ORDER BY " . $identifierColumn . " LIMIT " . $limit;
+    $baseQuery = "SELECT " . $identifierColumn . " as identifier, st_AsText(" . $geometryColumn . ") as footprint FROM " . $tableName . " WHERE ST_IsValid(". $geometryColumn .") = 't'" . ($where ? " AND " . $where : "") . " ORDER BY " . $identifierColumn . " LIMIT " . $limit;
     for ($j = 0; $j < $pages; $j++) {
         $offset = ($j * $limit);
         $query = $baseQuery . " OFFSET " . $offset;
