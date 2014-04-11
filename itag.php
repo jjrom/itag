@@ -236,7 +236,7 @@ if ($dbInfos) {
     /*
      * Seems like pagination is quicker !
      */
-    $baseQuery = "SELECT " . $identifierColumn . " as identifier, st_AsText(" . $geometryColumn . ") as footprint FROM " . $tableName . " ORDER BY " . $identifierColumn . " LIMIT " . $limit;
+    $baseQuery = "SELECT " . $identifierColumn . " as identifier, st_AsText(" . $geometryColumn . ") as footprint FROM " . $tableName . " WHERE ST_IsValid(footprint) = 't' ORDER BY " . $identifierColumn . " LIMIT " . $limit;
     for ($j = 0; $j < $pages; $j++) {
         $offset = ($j * $limit);
         $query = $baseQuery . " OFFSET " . $offset;

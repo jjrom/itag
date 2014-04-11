@@ -768,7 +768,7 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
 function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
 
     $result = array();
-
+    
     // Continents
     if ($keywords['continents'] && !$keywords['countries']) {
         if ($options['ordered']) {
@@ -798,7 +798,13 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
         } else {
             $query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
         }
-        $results = pg_query($dbh, $query);
+        try {
+            $results = pg_query($dbh, $query);
+        }
+        catch (Exception $e) {
+            echo '-- ' . $e->getMessage() . "\n";
+            return array();
+        }
         $countries = array();
         $continents = array();
         if (!$results) {
