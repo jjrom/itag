@@ -35,6 +35,15 @@ Prerequesites
 Note: iTag could work with lower version of the specified requirements.
 However there is no guaranty of success and unwanted result may occured !
 
+Configure postgresql
+--------------------
+
+Edit the PostreSQL postgresql.conf and be sure that postgres accept tcp_ip connection.
+
+        # Uncomment these two lines within postgesql.conf
+        listen_adresses = 'localhost'
+        port = 5432
+
 Step by step
 ------------
 
