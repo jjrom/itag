@@ -22,7 +22,7 @@ iTag is extensively used by [RESTo - REstful Semantic search Tool for geOspatial
 Installation
 ============
 
-We suppose that $ITAG_HOME is the directory containing this file
+We suppose that $ITAG_HOME is the directory containing this file.
 
 Prerequesites
 -------------
@@ -39,7 +39,8 @@ Step by step
 ------------
 
 1. Unzip data
-
+        
+        # Note : $ITAG_HOME **must be** an absolute path (not relative !)
         cd $ITAG_HOME/installation
         unzip data.zip
 
@@ -52,7 +53,23 @@ Step by step
         ./itagInstallDB.sh -F -d <path_to_postgis_directory> -p password
 
 3. Populate database
-
+        
+        # 
+        # Note : Read this if you are using Fedora, Red Hat Enterprise Linux, CentOS,
+        # Scientific Linux, or one of the other distros that enable SELinux by default.
+        #
+        # SELinux policies for PostgreSQL do not permit the server to read files outside
+        # the PostgreSQL data directory, or the file was created by a service covered by
+        # a targeted policy so it has a label that PostgreSQL isn't allowed to read from.
+        #
+        # To make the itagPopulateDB.sh, run the following command as root
+        #
+        #   setenforce 0
+        # 
+        # Then after a successful itagPopulateDB.sh relaunch the command
+        #
+        #   setenforce 1
+        #
         cd $ITAG_HOME/installation/
         ./itagPopulateDB.sh -D data
 
