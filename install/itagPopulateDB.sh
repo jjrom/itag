@@ -112,7 +112,7 @@ CREATE TABLE geoname (
     geonameid   int,
     name varchar(200),
     asciiname varchar(200),
-    alternatenames varchar(8000),
+    alternatenames varchar(10000),
     latitude float,
     longitude float,
     fclass char(1),
