@@ -39,7 +39,7 @@
  */
 
 // Remove PHP NOTICE
-//error_reporting(E_PARSE);
+error_reporting(E_PARSE);
 
 // Includes
 include_once 'config/config.php';
@@ -51,6 +51,7 @@ $isShell = !empty($_SERVER['SHELL']);
 // Output format
 $output = 'json';
 
+$footprint = null;
 $dbInfos = null;
 $dbLimit = null;
 
