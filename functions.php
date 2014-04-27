@@ -373,7 +373,7 @@ function getGLCClassName($code) {
     );
 
     if (is_int($code) && $code > 0) {
-        return $classNames[$code] ? $classNames[$code] : "";
+        return isset($classNames[$code]) ? $classNames[$code] : "";
     }
 
     return "";
@@ -671,7 +671,9 @@ function getLandCover($dbh, $isShell, $footprint, $options) {
         $out[$i] = 0;
     }
     while ($product = pg_fetch_assoc($results)) {
-        $out[$product['dn']] += $product['area'];
+        if (isset($out[$product['dn']])) {
+            $out[$product['dn']] += $product['area'];
+        }
         $totalarea = $product['totalarea'];
     }
 
