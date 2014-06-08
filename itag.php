@@ -82,7 +82,7 @@ if ($isShell) {
     $help .= "   -c : Countries\n";
     $help .= "   -x : Continents\n";
     $help .= "   -C : Cities (main|all)\n";
-    $help .= "   -R : French Regions and departements\n";
+    $help .= "   -R : Administrative level 1 (i.e. Regions and departements for France, USA states, etc.)\n";
     $help .= "   -p : Population\n";
     $help .= "   -g : Geophysical information (i.e. plates, volcanoes)\n";
     $help .= "   -l : Land Cover (i.e. Thematical content - forest, water, urban, etc.\n";
