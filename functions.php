@@ -1069,7 +1069,12 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
                 if ($element['region']) {
                     $regions[$element['region']] = $element['region'];
                 }
-                array_push($states, $element['state']);
+                if ($options['ordered']) {
+                    array_push($states, array('name' => $element['state'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+                }
+                else {
+                    array_push($states, array('name' => $element['state']));
+                }
             }
         }
         if (count($regions) > 0) {
