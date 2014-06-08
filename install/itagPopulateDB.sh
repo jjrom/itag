@@ -162,6 +162,13 @@ CREATE INDEX idx_deptsfrance_dept ON public.deptsfrance (nom_dept);
 CREATE INDEX idx_deptsfrance_region ON public.deptsfrance (nom_region);
 EOF
 
+## World administrative level 1 (i.e. states for USA, departements for France)
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp worldadm1level | psql -d $DB -U $SUPERUSER
+psql -d $DB -U $SUPERUSER << EOF
+CREATE INDEX idx_worldadm1level_geom ON public.worldadm1level USING gist(geom);
+EOF
+
+
 # =================== GEOPHYSICAL ==================
 ## Insert plates
 shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp plates | psql -d $DB -U $SUPERUSER
@@ -182,7 +189,7 @@ shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO
 # ===== UNUSUED ======
 ## Insert glaciers
 shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp glaciers | psql -d $DB -U $SUPERUSER
-// DOWNLOAD THIS INSTEAD - http://nsidc.org/data/docs/noaa/g01130_glacier_inventory/#data_descriptions
+# DOWNLOAD THIS INSTEAD - http://nsidc.org/data/docs/noaa/g01130_glacier_inventory/#data_descriptions
 
 ## Major earthquakes since 1900
 shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp earthquakes | psql -d $DB -U $SUPERUSER
@@ -190,7 +197,7 @@ shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/Major
 
 # ==================== AMENITIES ===================== 
 ## Insert airport
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER
+#shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER
 
 # ==================== LANDCOVER =====================
 psql -U $SUPERUSER -d $DB << EOF
@@ -204,10 +211,11 @@ EOF
 
 # GRANT RIGHTS TO itag USER
 psql -U $SUPERUSER -d $DB << EOF
-GRANT SELECT on airports to $USER;
+#GRANT SELECT on airports to $USER;
 GRANT SELECT on cities to $USER;
 GRANT SELECT on geoname to $USER;
 GRANT SELECT on deptsfrance to $USER;
+GRANT SELECT on worldadm1level to $USER;
 GRANT SELECT on continents to $USER;
 GRANT SELECT on countries to $USER;
 GRANT SELECT on earthquakes to $USER;
