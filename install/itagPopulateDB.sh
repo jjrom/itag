@@ -63,13 +63,13 @@ fi
 
 # ================== POLITICAL =====================
 ## Insert Continents
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp continents | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp continents | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 psql -d itag  -U $SUPERUSER -h $HOSTNAME<< EOF
 CREATE INDEX idx_continents_name ON public.continents (continent);
 EOF
 
 ## Insert Countries
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp countries | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp countries | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 psql -d $DB  -U $SUPERUSER -h $HOSTNAME << EOF
 --
 -- This is for WorldCountries not for ne_110m_admin_0_countries
@@ -101,7 +101,7 @@ CREATE INDEX idx_countries_geom ON public.countries USING gist(geom);
 EOF
 
 ## Insert Cities
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/cities/cities.shp cities | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/cities/cities.shp cities | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
 UPDATE cities set country='The Gambia' WHERE country='Gambia';
 CREATE INDEX idx_cities_name ON public.cities (name);
@@ -114,7 +114,7 @@ CREATE TABLE geoname (
     geonameid   int,
     name varchar(200),
     asciiname varchar(200),
-    alternatenames varchar(8000),
+    alternatenames varchar(10000),
     latitude float,
     longitude float,
     fclass char(1),
@@ -131,7 +131,8 @@ CREATE TABLE geoname (
     timezone varchar(40),
     moddate date
 );
-\COPY geoname (geonameid,name,asciiname,alternatenames,latitude,longitude,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,gtopo30,timezone,moddate) FROM '$DATADIR/geonames/cities1000.txt' NULL AS '' ENCODING 'UTF8';
+SET client_encoding = 'UTF8'; 
+COPY geoname (geonameid,name,asciiname,alternatenames,latitude,longitude,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,gtopo30,timezone,moddate) FROM '$DATADIR/geonames/cities1000.txt' NULL AS '';
 ALTER TABLE ONLY geoname ADD CONSTRAINT pk_geonameid PRIMARY KEY (geonameid);
 SELECT AddGeometryColumn ('public','geoname','geom',4326,'POINT',2);
 UPDATE geoname SET geom = ST_PointFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
@@ -139,6 +140,7 @@ CREATE INDEX idx_geoname_geom ON public.geoname USING gist(geom);
 CREATE INDEX idx_geoname_name ON public.geoname (name);
 ALTER TABLE geoname ADD COLUMN searchname VARCHAR(200);
 UPDATE geoname SET searchname = lower(replace(replace(asciiname, '-', ''), ' ', ''));
+UPDATE geoname SET searchname = replace(searchname, '\`', '');
 CREATE INDEX idx_geoname_searchname ON public.geoname (searchname);
 ALTER TABLE geoname ADD COLUMN countryname VARCHAR(200);
 UPDATE geoname SET countryname=(SELECT name FROM countries WHERE geoname.country = countries.iso_a2 LIMIT 1);
@@ -146,7 +148,7 @@ CREATE INDEX idx_geoname_countryname ON public.geoname ((lower(countryname)));
 EOF
 
 ## French departments
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/deptsfrance.shp deptsfrance | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+hp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/france/deptsfrance.shp deptsfrance | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
 UPDATE deptsfrance set nom_dept=initcap(nom_dept);
 UPDATE deptsfrance set nom_dept=replace(nom_dept, '-De-', '-de-');
@@ -162,7 +164,6 @@ CREATE INDEX idx_deptsfrance_dept ON public.deptsfrance (nom_dept);
 CREATE INDEX idx_deptsfrance_region ON public.deptsfrance (nom_region);
 EOF
 
-## French communes
 shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/commfrance.shp commfrance | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
 UPDATE commfrance set nom_comm=initcap(nom_comm);
@@ -182,15 +183,20 @@ shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/arrsfrance.shp arrsf
 psql -d $DB -U $SUPERUSER -h $HOSTNAME << EOF
 UPDATE arrsfrance set nom_chf=initcap(nom_chf);
 CREATE INDEX idx_arrsfrance_arrs ON public.arrsfrance (nom_chf);
+
+## World administrative level 1 (i.e. states for USA, departements for France)
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp worldadm1level | psql -d $DB -U $SUPERUSER
+psql -d $DB -U $SUPERUSER << EOF
+CREATE INDEX idx_worldadm1level_geom ON public.worldadm1level USING gist(geom);
 EOF
 
 
 # =================== GEOPHYSICAL ==================
 ## Insert plates
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp plates | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp plates | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 
 ## Insert faults
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP faults | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP faults | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 psql -d $DB  -U $SUPERUSER -h $HOSTNAME << EOF
 DELETE FROM faults WHERE type IS NULL;
 UPDATE faults set type='Thrust fault' WHERE type='thrust-fault';
@@ -200,27 +206,38 @@ UPDATE faults set type='Rift' WHERE type='rift';
 EOF
 
 ## Insert volcanoes
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP volcanoes | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP volcanoes | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 
 # ===== UNUSUED ======
 ## Insert glaciers
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp glaciers | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp glaciers | psql -d $DB -U $SUPERUSER -h $HOSTNAME
 ## DOWNLOAD THIS INSTEAD - http://nsidc.org/data/docs/noaa/g01130_glacier_inventory/#data_descriptions
 
 ## Major earthquakes since 1900
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp earthquakes | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp earthquakes | psql -d $DB -U $SUPERUSER -h $HOSTNAME
  
 
 # ==================== AMENITIES ===================== 
 ## Insert airport
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp airports | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+
+# ==================== LANDCOVER =====================
+psql -U $SUPERUSER -d $DB << EOF
+CREATE TABLE landcover (
+    ogc_fid         SERIAL,
+    dn              INTEGER
+);
+SELECT AddGeometryColumn ('public','landcover','wkb_geometry',4326,'POLYGON',2);
+CREATE INDEX landcover_geometry_idx ON landcover USING gist (wkb_geometry);
+EOF
 
 # GRANT RIGHTS TO itag USER
 psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
-GRANT SELECT on airports to $USER;
+#GRANT SELECT on airports to $USER;
 GRANT SELECT on cities to $USER;
 GRANT SELECT on geoname to $USER;
 GRANT SELECT on deptsfrance to $USER;
+GRANT SELECT on worldadm1level to $USER;
 GRANT SELECT on continents to $USER;
 GRANT SELECT on countries to $USER;
 GRANT SELECT on earthquakes to $USER;
@@ -228,5 +245,5 @@ GRANT SELECT on glaciers to $USER;
 GRANT SELECT on plates to $USER;
 GRANT SELECT on faults to $USER;
 GRANT SELECT on volcanoes to $USER;
+GRANT SELECT on landcover to $USER;
 EOF
-
