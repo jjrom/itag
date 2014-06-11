@@ -46,6 +46,7 @@ include_once 'config/config.php';
 /*
  * Stop program on error
  */
+
 function error($dbh, $isShell, $message) {
 
     if ($dbh) {
@@ -176,7 +177,7 @@ function percentage($part, $total) {
  *
  * 8 Global landuse created from above GLC2000 classes
  *
-  100=>Artificial (22)
+  100=>Urban (22)
   200=>Cultivated (15 + 16 + 17 + 18)
   310=>Forests (1 + 2 + 3 + 4 + 5 + 6)
   320=>Herbaceous (9 + 11 + 12 + 13)
@@ -189,6 +190,7 @@ function percentage($part, $total) {
 /**
  *
  * Return a random table name
+ * 
  *
  * @param <integer> $length : length of the table name
  * @return string : random table name
@@ -346,7 +348,7 @@ function getGLCClassName($code) {
         6 => "Tree Cover, mixed leaf type",
         7 => "Tree Cover, regularly flooded, fresh  water",
         8 => "Tree Cover, regularly flooded, saline water",
-        9 => "Mosaic: Tree cover / Other natural vegetation",
+        9 => "Mosaic - Tree cover / Other natural vegetation",
         10 => "Tree Cover, burnt",
         11 => "Shrub Cover, closed-open, evergreen",
         12 => "Shrub Cover, closed-open, deciduous",
@@ -354,27 +356,464 @@ function getGLCClassName($code) {
         14 => "Sparse Herbaceous or sparse Shrub Cover",
         15 => "Regularly flooded Shrub and/or Herbaceous Cover",
         16 => "Cultivated and managed areas",
-        17 => "Mosaic: Cropland / Tree Cover / Other natural vegetation",
-        18 => "Mosaic: Cropland / Shrub or Grass Cover",
+        17 => "Mosaic - Cropland / Tree Cover / Other natural vegetation",
+        18 => "Mosaic - Cropland / Shrub or Grass Cover",
         19 => "Bare Areas",
         20 => "Water Bodies",
         21 => "Snow and Ice",
         22 => "Artificial surfaces and associated areas",
-        100 => "Artificial",
+        100 => "Urban",
         200 => "Cultivated",
-        310 => "Forests",
+        310 => "Forest",
         320 => "Herbaceous",
-        330 => "Deserts",
+        330 => "Desert",
         335 => "Snow and ice",
         400 => "Flooded",
         500 => "Water"
     );
 
     if (is_int($code) && $code > 0) {
-        return $classNames[$code] ? $classNames[$code] : "";
+        return isset($classNames[$code]) ? $classNames[$code] : "";
     }
 
     return "";
+}
+
+function getCountryName($code) {
+    
+    $countryNames = array(
+        'AD' => 'Andorra',
+        'AF' => 'Afghanistan',
+        'AFG' => 'Afghanistan',
+        'AG' => 'Antigua and Barbuda',
+        'AI' => 'Anguilla',
+        'AL' => 'Albania',
+        'ALB' => 'Albania',
+        'AN' => 'Netherlands Antilles',
+        'AO' => 'Angola',
+        'AGO' => 'Angola',
+        'AQ' => 'Antarctica',
+        'AR' => 'Argentina',
+        'AE' => 'United Arab Emirates',
+        'ARE' => 'United Arab Emirates',
+        'ARG' => 'Argentina',
+        'AM' => 'Armenia',
+        'ARM' => 'Armenia',
+        'AS' => 'American Samoa',
+        'AT' => 'Austria',
+        'ATA' => 'Antarctica',
+        'ATF' => 'French Southern and Antarctic Lands',
+        'AU' => 'Australia',
+        'AUS' => 'Australia',
+        'AUT' => 'Austria',
+        'AW' => 'Aruba',
+        'AX' => 'Aland Islands',
+        'AZ' => 'Azerbaijan',
+        'AZE' => 'Azerbaijan',
+        'BA' => 'Bosnia and Herzegovina',
+        'BB' => 'Barbados',
+        'BD' => 'Bangladesh',
+        'BDI' => 'Burundi',
+        'BE' => 'Belgium',
+        'BEL' => 'Belgium',
+        'BEN' => 'Benin',
+        'BF' => 'Burkina Faso',
+        'BFA' => 'Burkina Faso',
+        'BG' => 'Bulgaria',
+        'BGD' => 'Bangladesh',
+        'BGR' => 'Bulgaria',
+        'BH' => 'Bahrain',
+        'BHS' => 'Bahamas',
+        'BI' => 'Burundi',
+        'BIH' => 'Bosnia and Herzegovina',
+        'BJ' => 'Benin',
+        'BL' => 'Saint Barthelemy',
+        'BLR' => 'Belarus',
+        'BLZ' => 'Belize',
+        'BM' => 'Bermuda',
+        'BN' => 'Brunei',
+        'BO' => 'Bolivia',
+        'BOL' => 'Bolivia',
+        'BQ' => 'Bonaire, Saint Eustatius and Saba ',
+        'BR' => 'Brazil',
+        'BRA' => 'Brazil',
+        'BRN' => 'Brunei',
+        'BS' => 'Bahamas',
+        'BT' => 'Bhutan',
+        'BTN' => 'Bhutan',
+        'BV' => 'Bouvet Island',
+        'BW' => 'Botswana',
+        'BWA' => 'Botswana',
+        'BY' => 'Belarus',
+        'BZ' => 'Belize',
+        'CA' => 'Canada',
+        'CAF' => 'Central African Republic',
+        'CAN' => 'Canada',
+        'CC' => 'Cocos Islands',
+        'CD' => 'Democratic Republic of the Congo',
+        'CF' => 'Central African Republic',
+        'CG' => 'Republic of the Congo',
+        'CH' => 'Switzerland',
+        'CHE' => 'Switzerland',
+        'CHL' => 'Chile',
+        'CHN' => 'China',
+        'CI' => 'Ivory Coast',
+        'CIV' => 'Ivory Coast',
+        'CK' => 'Cook Islands',
+        'CL' => 'Chile',
+        'CM' => 'Cameroon',
+        'CMR' => 'Cameroon',
+        'CN' => 'China',
+        'CO' => 'Colombia',
+        'COD' => 'Democratic Republic of the Congo',
+        'COG' => 'Republic of the Congo',
+        'COL' => 'Colombia',
+        'CR' => 'Costa Rica',
+        'CRI' => 'Costa Rica',
+        'CS' => 'Serbia and Montenegro',
+        'CU' => 'Cuba',
+        'CUB' => 'Cuba',
+        'CV' => 'Cape Verde',
+        'CW' => 'Curacao',
+        'CX' => 'Christmas Island',
+        'CY' => 'Cyprus',
+        'CYN' => 'Northern Cyprus',
+        'CYP' => 'Cyprus',
+        'CZ' => 'Czech Republic',
+        'CZE' => 'Czech Republic',
+        'DE' => 'Germany',
+        'DEU' => 'Germany',
+        'DJ' => 'Djibouti',
+        'DJI' => 'Djibouti',
+        'DK' => 'Denmark',
+        'DM' => 'Dominica',
+        'DNK' => 'Denmark',
+        'DO' => 'Dominican Republic',
+        'DOM' => 'Dominican Republic',
+        'DZ' => 'Algeria',
+        'DZA' => 'Algeria',
+        'EC' => 'Ecuador',
+        'ECU' => 'Ecuador',
+        'EE' => 'Estonia',
+        'EG' => 'Egypt',
+        'EGY' => 'Egypt',
+        'EH' => 'Western Sahara',
+        'ER' => 'Eritrea',
+        'ERI' => 'Eritrea',
+        'ES' => 'Spain',
+        'ESP' => 'Spain',
+        'EST' => 'Estonia',
+        'ET' => 'Ethiopia',
+        'ETH' => 'Ethiopia',
+        'FI' => 'Finland',
+        'FIN' => 'Finland',
+        'FJ' => 'Fiji',
+        'FJI' => 'Fiji',
+        'FK' => 'Falkland Islands',
+        'FLK' => 'Falkland Islands',
+        'FM' => 'Micronesia',
+        'FO' => 'Faroe Islands',
+        'FR' => 'France',
+        'FRA' => 'France',
+        'GA' => 'Gabon',
+        'GAB' => 'Gabon',
+        'GB' => 'United Kingdom',
+        'GBR' => 'United Kingdom',
+        'GD' => 'Grenada',
+        'GE' => 'Georgia',
+        'GEO' => 'Georgia',
+        'GF' => 'French Guiana',
+        'GG' => 'Guernsey',
+        'GH' => 'Ghana',
+        'GHA' => 'Ghana',
+        'GI' => 'Gibraltar',
+        'GIN' => 'Guinea',
+        'GL' => 'Greenland',
+        'GM' => 'Gambia',
+        'GMB' => 'Gambia',
+        'GN' => 'Guinea',
+        'GNB' => 'Guinea-Bissau',
+        'GNQ' => 'Equatorial Guinea',
+        'GP' => 'Guadeloupe',
+        'GQ' => 'Equatorial Guinea',
+        'GR' => 'Greece',
+        'GRC' => 'Greece',
+        'GRL' => 'Greenland',
+        'GS' => 'South Georgia and the South Sandwich Islands',
+        'GT' => 'Guatemala',
+        'GTM' => 'Guatemala',
+        'GU' => 'Guam',
+        'GUY' => 'Guyana',
+        'GW' => 'Guinea-Bissau',
+        'GY' => 'Guyana',
+        'HK' => 'Hong Kong',
+        'HM' => 'Heard Island and McDonald Islands',
+        'HN' => 'Honduras',
+        'HND' => 'Honduras',
+        'HR' => 'Croatia',
+        'HRV' => 'Croatia',
+        'HT' => 'Haiti',
+        'HTI' => 'Haiti',
+        'HU' => 'Hungary',
+        'HUN' => 'Hungary',
+        'ID' => 'Indonesia',
+        'IDN' => 'Indonesia',
+        'IE' => 'Ireland',
+        'IL' => 'Israel',
+        'IM' => 'Isle of Man',
+        'IN' => 'India',
+        'IND' => 'India',
+        'IO' => 'British Indian Ocean Territory',
+        'IQ' => 'Iraq',
+        'IR' => 'Iran',
+        'IRL' => 'Ireland',
+        'IRN' => 'Iran',
+        'IRQ' => 'Iraq',
+        'IS' => 'Iceland',
+        'ISL' => 'Iceland',
+        'ISR' => 'Israel',
+        'IT' => 'Italy',
+        'ITA' => 'Italy',
+        'JAM' => 'Jamaica',
+        'JE' => 'Jersey',
+        'JM' => 'Jamaica',
+        'JO' => 'Jordan',
+        'JOR' => 'Jordan',
+        'JP' => 'Japan',
+        'JPN' => 'Japan',
+        'KAZ' => 'Kazakhstan',
+        'KE' => 'Kenya',
+        'KEN' => 'Kenya',
+        'KG' => 'Kyrgyzstan',
+        'KGZ' => 'Kyrgyzstan',
+        'KH' => 'Cambodia',
+        'KHM' => 'Cambodia',
+        'KI' => 'Kiribati',
+        'KM' => 'Comoros',
+        'KN' => 'Saint Kitts and Nevis',
+        'KOR' => 'Korea',
+        'KOS' => 'Kosovo',
+        'KP' => 'North Korea',
+        'KR' => 'South Korea',
+        'KW' => 'Kuwait',
+        'KWT' => 'Kuwait',
+        'KY' => 'Cayman Islands',
+        'KZ' => 'Kazakhstan',
+        'LA' => 'Laos',
+        'LAO' => 'Laos',
+        'LB' => 'Lebanon',
+        'LBN' => 'Lebanon',
+        'LBR' => 'Liberia',
+        'LBY' => 'Libya',
+        'LC' => 'Saint Lucia',
+        'LI' => 'Liechtenstein',
+        'LK' => 'Sri Lanka',
+        'LKA' => 'Sri Lanka',
+        'LR' => 'Liberia',
+        'LS' => 'Lesotho',
+        'LSO' => 'Lesotho',
+        'LT' => 'Lithuania',
+        'LTU' => 'Lithuania',
+        'LU' => 'Luxembourg',
+        'LUX' => 'Luxembourg',
+        'LV' => 'Latvia',
+        'LVA' => 'Latvia',
+        'LY' => 'Libya',
+        'MA' => 'Morocco',
+        'MAR' => 'Morocco',
+        'MC' => 'Monaco',
+        'MD' => 'Moldova',
+        'MDA' => 'Moldova',
+        'MDG' => 'Madagascar',
+        'ME' => 'Montenegro',
+        'MEX' => 'Mexico',
+        'MF' => 'Saint Martin',
+        'MG' => 'Madagascar',
+        'MH' => 'Marshall Islands',
+        'MK' => 'Macedonia',
+        'MKD' => 'Macedonia',
+        'ML' => 'Mali',
+        'MLI' => 'Mali',
+        'MM' => 'Myanmar',
+        'MMR' => 'Myanmar',
+        'MN' => 'Mongolia',
+        'MNE' => 'Montenegro',
+        'MNG' => 'Mongolia',
+        'MO' => 'Macao',
+        'MOZ' => 'Mozambique',
+        'MP' => 'Northern Mariana Islands',
+        'MQ' => 'Martinique',
+        'MR' => 'Mauritania',
+        'MRT' => 'Mauritania',
+        'MS' => 'Montserrat',
+        'MT' => 'Malta',
+        'MU' => 'Mauritius',
+        'MV' => 'Maldives',
+        'MW' => 'Malawi',
+        'MWI' => 'Malawi',
+        'MX' => 'Mexico',
+        'MY' => 'Malaysia',
+        'MYS' => 'Malaysia',
+        'MZ' => 'Mozambique',
+        'NA' => 'Namibia',
+        'NAM' => 'Namibia',
+        'NC' => 'New Caledonia',
+        'NCL' => 'New Caledonia',
+        'NE' => 'Niger',
+        'NER' => 'Niger',
+        'NF' => 'Norfolk Island',
+        'NG' => 'Nigeria',
+        'NGA' => 'Nigeria',
+        'NI' => 'Nicaragua',
+        'NIC' => 'Nicaragua',
+        'NL' => 'Netherlands',
+        'NLD' => 'Netherlands',
+        'NO' => 'Norway',
+        'NOR' => 'Norway',
+        'NP' => 'Nepal',
+        'NPL' => 'Nepal',
+        'NR' => 'Nauru',
+        'NU' => 'Niue',
+        'NZ' => 'New Zealand',
+        'NZL' => 'New Zealand',
+        'OM' => 'Oman',
+        'OMN' => 'Oman',
+        'PA' => 'Panama',
+        'PAK' => 'Pakistan',
+        'PAN' => 'Panama',
+        'PE' => 'Peru',
+        'PER' => 'Peru',
+        'PF' => 'French Polynesia',
+        'PG' => 'Papua New Guinea',
+        'PH' => 'Philippines',
+        'PHL' => 'Philippines',
+        'PK' => 'Pakistan',
+        'PL' => 'Poland',
+        'PM' => 'Saint Pierre and Miquelon',
+        'PN' => 'Pitcairn',
+        'PNG' => 'Papua New Guinea',
+        'POL' => 'Poland',
+        'PR' => 'Puerto Rico',
+        'PRI' => 'Puerto Rico',
+        'PRK' => 'North Korea',
+        'PRT' => 'Portugal',
+        'PRY' => 'Paraguay',
+        'PS' => 'Palestinian Territory',
+        'PSX' => 'Palestine',
+        'PT' => 'Portugal',
+        'PW' => 'Palau',
+        'PY' => 'Paraguay',
+        'QA' => 'Qatar',
+        'QAT' => 'Qatar',
+        'RE' => 'Reunion',
+        'RO' => 'Romania',
+        'ROU' => 'Romania',
+        'RS' => 'Serbia',
+        'RU' => 'Russia',
+        'RUS' => 'Russia',
+        'RW' => 'Rwanda',
+        'RWA' => 'Rwanda',
+        'SA' => 'Saudi Arabia',
+        'SAH' => 'Western Sahara',
+        'SAU' => 'Saudi Arabia',
+        'SB' => 'Solomon Islands',
+        'SC' => 'Seychelles',
+        'SD' => 'Sudan',
+        'SDN' => 'Sudan',
+        'SDS' => 'South Sudan',
+        'SE' => 'Sweden',
+        'SEN' => 'Senegal',
+        'SG' => 'Singapore',
+        'SH' => 'Saint Helena',
+        'SI' => 'Slovenia',
+        'SJ' => 'Svalbard and Jan Mayen',
+        'SK' => 'Slovakia',
+        'SL' => 'Sierra Leone',
+        'SLB' => 'Solomon Islands',
+        'SLE' => 'Sierra Leone',
+        'SLV' => 'El Salvador',
+        'SM' => 'San Marino',
+        'SN' => 'Senegal',
+        'SO' => 'Somalia',
+        'SOL' => 'Somaliland',
+        'SOM' => 'Somalia',
+        'SR' => 'Suriname',
+        'SRB' => 'Serbia',
+        'SS' => 'South Sudan',
+        'ST' => 'Sao Tome and Principe',
+        'SUR' => 'Suriname',
+        'SV' => 'El Salvador',
+        'SVK' => 'Slovakia',
+        'SVN' => 'Slovenia',
+        'SWE' => 'Sweden',
+        'SWZ' => 'Swaziland',
+        'SX' => 'Sint Maarten',
+        'SY' => 'Syria',
+        'SYR' => 'Syria',
+        'SZ' => 'Swaziland',
+        'TC' => 'Turks and Caicos Islands',
+        'TCD' => 'Chad',
+        'TD' => 'Chad',
+        'TF' => 'French Southern Territories',
+        'TG' => 'Togo',
+        'TGO' => 'Togo',
+        'TH' => 'Thailand',
+        'THA' => 'Thailand',
+        'TJ' => 'Tajikistan',
+        'TJK' => 'Tajikistan',
+        'TK' => 'Tokelau',
+        'TKM' => 'Turkmenistan',
+        'TL' => 'East Timor',
+        'TLS' => 'Timor-Leste',
+        'TM' => 'Turkmenistan',
+        'TN' => 'Tunisia',
+        'TO' => 'Tonga',
+        'TR' => 'Turkey',
+        'TT' => 'Trinidad and Tobago',
+        'TTO' => 'Trinidad and Tobago',
+        'TUN' => 'Tunisia',
+        'TUR' => 'Turkey',
+        'TV' => 'Tuvalu',
+        'TW' => 'Taiwan',
+        'TWN' => 'Taiwan',
+        'TZ' => 'Tanzania',
+        'TZA' => 'Tanzania',
+        'UA' => 'Ukraine',
+        'UG' => 'Uganda',
+        'UGA' => 'Uganda',
+        'UKR' => 'Ukraine',
+        'UM' => 'United States Minor Outlying Islands',
+        'URY' => 'Uruguay',
+        'US' => 'United States',
+        'USA' => 'United States',
+        'UY' => 'Uruguay',
+        'UZ' => 'Uzbekistan',
+        'UZB' => 'Uzbekistan',
+        'VA' => 'Vatican',
+        'VC' => 'Saint Vincent and the Grenadines',
+        'VE' => 'Venezuela',
+        'VEN' => 'Venezuela',
+        'VG' => 'British Virgin Islands',
+        'VI' => 'U.S. Virgin Islands',
+        'VN' => 'Vietnam',
+        'VNM' => 'Vietnam',
+        'VU' => 'Vanuatu',
+        'VUT' => 'Vanuatu',
+        'WF' => 'Wallis and Futuna',
+        'WS' => 'Samoa',
+        'XK' => 'Kosovo',
+        'YE' => 'Yemen',
+        'YEM' => 'Yemen',
+        'YT' => 'Mayotte',
+        'ZA' => 'South Africa',
+        'ZAF' => 'South Africa',
+        'ZM' => 'Zambia',
+        'ZMB' => 'Zambia',
+        'ZW' => 'Zimbabwe',
+        'ZWE' => 'Zimbabwe'
+    );
+    
+    return $countryNames[$code] ? $countryNames[$code] : $code;
 }
 
 /**
@@ -384,43 +823,23 @@ function getGLCClassName($code) {
  * @param {DatabaseConnection} $dbh
  * 
  */
-function getLandCover($dbh, $isShell, $footprint) {
+function getLandCover($dbh, $isShell, $footprint, $options) {
 
-    // Create temporary name for processing
-    $tmpTable = getTableName(6);
-
-    // Crop GLC2000 raster
+    /*
+     * Do not process if $footprint is more than 2x2 degrees
+     */
     $cropOrigin = cropOriginGLC2000(bbox($footprint));
-       
-    $srcWin = $cropOrigin['x'] . ' ' . $cropOrigin['y'] . ' ' . $cropOrigin['xsize'] . ' ' . $cropOrigin['ysize'];
-
-    // Avoid crashing the machine with big crops (2x2 square degrees)
-    if (!isShell) {
-        if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
-            error($dbh, $isShell, "\nFATAL : input footprint should be smaller than 2x2 square degrees\n\n");
-        }
+    if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
+        return null;
     }
     
-    // Crop GLC2000 raster to $srcWin 
-    exec(GDAL_TRANSLATE_PATH . " -of GTiff -srcwin " . $srcWin . " -a_srs EPSG:4326 " . GLC2000_TIFF . " /tmp/" . $tmpTable . ".tif");
-
-    // In case of crashing crop - polygon is outside bounds for example
-    if (!file_exists("/tmp/" . $tmpTable . ".tif")) {
-        error($dbh, $isShell, "\nFATAL : glc2000 crop error\n\n");
-    }
-
-    // Polygonize extracted raster within temporary table $tmpTable
-    exec(GDAL_POLYGONIZE_PATH . ' /tmp/' . $tmpTable . '.tif -f "PostgreSQL" PG:"host=' . DB_HOST . ' user=' . DB_USER . ' password=' . DB_PASSWORD . ' dbname=' . DB_NAME . '" ' . $tmpTable . ' 2>&1');
-    unlink("/tmp/" . $tmpTable . ".tif");
-
     // Crop data
     $geom = "ST_GeomFromText('" . $footprint . "', 4326)";
-    $query = "SELECT dn as dn, st_area($geom) as totalarea, st_area(st_intersection(wkb_geometry, $geom)) as area FROM $tmpTable WHERE st_intersects(wkb_geometry, $geom)";
+    $query = "SELECT dn as dn, st_area($geom) as totalarea, st_area(st_intersection(wkb_geometry, $geom)) as area FROM landcover WHERE st_intersects(wkb_geometry, $geom)";
     $results = pg_query($dbh, $query);
     if (!$results) {
         echo "-- Error for $footprint - skip\n";
         return null;
-        //error($dbh, $isShell, "\nFATAL : database connection error\n\n");
     }
 
     // Store results in $out array
@@ -429,12 +848,11 @@ function getLandCover($dbh, $isShell, $footprint) {
         $out[$i] = 0;
     }
     while ($product = pg_fetch_assoc($results)) {
-        $out[$product['dn']] += $product['area'];
+        if (isset($out[$product['dn']])) {
+            $out[$product['dn']] += $product['area'];
+        }
         $totalarea = $product['totalarea'];
     }
-
-    // Remove temporary table
-    pg_query($dbh, "DROP TABLE $tmpTable");
 
     // Compute parent classes
     $parent = array();
@@ -453,8 +871,13 @@ function getLandCover($dbh, $isShell, $footprint) {
     $count = 0;
     foreach ($parent as $key => $val) {
         $count++;
-        if ($val !== 0 && percentage($val, $totalarea) > 20) {
-            array_push($landUse, getGLCClassName($key));
+        $pcover = percentage($val, $totalarea);
+        if ($val !== 0 && $pcover > 20) {
+            if ($options['ordered']) {
+                array_push($landUse, array('name' => getGLCClassName($key), 'pcover' => $pcover));
+            } else {
+                array_push($landUse, getGLCClassName($key));
+            }
         }
         if ($count > 2) {
             break;
@@ -466,13 +889,13 @@ function getLandCover($dbh, $isShell, $footprint) {
      */
     $result = array(
         'area' => $totalarea,
-        'landUse' => join(LIST_SEPARATOR, $landUse),
+        'landUse' => $landUse,
         'landUseDetails' => array()
     );
 
     foreach ($out as $key => $val) {
         if ($val !== 0) {
-            array_push($result['landUseDetails'], array('type' => getGLCClassName($key), 'code' => $key, 'percentage' => percentage($val, $totalarea)));
+            array_push($result['landUseDetails'], array('name' => getGLCClassName($key), 'code' => $key, 'pcover' => min(100, percentage($val, $totalarea))));
         }
     }
 
@@ -491,8 +914,9 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
     if (isset($order)) {
         $orderBy = " ORDER BY " . $order;
     }
-    
+
     $query = "SELECT distinct(" . $columnName . ") FROM " . $tableName . " WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))" . $orderBy;
+
     $results = pg_query($dbh, $query);
     $keywords = array();
     if (!$results) {
@@ -501,7 +925,7 @@ function getKeywords($dbh, $isShell, $tableName, $columnName, $footprint, $order
     while ($result = pg_fetch_assoc($results)) {
         array_push($keywords, $result[$columnName]);
     }
-    
+
     return $keywords;
 }
 
@@ -599,82 +1023,215 @@ function getArrondissements($dbh, $isShell, $footprint) {
  * from input WKT footprint
  * 
  * @param {DatabaseConnection} $dbh
+ * @param {boolean} $isShell - true if launch by shell script, false is launch from webserver
+ * @param {string} $footprint - WKT POLYGON
+ * @param {array} $keywords - list of keywords class to produce
+ * @param {array} $options - processing options
+ *                  {
+ *                      'hierarchical' => // if true return keywords by descending area of intersection
+ *                  }
  * 
  */
-function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $continentOnly) {
+function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
 
     $result = array();
     
-    if ($continentOnly) {
-        $continents = getKeywords($dbh, $isShell, "continents", "continent", $footprint, "continent");
+    // Continents
+    if ($keywords['continents'] && !$keywords['countries']) {
+        if ($options['ordered']) {
+            $query = "SELECT continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM continents WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+            $results = pg_query($dbh, $query);
+            $continents = array();
+            if (!$results) {
+                error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+            }
+            while ($element = pg_fetch_assoc($results)) {
+                array_push($continents, $element['continent']);
+            }
+        } else {
+            $continents = getKeywords($dbh, $isShell, "continents", "continent", $footprint, "continent");
+        }
         if (count($continents) > 0) {
-            $result['continents'] = join(LIST_SEPARATOR, $continents);
+            $result['continents'] = $continents;
         }
     }
-    else {
+
+    // Countries
+    if ($keywords['countries']) {
+
         // Continents and countries
-        $query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
-        $results = pg_query($dbh, $query);
+        if ($options['ordered']) {
+            $query = "SELECT name as name, continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+        } else {
+            $query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+        }
+        try {
+            $results = pg_query($dbh, $query);
+        }
+        catch (Exception $e) {
+            echo '-- ' . $e->getMessage() . "\n";
+            return array();
+        }
         $countries = array();
         $continents = array();
         if (!$results) {
             error($dbh, $isShell, "\nFATAL : database connection error\n\n");
         }
         while ($element = pg_fetch_assoc($results)) {
-            if (isset($element['continent']) && $element['continent']) {
-                array_push($continents, $element['continent']);
+            if ($options['hierarchical']) {
+                if (!$continents[$element['continent']]) {
+                    $continents[$element['continent']] = array(
+                        'countries' => array()
+                    );
+                }
+                if ($options['ordered']) {
+                    array_push($continents[$element['continent']]['countries'], array('name' => $element['name'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+                } else {
+                    array_push($continents[$element['continent']]['countries'], array('name' => $element['name']));
+                }
+            } else {
+                $continents[$element['continent']] = $element['continent'];
+                if ($options['ordered']) {
+                    array_push($countries, array('name' => $element['name'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+                } else {
+                    array_push($countries, array('name' => $element['name']));
+                }
             }
-            if (isset($element['continent']) && $element['continent']) {
-                array_push($countries, $element['name']);
-            }
-        }
-        if (count($countries) > 0) {
-            $result['countries'] = join(LIST_SEPARATOR, $countries);
         }
         if (count($continents) > 0) {
-            $result['continents'] = join(LIST_SEPARATOR, $continents);
+            if ($options['hierarchical']) {
+                $result['continents'] = $continents;
+            } else {
+                $result['countries'] = $countries;
+                $result['continents'] = array_keys($continents);
+            }
         }
     }
+
     // Regions
-    if ($hasRegions) {
-    	if($hasRegions === "all") {
-			$regions = getRegions($dbh, $isShell, $footprint);
-			if (count($regions) > 0) {
-				$result['regions'] = $regions;
-			}
-			$depts = getDepartements($dbh, $isShell, $footprint);
-			if (count($depts) > 0) {
-				$result['departements'] = $depts;
-			}
-			$arrs = getArrondissements($dbh, $isShell, $footprint);
-			if (count($arrs) > 0) {
-				$result['arrondissements'] = $arrs;
-			}
-			$communes = getCommunes($dbh, $isShell, $footprint);
-			if (count($communes) > 0) {
-				$result['communes'] = $communes;
-			}
-		}
-		else {
-			$regions = getKeywords($dbh, $isShell, "deptsfrance", "nom_region", $footprint, "nom_region");
-			if (count($regions) > 0) {
-				$result['regions'] = join(LIST_SEPARATOR, $regions);
-			}
-			$depts = getKeywords($dbh, $isShell, "deptsfrance", "nom_dept", $footprint, "nom_dept");
-			if (count($depts) > 0) {
-				$result['departements'] = join(LIST_SEPARATOR, $depts);
-			}
-		}
-    }
-    
-    // Cities
-    if ($citiesType) {
-        $cities = getKeywords($dbh, $isShell, $citiesType === "all" ? "geoname" : "cities", "name", $footprint, "name");
-        if (count($cities) > 0) {
-            $result['cities'] = join(LIST_SEPARATOR, $cities);
+    if ($keywords['regions']) {
+        if ($options['ordered']) {
+            $query = "SELECT region, name as state, adm0_a3 as isoa3, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM worldadm1level WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+        } else {
+            $query = "SELECT region, name as state, adm0_a3 as isoa3 FROM worldadm1level WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY region";
+        }
+        $results = pg_query($dbh, $query);
+        $regions = array();
+        $states = array();
+        if (!$results) {
+            error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+        }
+        while ($element = pg_fetch_assoc($results)) {
+            
+            if ($options['hierarchical']) {
+                
+                /*
+                 * Set regions under countries
+                 */
+                if ($keywords['countries']) {
+                    foreach (array_keys($result['continents']['Europe']['countries']) as $country) {
+                        if ($result['continents']['Europe']['countries'][$country]['name'] === getCountryName($element['isoa3'])) {
+                            
+                            if (!$result['continents']['Europe']['countries'][$country]['regions']) {
+                                $result['continents']['Europe']['countries'][$country]['regions'] = array();
+                            }
+                            
+                            if (!$result['continents']['Europe']['countries'][$country]['regions'][$element['region']]) {
+                                $result['continents']['Europe']['countries'][$country]['regions'][$element['region']] = array(
+                                    'states' => array()
+                                );
+                            }
+                            if ($options['ordered']) {
+                                array_push($result['continents']['Europe']['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+                            }
+                            else {
+                                array_push($result['continents']['Europe']['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state']));
+                            }
+                            
+                            break;
+                        }
+                    }
+                }
+              
+            } else {
+                if ($element['region']) {
+                    $regions[$element['region']] = $element['region'];
+                }
+                if ($options['ordered']) {
+                    array_push($states, array('name' => $element['state'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+                }
+                else {
+                    array_push($states, array('name' => $element['state']));
+                }
+            }
+        }
+        if (count($regions) > 0) {
+            $result['regions'] = array_keys($regions);
+        }
+        if (count($states) > 0) {
+            $result['states'] = $states;
         }
     }
-    
+
+    // Cities
+    if ($keywords['cities']) {
+        if ($keywords['cities'] === "all") {
+
+            /*
+             * Do not process if $footprint is more than 2x2 degrees
+             */
+            $cropOrigin = cropOriginGLC2000(bbox($footprint));
+            if ($cropOrigin['xsize'] * $cropOrigin['ysize'] > 50176) {
+                return $result;
+            }
+            $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM geoname g LEFT OUTER JOIN worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY g.name";
+            } else {
+            $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM geoname g LEFT OUTER JOIN worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) and g.fcode in ('PPLA','PPLC') ORDER BY g.name";
+        }
+        $results = pg_query($dbh, $query);
+        $cities = array();
+        if (!$results) {
+            error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+        }
+        while ($element = pg_fetch_assoc($results)) {
+            if ($keywords['countries'] && $options['hierarchical']) {
+                if (!$keywords['regions']) {
+                    foreach (array_keys($result['continents']) as $continent) {
+                        foreach (array_keys($result['continents'][$continent]['countries']) as $country) {
+                            if ($result['continents'][$continent]['countries'][$country]['name'] === $element['country']) {
+                                if (!$result['continents'][$continent]['countries'][$country]['cities']) {
+                                    $result['continents'][$continent]['countries'][$country]['cities'] = array();
+                                }
+                                array_push($result['continents'][$continent]['countries'][$country]['cities'], $element['name']);
+                            }
+                        }
+                    }
+                } else {
+                    foreach (array_keys($result['continents']) as $continent) {
+                        foreach (array_keys($result['continents'][$continent]['countries']) as $country) {
+                            if ($result['continents'][$continent]['countries'][$country]['name'] === $element['country']) {
+                                foreach (array_keys($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states']) as $state) {
+                                    if ($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['name'] === $element['state']) {
+                                        if (!$result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['cities']) {
+                                            $result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['cities'] = array();
+                                        }
+                                        array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['cities'], $element['name']);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                array_push($cities, $element['name']);
+            }
+        }
+
+        if (count($cities) > 0) {
+            $result['cities'] = $cities;
+        }
+    }
+
     return $result;
 }
 
@@ -689,58 +1246,170 @@ function getPolitical($dbh, $isShell, $footprint, $citiesType, $hasRegions, $con
 function getGeophysical($dbh, $isShell, $footprint) {
 
     $result = array();
-    
+
     // Plates
     $plates = getKeywords($dbh, $isShell, "plates", "name", $footprint);
     if (count($plates) > 0) {
-        $result['plates'] = join(LIST_SEPARATOR, $plates);
+        $result['plates'] = $plates;
     }
-    
+
     // Faults
     $faults = getKeywords($dbh, $isShell, "faults", "type", $footprint);
     if (count($faults) > 0) {
-        $result['faults'] = join(LIST_SEPARATOR, $faults);
+        $result['faults'] = $faults;
     }
-    
+
     // Volcanoes
     $volcanoes = getKeywords($dbh, $isShell, "volcanoes", "name", $footprint);
     if (count($volcanoes) > 0) {
-       $result['volcanoes'] = join(LIST_SEPARATOR, $volcanoes);
+        $result['volcanoes'] = $volcanoes;
     }
-    
+
     // Glaciers
     $glaciers = getKeywords($dbh, $isShell, "glaciers", "objectid", $footprint);
     if (count($glaciers) > 0) {
-       $result['hasGlaciers'] = true;
+        $result['hasGlaciers'] = true;
     }
-    
+
     return $result;
 }
 
 function json_encode_utf8($struct) {
-   return preg_replace("/\\\\u([a-f0-9]{4})/e", "iconv('UCS-4LE','UTF-8',pack('V', hexdec('U$1')))", json_encode($struct));
+    return preg_replace("/\\\\u([a-f0-9]{4})/e", "iconv('UCS-4LE','UTF-8',pack('V', hexdec('U$1')))", json_encode($struct));
 }
 
 /*
  * Output result to stdin
  */
+
 function tostdin($identifier, $properties, $type, $tableName, $identifierColumn, $hstoreColumn, $output) {
-    
-    $arr2 = split(LIST_SEPARATOR, $properties);
-    
-    for ($i = 0, $l = count($arr2); $i < $l; $i++) {
-        if ($arr2[$i]) {
+
+    for ($i = 0, $l = count($properties); $i < $l; $i++) {
+
+        $name = $properties[$i];
+        $val = "NULL";
+        if ($name) {
+            if (!is_string($name)) {
+                if ($name['pcover']) {
+                    $val = $name['pcover'];
+                }
+                $name = $name['name'];
+            }
             if (isset($output) && $output === 'copy') {
-                echo $identifier . "\t" . $arr2[$i] . "\t" . $type ."\n";
-            } else if (isset($output) && $output === 'hstore') {
-                $key = trim($arr2[$i]);
+                echo $identifier . "\t" . $name . "\t" . $type . "\n";
+            }
+            else if (isset($output) && $output === 'hstore') {
+                $key = trim($name);
                 $splitted = split(' ', $key);
                 $quote = count($splitted) > 1 ? '"' : '';
-                $hstore = "'" . $quote . strtolower($key) . $quote . " => " . $type . "'";
+                $hstore = "'" . $quote . $type . ':' . strtolower($key) . $quote . " => " . $val . "'";
                 echo "UPDATE " . $tableName . " SET " . $hstoreColumn . " = " . $hstoreColumn . " || " . $hstore . " WHERE " . $identifierColumn . "='" . $identifier . "';\n";
-            } else {
-                echo "INSERT INTO " . $hstoreColumn . " VALUES ('" . $identifier . "','" . $arr2[$i] . "','" . $type . "');\n";
+            }
+            else {
+                echo "INSERT INTO " . $hstoreColumn . " VALUES ('" . $identifier . "','" . $name . "','" . $type . "');\n";
             }
         }
     }
+}
+
+/**
+ * Return true if $str value is true, 1 or yes
+ * Return false otherwise
+ * 
+ * @param string $str
+ */
+function trueOrFalse($str) {
+    
+    if (!$str) {
+        return false;
+    }
+    
+    if (strtolower($str) === 'true' || strtolower($str) === 'yes') {
+        return true;
+    }
+    
+    return false;
+    
+}
+
+/**
+ * Format a flat JSON string to make it more human-readable
+ *
+ * Code modified from https://github.com/GerHobbelt/nicejson-php
+ * 
+ * @param string $json The original JSON string to process
+ *        When the input is not a string it is assumed the input is RAW
+ *        and should be converted to JSON first of all.
+ * @return string Indented version of the original JSON string
+ */
+function json_format($json, $pretty) {
+    
+    /*
+     * No pretty print - easy part
+     */
+    if (!$pretty) {
+        if (!is_string($json)) {
+            return json_encode($json);
+        }
+        return $json;
+    }
+    
+    if (!is_string($json)) {
+        if (phpversion() && phpversion() >= 5.4) {
+            return json_encode($json, JSON_PRETTY_PRINT);
+        }
+        $json = json_encode($json);
+    }
+    $result = '';
+    $pos = 0;               // indentation level
+    $strLen = strlen($json);
+    $indentStr = "\t";
+    $newLine = "\n";
+    $prevChar = '';
+    $outOfQuotes = true;
+
+    for ($i = 0; $i < $strLen; $i++) {
+        // Grab the next character in the string
+        $char = substr($json, $i, 1);
+
+        // Are we inside a quoted string?
+        if ($char == '"' && $prevChar != '\\') {
+            $outOfQuotes = !$outOfQuotes;
+        }
+        // If this character is the end of an element,
+        // output a new line and indent the next line
+        else if (($char == '}' || $char == ']') && $outOfQuotes) {
+            $result .= $newLine;
+            $pos--;
+            for ($j = 0; $j < $pos; $j++) {
+                $result .= $indentStr;
+            }
+        }
+        // eat all non-essential whitespace in the input as we do our own here and it would only mess up our process
+        else if ($outOfQuotes && false !== strpos(" \t\r\n", $char)) {
+            continue;
+        }
+
+        // Add the character to the result string
+        $result .= $char;
+        // always add a space after a field colon:
+        if ($char == ':' && $outOfQuotes) {
+            $result .= ' ';
+        }
+
+        // If the last character was the beginning of an element,
+        // output a new line and indent the next line
+        if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
+            $result .= $newLine;
+            if ($char == '{' || $char == '[') {
+                $pos++;
+            }
+            for ($j = 0; $j < $pos; $j++) {
+                $result .= $indentStr;
+            }
+        }
+        $prevChar = $char;
+    }
+
+    return $result;
 }
