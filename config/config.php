@@ -30,8 +30,3 @@ define("GLC2000_TIFF", "/Users/jrom/data/geography/glc2000/glc2000_v1_1.tif");
  * Mandatory for Population computation count
  */
 define("GPW2PGSQL_URL", "http://mapshup.info/gpw2pgsql/ws/population.php?format=txt&polygon=");
-
-/*
- *  You should not touch this !
- */
-define("LIST_SEPARATOR", ";");
