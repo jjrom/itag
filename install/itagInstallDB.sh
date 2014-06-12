@@ -42,7 +42,7 @@ DB=itag
 USER=itag
 HOSTNAME=localhost
 usage="## iTag database installation\n\n  Usage $0 -d <PostGIS directory> -p [itag user password] [-s <database SUPERUSER> -F -H <server HOSTNAME>]\n\n  -d : absolute path to the directory containing postgis.sql\n  -s : database SUPERUSER (default "postgres")\n  -F : WARNING - suppress existing itag database\n  -H : postgres server hostname (default localhost)"
-while getopts "d:s:p:hF" options; do
+while getopts "d:s:p:hFH:" options; do
     case $options in
         d ) ROOTDIR=`echo $OPTARG`;;
         s ) SUPERUSER=`echo $OPTARG`;;
