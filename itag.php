@@ -45,7 +45,7 @@ error_reporting(E_PARSE);
 include_once 'config/config.php';
 include_once 'functions.php';
 
-// This application can be called either from a shell or from an HTTP GET request
+// This application can be called either from a shell or from an HTTP GET/POST request
 $isShell = !empty($_SERVER['SHELL']);
 
 // Output format
@@ -63,7 +63,8 @@ $keywords = array(
     'geophysical' => false,
     'population' => false,
     'landcover' => false,
-    'regions' => false
+    'regions' => false,
+	'french' => false
 );
 
 // Options
@@ -71,6 +72,7 @@ $modifiers = array(
     'hierarchical' => false,
     'ordered' => false
 );
+
 
 // Case 1 - Shell command line parameters
 if ($isShell) {
@@ -82,23 +84,15 @@ if ($isShell) {
     $help .= "   -c : Countries\n";
     $help .= "   -x : Continents\n";
     $help .= "   -C : Cities (main|all)\n";
-<<<<<<< HEAD
-    $help .= "   -R : French Regions, departements and communes (main|all)\n";
-    $help .= "   -p : Compute population\n";
-=======
     $help .= "   -R : Administrative level 1 (i.e. Regions and departements for France, USA states, etc.)\n";
+    $help .= "   -F : Use French IGN data (will replace cities, administrative level 1)\n";
     $help .= "   -p : Population\n";
->>>>>>> upstream/master
     $help .= "   -g : Geophysical information (i.e. plates, volcanoes)\n";
     $help .= "   -l : Land Cover (i.e. Thematical content - forest, water, urban, etc.\n";
     $help .= "   -t : (For DB connection only) Format is 'modifieddate,2014-10-10' : limit update to date'modifieddate' greater than 2014-10-10.\n";
     $help .= "   -d : DB connection info - dbhost:dbname:dbschema:dbuser:dbpassword:dbport:tableName:identifierColumnName:geometryColumnName\n";
     $help .= "\n\n";
-<<<<<<< HEAD
-    $options = getopt("cxC:R:pgld:f:o:h");
-=======
     $options = getopt("cxC:Rpgld:f:o:OHt:h");
->>>>>>> upstream/master
     foreach ($options as $option => $value) {
         if ($option === "f") {
             $footprint = $value;
@@ -122,11 +116,10 @@ if ($isShell) {
             $keywords['cities'] = $value;
         }
         if ($option === "R") {
-<<<<<<< HEAD
-            $hasRegions = $value;
-=======
             $keywords['regions'] = true;
->>>>>>> upstream/master
+        }
+        if ($option === "F") {
+            $keywords['french'] = true;
         }
         if ($option === "g") {
             $keywords['geophysical'] = true;
@@ -161,34 +154,35 @@ if ($isShell) {
  *  Note : -d option is not possible from Webservice
  */
 else {
+			
+	if($_SERVER['REQUEST_METHOD'] == 'GET') {
+		$http_param = $_REQUEST;
+	} elseif($_SERVER['REQUEST_METHOD'] == 'PUT') {
+		parse_str(file_get_contents("php://input"),$http_param);
+	}
     
     $keywords = array(
-        'countries' => trueOrFalse($_REQUEST['countries']),
-        'continents' => trueOrFalse($_REQUEST['continents']),
-        'cities' => isset($_REQUEST['cities']) ? $_REQUEST['cities'] : null,
-        'geophysical' => trueOrFalse($_REQUEST['geophysical']),
-        'population' => trueOrFalse($_REQUEST['population']),
-        'landcover' => trueOrFalse($_REQUEST['landcover']),
-        'regions' => trueOrFalse($_REQUEST['regions'])
+        'countries' => trueOrFalse($http_param['countries']),
+        'continents' => trueOrFalse($http_param['continents']),
+        'cities' => isset($http_param['cities']) ? $http_param['cities'] : null,
+        'geophysical' => trueOrFalse($http_param['geophysical']),
+        'population' => trueOrFalse($http_param['population']),
+        'landcover' => trueOrFalse($http_param['landcover']),
+        'regions' => trueOrFalse($http_param['regions']),
+    	'french' => trueOrFalse($http_param['french'])
+    	
     );
 
     // Options
     $modifiers = array(
-        'hierarchical' => trueOrFalse($_REQUEST['hierarchical']),
-        'ordered' => trueOrFalse($_REQUEST['ordered']),
+        'hierarchical' => trueOrFalse($http_param['hierarchical']),
+        'ordered' => trueOrFalse($http_param['ordered']),
     );
     
-    $footprint = isset($_REQUEST['footprint']) ? $_REQUEST['footprint'] : null;
-<<<<<<< HEAD
-    $hasCountries = isset($_REQUEST['countries']) ? true : false;
-    $citiesType = isset($_REQUEST['cities']) ? $_REQUEST['cities'] : null;
-    $hasRegions = isset($_REQUEST['regions']) ? $_REQUEST['regions'] : null;
-    $hasGeophysical = isset($_REQUEST['geophysical']) ? true : false;
-    $hasLandCover = isset($_REQUEST['landcover']) ? true : false;
-    $hasPopulation = isset($_REQUEST['population']) ? true : false;
-=======
->>>>>>> upstream/master
-    $output = isset($_REQUEST['output']) ? $_REQUEST['output'] : $output;
+    $footprint = isset($http_param['footprint']) ? $http_param['footprint'] : null;
+
+    $output = isset($http_param['output']) ? $http_param['output'] : $output;
+	    	
     if (!$footprint) {
         echo "footprint is mandatory";
         exit;
@@ -357,8 +351,10 @@ else {
         'geometry' => wktPolygon2GeoJSONGeometry($footprint),
         'properties' => array()
     );
-
-    if ($keywords['countries'] || $keywords['cities'] || $keywords['regions'] || $keywords['continents']) {
+    
+    if ($keywords['french']) {
+    	$feature['properties']['political'] = getFrenchPolitical($dbh, $isShell, $footprint, $keywords, $modifiers);
+    } elseif ($keywords['countries'] || $keywords['cities'] || $keywords['regions'] || $keywords['continents']) {
         $feature['properties']['political'] = getPolitical($dbh, $isShell, $footprint, $keywords, $modifiers);
     }
 
