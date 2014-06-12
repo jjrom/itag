@@ -1147,6 +1147,258 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
     return $result;
 }
 
+
+/**
+ *
+ * Compute intersected politicals information (i.e. continent, countries, cities)
+ * from input WKT footprint using French IGN datas. (Will only return information regarding France)
+ *
+ * @param {DatabaseConnection} $dbh
+ * @param {boolean} $isShell - true if launch by shell script, false is launch from webserver
+ * @param {string} $footprint - WKT POLYGON
+ * @param {array} $keywords - list of keywords class to produce
+ * @param {array} $options - processing options
+ *                  {
+ *                      'hierarchical' => // if true return keywords by descending area of intersection
+ *                  }
+ *
+ */
+function getFrenchPolitical($dbh, $isShell, $footprint, $keywords, $options) {
+	
+	// Continents
+	if ($keywords['continents'] && !$keywords['countries']) {
+		if ($options['ordered']) {
+			$query = "SELECT continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM continents WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+			$results = pg_query($dbh, $query);
+			$continents = array();
+			if (!$results) {
+				error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+			}
+			while ($element = pg_fetch_assoc($results)) {
+				array_push($continents, $element['continent']);
+			}
+		} else {
+			$continents = getKeywords($dbh, $isShell, "continents", "continent", $footprint, "continent");
+		}
+		if (count($continents) > 0) {
+			$result['continents'] = $continents;
+		}
+	}
+	
+	// Countries
+	if ($keywords['countries']) {
+	
+		// Continents and countries
+		if ($options['ordered']) {
+			$query = "SELECT name as name, continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+		} else {
+			$query = "SELECT name as name, continent as continent FROM countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+		}
+		try {
+			$results = pg_query($dbh, $query);
+		}
+		catch (Exception $e) {
+			echo '-- ' . $e->getMessage() . "\n";
+			return array();
+		}
+		$countries = array();
+		$continents = array();
+		if (!$results) {
+			error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+		}
+		while ($element = pg_fetch_assoc($results)) {
+			if ($options['hierarchical']) {
+				if (!$continents[$element['continent']]) {
+					$continents[$element['continent']] = array(
+							'countries' => array()
+					);
+				}
+				if ($options['ordered']) {
+					array_push($continents[$element['continent']]['countries'], array('name' => $element['name'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+				} else {
+					array_push($continents[$element['continent']]['countries'], array('name' => $element['name']));
+				}
+			} else {
+				$continents[$element['continent']] = $element['continent'];
+				if ($options['ordered']) {
+					array_push($countries, array('name' => $element['name'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+				} else {
+					array_push($countries, array('name' => $element['name']));
+				}
+			}
+		}
+		if (count($continents) > 0) {
+			if ($options['hierarchical']) {
+				$result['continents'] = $continents;
+			} else {
+				$result['countries'] = $countries;
+				$result['continents'] = array_keys($continents);
+			}
+		}
+	}
+		
+	// Regions
+	$result['regions'] = getRegions($dbh, $isShell, $footprint);
+	$result['states'] = getDepartements($dbh, $isShell, $footprint);
+	
+	// Cities
+	$result['cities'] = getCommunes($dbh, $isShell, $footprint);
+	
+	return $result;
+	
+}
+
+
+
+/**
+ *
+ * Get french communes namees and intersected ratio
+ *
+ * @param {DatabaseConnection} $dbh
+ *
+ */
+function getCommunes($dbh, $isShell, $footprint) {
+	// $query = "SELECT record.nom_comm, record.area, record.coverageratio from (SELECT distinct nom_comm, ST_Area(geom) as area, round((ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326)))/ST_Area(geom))::numeric, 2) as coverageratio from commfrance order by coverageratio desc, area desc) as record where record.coverageratio > 0.1";
+// 	$results = pg_query($dbh, $query);
+// 	$keywords = array();
+// 	if(!$results) {
+// 		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+// 	}
+// 	while ($result = pg_fetch_assoc($results)) {
+// 		// temporary variable to display only nom_comm and coverageration fields
+// 		$resulttmp['nom_comm'] = $result['nom_comm'];
+// 		$resulttmp['coverageratio'] = $result['coverageratio'];
+// 		array_push($keywords, $resulttmp);
+// 	}
+
+// 	return $keywords;
+	
+	//$query = "SELECT record.nom_comm from (SELECT distinct nom_comm, ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area_intersect from commfrance order by area_intersect desc) as record where area_intersect > 0 limit 20";
+	$query = "SELECT record.nom_comm from (SELECT nom_comm, ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area_intersect, population, superficie from commfrance) as record where area_intersect > 0 order by record.area_intersect*(record.population/record.superficie) desc limit 20";
+	$results = pg_query($dbh, $query);
+	if(!$results) {
+		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+	}
+	$result = pg_fetch_all($results);
+	
+	if($result == false) {
+		$query = "SELECT distinct(asciiname) as nom_comm FROM geoname WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+		$results = pg_query($dbh, $query);
+		if(!$results) {
+			error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+		}
+		$result = pg_fetch_all($results);
+	
+	}
+	
+	return $result;
+
+}
+
+
+/**
+ *
+ * Get french departements with codes
+ *
+ * @param {DatabaseConnection} $dbh
+ *
+ */
+function getDepartements($dbh, $isShell, $footprint) {
+// 	$query = "SELECT r.nom_dept, r.code_dept from deptsfrance as r where st_intersects(r.geom, ST_GeomFromText('" . $footprint . "', 4326))";
+// 	$results = pg_query($dbh, $query);
+// 	if(!$results) {
+// 		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+// 	}
+// 	$result = pg_fetch_all($results);
+
+// 	return $result;
+	
+	$query = "SELECT r.nom_dept, r.code_dept from deptsfrance as r where st_intersects(r.geom, ST_GeomFromText('" . $footprint . "', 4326)) order by st_area(st_intersection(r.geom, ST_GeomFromText('" . $footprint . "', 4326))) desc";
+	//$query = "SELECT r.nom_dept, r.code_dept from (SELECT nom_dept, ST_Area(ST_Intersection(geom, "
+	$results = pg_query($dbh, $query);
+	if(!$results) {
+		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+	}
+	$result = array_unique(pg_fetch_all($results), SORT_REGULAR);
+	
+	if($result == false) {
+		$query = "SELECT distinct(admin2) as nom_dept, admin2 as code_dept FROM geoname WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+		$results = pg_query($dbh, $query);
+		if(!$results) {
+			error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+		}
+		$result = pg_fetch_all($results);
+	}
+	
+	return $result;
+
+}
+
+/**
+ *
+ * Get french regions with codes
+ *
+ * @param {DatabaseConnection} $dbh
+ *
+ */
+function getRegions($dbh, $isShell, $footprint) {
+// 	$query = "SELECT distinct(r.nom_region), r.code_reg from deptsfrance as r where st_intersects(r.geom, ST_GeomFromText('" . $footprint . "', 4326))";
+// 	$results = pg_query($dbh, $query);
+// 	if(!$results) {
+// 		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+// 	}
+// 	$result = pg_fetch_all($results);
+
+// 	return $result;
+	
+	//$query = "SELECT distinct(r.nom_region), r.code_reg from deptsfrance as r where st_intersects(r.geom, ST_GeomFromText('" . $footprint . "', 4326))";
+	$query = "SELECT r.nom_region, r.code_reg from deptsfrance as r where st_intersects(r.geom, ST_GeomFromText('" . $footprint . "', 4326)) order by st_area(st_intersection(r.geom, ST_GeomFromText('" . $footprint . "', 4326))) desc";
+	$results = pg_query($dbh, $query);
+	if(!$results) {
+		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+	}
+	$result = array_unique(pg_fetch_all($results), SORT_REGULAR);
+		
+	if($result == false) {
+		$query = "SELECT distinct(admin1) as nom_region, admin1 as code_region FROM geoname WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+		$results = pg_query($dbh, $query);
+		if(!$results) {
+			error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+		}
+		$result = pg_fetch_all($results);
+	
+	}
+	
+	return $result;
+	
+	
+}
+
+/**
+ *
+ * Get french arrondissements with codes
+ *
+ * @param {DatabaseConnection} $dbh
+ *
+ */
+function getArrondissements($dbh, $isShell, $footprint) {
+	$query = "SELECT record.nom_chf, record.code_arr, record.area, record.coverageratio from (SELECT distinct nom_chf, code_arr, ST_Area(geom) as area, round((ST_Area(ST_Intersection(geom, ST_GeomFromText('" . $footprint . "', 4326)))/ST_Area(geom))::numeric, 2) as coverageratio from arrsfrance order by coverageratio desc, area desc) as record where coverageratio > 0";
+	$results = pg_query($dbh, $query);
+	$keywords = array();
+	if(!$results) {
+		error($dbh, $isShell, "\nFATAL : database connection error\n\n");
+	}
+	while ($result = pg_fetch_assoc($results)) {
+		// temporary variable to display only nom_comm and coverageration fields
+		$resulttmp['nom_chf'] = $result['nom_chf'];
+		$resulttmp['code_arr'] = $result['code_arr'];
+		array_push($keywords, $resulttmp);
+	}
+
+	return $keywords;
+
+}
+
 /**
  * 
  * Compute intersected geophysical information (i.e. plates, faults, volcanoes, etc.)
