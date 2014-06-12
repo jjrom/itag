@@ -187,19 +187,7 @@ Examples :
     
         http://mapshup.info/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
 
-
-<<<<<<< HEAD
-iTag can tag footprint with the following information :
-* continents
-* countries
-* cities
-* french regions, departments and communes (communes are sorted ascendingly by intersected area) 
-* geophysical plates
-* volcanoes
-* land cover (i.e. forest, water, urban, cultivated, herbaceous, desert, snow, flooded)
-* population count
-=======
     Tag footprint intersecting France, Italy and Switzerland with cities, regions and states. Hierarchical result as pretty GeoJSON output
     
         http://mapshup.info/itag/?regions=true&hierarchical=true&ordered=true&countries=true&cities=all&output=pretty&footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))
->>>>>>> upstream/master
+
