@@ -146,7 +146,7 @@ function wktPolygon2GeoJSONGeometry($wkt) {
  * @return <float>
  */
 function percentage($part, $total) {
-    return floor(10000 * ($part / $total)) / 100;
+    return min(array(100, floor(10000 * ($part / $total)) / 100));
 }
 
 /*
@@ -895,7 +895,7 @@ function getLandCover($dbh, $isShell, $footprint, $options) {
 
     foreach ($out as $key => $val) {
         if ($val !== 0) {
-            array_push($result['landUseDetails'], array('name' => getGLCClassName($key), 'code' => $key, 'pcover' => min(100, percentage($val, $totalarea))));
+            array_push($result['landUseDetails'], array('name' => getGLCClassName($key), 'code' => $key, 'pcover' => percentage($val, $totalarea)));
         }
     }
 
