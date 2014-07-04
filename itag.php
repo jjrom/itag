@@ -64,7 +64,7 @@ $keywords = array(
     'population' => false,
     'landcover' => false,
     'regions' => false,
-	'french' => false
+    'french' => false
 );
 
 // Options
