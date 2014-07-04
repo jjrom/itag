@@ -1041,26 +1041,28 @@ function getPolitical($dbh, $isShell, $footprint, $keywords, $options) {
                  * Set regions under countries
                  */
                 if ($keywords['countries']) {
-                    foreach (array_keys($result['continents']['Europe']['countries']) as $country) {
-                        if ($result['continents']['Europe']['countries'][$country]['name'] === getCountryName($element['isoa3'])) {
-                            
-                            if (!$result['continents']['Europe']['countries'][$country]['regions']) {
-                                $result['continents']['Europe']['countries'][$country]['regions'] = array();
+                    foreach (array_keys($result['continents']) as $continent) {
+                        foreach (array_keys($result['continents'][$continent]['countries']) as $country) {
+                            if ($result['continents'][$continent]['countries'][$country]['name'] === getCountryName($element['isoa3'])) {
+
+                                if (!$result['continents'][$continent]['countries'][$country]['regions']) {
+                                    $result['continents'][$continent]['countries'][$country]['regions'] = array();
+                                }
+
+                                if (!$result['continents'][$continent]['countries'][$country]['regions'][$element['region']]) {
+                                    $result['continents'][$continent]['countries'][$country]['regions'][$element['region']] = array(
+                                        'states' => array()
+                                    );
+                                }
+                                if ($options['ordered']) {
+                                    array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state'], 'pcover' => percentage($element['area'], $element['totalarea'])));
+                                }
+                                else {
+                                    array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state']));
+                                }
+
+                                break;
                             }
-                            
-                            if (!$result['continents']['Europe']['countries'][$country]['regions'][$element['region']]) {
-                                $result['continents']['Europe']['countries'][$country]['regions'][$element['region']] = array(
-                                    'states' => array()
-                                );
-                            }
-                            if ($options['ordered']) {
-                                array_push($result['continents']['Europe']['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state'], 'pcover' => percentage($element['area'], $element['totalarea'])));
-                            }
-                            else {
-                                array_push($result['continents']['Europe']['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state']));
-                            }
-                            
-                            break;
                         }
                     }
                 }
