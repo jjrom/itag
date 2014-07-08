@@ -47,7 +47,7 @@ while getopts "D:d:s:u:H:hF" options; do
         d ) DB=`echo $OPTARG`;;
         u ) USER=`echo $OPTARG`;;
         s ) SUPERUSER=`echo $OPTARG`;;
-        H ) HOSTNAME=`echo -h $OPTARG`;;
+        H ) HOSTNAME=`echo "-h "$OPTARG`;;
         h ) echo -e $usage;;
         \? ) echo -e $usage
             exit 1;;
@@ -63,13 +63,13 @@ fi
 
 # ================== POLITICAL =====================
 ## Insert Continents
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp continents | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp continents | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d itag  -U $SUPERUSER $HOSTNAME<< EOF
 CREATE INDEX idx_continents_name ON public.continents (continent);
 EOF
 
 ## Insert Countries
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp countries | psql -d $DB -U $SUPERUSER -h $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp countries | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB  -U $SUPERUSER $HOSTNAME << EOF
 --
 -- This is for WorldCountries not for ne_110m_admin_0_countries
