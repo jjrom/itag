@@ -86,6 +86,21 @@ psql -U $SUPERUSER -d template1 -h $HOSTNAME << EOF
 CREATE USER $USER WITH PASSWORD '$PASSWORD' NOCREATEDB
 EOF
 
+# Create unaccent function
+psql -U $SUPERUSER -d template1 -h $HOSTNAME << EOF
+CREATE OR REPLACE FUNCTION unaccent(text)
+RETURNS text
+IMMUTABLE
+STRICT
+LANGUAGE SQL
+AS $$
+SELECT translate(
+    $1,
+    'áàâãäåāăąạÀÁÂÃÄÅĀĂĄÆèééêëēĕėęěÈÉÊĒĔĖĘĚìíîïìĩīĭÌÍÎÏÌĨĪĬḩóồôõöōŏőợÒÓÔÕÖŌŎŐØùúûüũūŭůưÙÚÛÜŨŪŬŮæÇçćĉčøßýÿñşšŠŒŽžœðÝŸ¥µÐÑ ',
+    'aaaaaaaaaaAAAAAAAAAAeeeeeeeeeeEEEEEEEEiiiiiiiiIIIIIIIIhoooooooooOOOOOOOOOuuuuuuuuuUUUUUUUUaCccccosyynssSOZzooYYYuDN-'
+);
+$$;
+EOF
 # Rights
 psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 GRANT ALL ON geometry_columns to $USER;
