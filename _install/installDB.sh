@@ -1,11 +1,12 @@
 #!/bin/bash
 #
-# iTag
+#  iTag
 #
-#  Automatically tag a geographical footprint against every kind of things
-# (i.e. Land Cover, OSM data, population count, etc.)
-#
-# jerome[dot]gasperi[at]gmail[dot]com
+#  iTag - Semantic enhancement of Earth Observation data
+#  
+#  Copyright 2013 Jérôme Gasperi <https://github.com/jjrom>
+# 
+#  jerome[dot]gasperi[at]gmail[dot]com
 #  
 #  
 #  This software is governed by the CeCILL-B license under French law and
@@ -101,12 +102,15 @@ SELECT translate(
 );
 $$;
 EOF
+
 # Rights
 psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 GRANT ALL ON geometry_columns to $USER;
 GRANT ALL ON geography_columns to $USER;
 GRANT SELECT on spatial_ref_sys to $USER;
 EOF
+
+
 
 
 
