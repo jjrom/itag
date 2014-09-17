@@ -3,12 +3,11 @@
 /*
  * iTag
  *
- * Automatically tag a geographical footprint against every kind of things
- * (i.e. Land Cover, OSM data, population count, etc.)
+ * iTag - Semantic enhancement of Earth Observation data
+ *
  * Copyright 2013 Jérôme Gasperi <https://github.com/jjrom>
  * 
  * jerome[dot]gasperi[at]gmail[dot]com
- * 
  * 
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use,
@@ -39,11 +38,178 @@
  */
 
 /*
- * Define path to application directory
+ * Autoload controllers and modules
  */
-defined('APPLICATION_PATH') || define('APPLICATION_PATH', realpath(dirname(__FILE__)));
 
-/*
- * Launch itag
+function autoload($className) {
+    foreach (array('include/', 'include/itag/') as $current_dir) {
+        $path = $current_dir . sprintf('%s.php', $className);
+        if (file_exists($path)) {
+            include $path;
+            return;
+        }
+    }
+}
+
+/**
+ * Return true if $str value is true, 1 or yes
+ * Return false otherwise
+ * 
+ * @param string $str
  */
-require APPLICATION_PATH . '/itag.php';
+function trueOrFalse($str) {
+    
+    if (!$str) {
+        return false;
+    }
+    
+    if (strtolower($str) === 'true' || strtolower($str) === 'yes') {
+        return true;
+    }
+    
+    return false;
+    
+}
+
+/**
+ * Format a flat JSON string to make it more human-readable
+ *
+ * Code modified from https://github.com/GerHobbelt/nicejson-php
+ * 
+ * @param string $json The original JSON string to process
+ *        When the input is not a string it is assumed the input is RAW
+ *        and should be converted to JSON first of all.
+ * @return string Indented version of the original JSON string
+ */
+function json_format($json, $pretty) {
+
+    /*
+     * No pretty print - easy part
+     */
+    if (!$pretty) {
+        if (!is_string($json)) {
+            return json_encode($json);
+        }
+        return $json;
+    }
+
+    if (!is_string($json)) {
+        if (phpversion() && phpversion() >= 5.4) {
+            return json_encode($json, JSON_PRETTY_PRINT);
+        }
+        $json = json_encode($json);
+    }
+    $result = '';
+    $pos = 0;               // indentation level
+    $strLen = strlen($json);
+    $indentStr = "\t";
+    $newLine = "\n";
+    $prevChar = '';
+    $outOfQuotes = true;
+
+    for ($i = 0; $i < $strLen; $i++) {
+        // Grab the next character in the string
+        $char = substr($json, $i, 1);
+
+        // Are we inside a quoted string?
+        if ($char == '"' && $prevChar != '\\') {
+            $outOfQuotes = !$outOfQuotes;
+        }
+        // If this character is the end of an element,
+        // output a new line and indent the next line
+        else if (($char == '}' || $char == ']') && $outOfQuotes) {
+            $result .= $newLine;
+            $pos--;
+            for ($j = 0; $j < $pos; $j++) {
+                $result .= $indentStr;
+            }
+        }
+        // eat all non-essential whitespace in the input as we do our own here and it would only mess up our process
+        else if ($outOfQuotes && false !== strpos(" \t\r\n", $char)) {
+            continue;
+        }
+
+        // Add the character to the result string
+        $result .= $char;
+        // always add a space after a field colon:
+        if ($char == ':' && $outOfQuotes) {
+            $result .= ' ';
+        }
+
+        // If the last character was the beginning of an element,
+        // output a new line and indent the next line
+        if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
+            $result .= $newLine;
+            if ($char == '{' || $char == '[') {
+                $pos++;
+            }
+            for ($j = 0; $j < $pos; $j++) {
+                $result .= $indentStr;
+            }
+        }
+        $prevChar = $char;
+    }
+
+    return $result;
+}
+
+spl_autoload_register('autoload');
+
+ob_start();
+header('HTTP/1.1 OK 200');
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+try {
+    
+    /*
+     * Read itag.ini configuration file
+     */
+    $iniFile = realpath(dirname(__FILE__)) . '/include/itag.ini';
+    if (!file_exists($iniFile)) {
+        throw new Exception('Missing mandatory configuration file', 500);
+    }
+    $config = IniParser::read($iniFile);
+    $config['database']['host'] = isset($config['database']['host']) ? $config['database']['host'] : 'localhost';
+    $config['database']['port'] = isset($config['database']['port']) ? $config['database']['port'] : '5432';
+    $config['database']['dbname'] = isset($config['database']['dbname']) ? $config['database']['dbname'] : 'itag';
+    $config['database']['user'] = isset($config['database']['user']) ? $config['database']['user'] : 'itag';
+    $config['database']['password'] = isset($config['database']['password']) ? $config['database']['password'] : 'itag';
+    $dbh = pg_connect('host=' . $config['database']['host'] . ' dbname=' . $config['database']['dbname'] . ' user=' . $config['database']['user'] . ' password=' . $config['database']['password'] . ' port=' . $config['database']['port']);
+    
+    
+    /*
+     * User request
+     */
+    if($_SERVER['REQUEST_METHOD'] == 'GET') {
+        $http_param = $_REQUEST;
+    }
+    else if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
+        parse_str(file_get_contents("php://input"), $http_param);
+    }
+    $options = array(
+        'countries' => trueOrFalse($http_param['countries']),
+        'continents' => trueOrFalse($http_param['continents']),
+        'cities' => isset($http_param['cities']) ? $http_param['cities'] : null,
+        'geophysical' => trueOrFalse($http_param['geophysical']),
+        'population' => trueOrFalse($http_param['population']),
+        'landcover' => trueOrFalse($http_param['landcover']),
+        'regions' => trueOrFalse($http_param['regions']),
+        'french' => trueOrFalse($http_param['french']),
+        'hierarchical' => trueOrFalse($http_param['hierarchical']),
+        'ordered' => trueOrFalse($http_param['ordered']),
+    );
+    $footprint = isset($http_param['footprint']) ? $http_param['footprint'] : null;
+    if (!$footprint) {
+        throw new Exception('Missing mandatory footprint', 500);
+    }
+    
+    /*
+     * Launch iTag
+     */
+    $itag = new iTag($dbh);
+    echo json_format($itag->tag($footprint, $options), trueOrFalse($http_param['pretty']));
+    
+} catch (Exception $e) {
+    echo $e->getMessage();
+}
+ob_end_flush(); 
