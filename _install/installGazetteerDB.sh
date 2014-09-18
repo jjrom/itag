@@ -141,6 +141,11 @@ SELECT AddGeometryColumn ('gazetteer','geoname','geom',4326,'POINT',2);
 UPDATE gazetteer.geoname SET geom = ST_PointFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
 CREATE INDEX idx_geoname_geom ON gazetteer.geoname USING gist(geom);
 
+-- Add countryname to speed up iTag
+ALTER TABLE gazetteer.geoname ADD COLUMN countryname VARCHAR(200);
+UPDATE gazetteer.geoname SET countryname=(SELECT name FROM datasources.countries WHERE gazetteer.geoname.country = countries.iso_a2 LIMIT 1);
+CREATE INDEX idx_geoname_countryname ON gazetteer.geoname ((lower(countryname)));
+
 -- Text search
 CREATE INDEX idx_geoname_name ON gazetteer.geoname (lower(unaccent(name)));
 CREATE INDEX idx_geoname_country ON gazetteer.geoname (country);

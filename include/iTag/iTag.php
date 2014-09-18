@@ -269,14 +269,14 @@ class iTag {
         // Continents
         if ($options['continents'] && !isset($options['countries'])) {
             if ($options['ordered']) {
-                $query = "SELECT continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM " . $this->schema . ".continents WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+                $query = "SELECT continent as continent, lower(unaccent(continent)) as id, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area FROM " . $this->schema . ".continents WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
                 $results = pg_query($this->dbh, $query);
                 $continents = array();
                 if (!isset($results)) {
                     $this->error();
                 }
                 while ($element = pg_fetch_assoc($results)) {
-                    array_push($continents, $element['continent']);
+                    array_push($continents, array('name' => $element['continent'], 'id' => $element['id']));
                 }
             } else {
                 $continents = getKeywords($this->schema . ".continents", "continent", $footprint, "continent");
@@ -291,9 +291,9 @@ class iTag {
 
             // Continents and countries
             if ($options['ordered']) {
-                $query = "SELECT name as name, continent as continent, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM " . $this->schema . ".countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+                $query = "SELECT name as name, lower(unaccent(name)) as id, continent as continent, lower(unaccent(continent)) as continentid, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM " . $this->schema . ".countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
             } else {
-                $query = "SELECT name as name, continent as continent FROM " . $this->schema . ".countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
+                $query = "SELECT name as name, lower(unaccent(name)) as id, continent as continent, lower(unaccent(continent)) as continentid FROM " . $this->schema . ".countries WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326))";
             }
             try {
                 $results = pg_query($this->dbh, $query);
@@ -309,20 +309,21 @@ class iTag {
                 if ($options['hierarchical']) {
                     if (!isset($continents[$element['continent']])) {
                         $continents[$element['continent']] = array(
+                            'id' => $element['continentid'],
                             'countries' => array()
                         );
                     }
                     if ($options['ordered']) {
-                        array_push($continents[$element['continent']]['countries'], array('name' => $element['name'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
+                        array_push($continents[$element['continent']]['countries'], array('name' => $element['name'], 'id' => $element['id'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
                     } else {
-                        array_push($continents[$element['continent']]['countries'], array('name' => $element['name']));
+                        array_push($continents[$element['continent']]['countries'], array('name' => $element['name'], 'id' => $element['id']));
                     }
                 } else {
-                    $continents[$element['continent']] = $element['continent'];
+                    $continents[] = array('name' => $element['continent'], 'id' => $element['continentid']);
                     if ($options['ordered']) {
-                        array_push($countries, array('name' => $element['name'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
+                        array_push($countries, array('name' => $element['name'], 'id' => $element['id'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
                     } else {
-                        array_push($countries, array('name' => $element['name']));
+                        array_push($countries, array('name' => $element['name'], 'id' => $element['id']));
                     }
                 }
             }
@@ -331,7 +332,7 @@ class iTag {
                     $result['continents'] = $continents;
                 } else {
                     $result['countries'] = $countries;
-                    $result['continents'] = array_keys($continents);
+                    $result['continents'] = $continents;
                 }
             }
         }
@@ -339,9 +340,9 @@ class iTag {
         // Regions
         if ($options['regions']) {
             if ($options['ordered']) {
-                $query = "SELECT region, name as state, adm0_a3 as isoa3, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM " . $this->schema . ".worldadm1level WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
+                $query = "SELECT region, name as state, lower(unaccent(name)) as stateid, lower(unaccent(region)) as regionid, adm0_a3 as isoa3, st_area(st_intersection(geom, ST_GeomFromText('" . $footprint . "', 4326))) as area, st_area(ST_GeomFromText('" . $footprint . "', 4326)) as totalarea FROM " . $this->schema . ".worldadm1level WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY area DESC";
             } else {
-                $query = "SELECT region, name as state, adm0_a3 as isoa3 FROM " . $this->schema . ".worldadm1level WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY region";
+                $query = "SELECT region, name as state, lower(unaccent(name)) as stateid, lower(unaccent(region)) as regionid, adm0_a3 as isoa3 FROM " . $this->schema . ".worldadm1level WHERE st_intersects(geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY region";
             }
             $results = pg_query($this->dbh, $query);
             $regions = array();
@@ -367,13 +368,14 @@ class iTag {
 
                                     if (!isset($result['continents'][$continent]['countries'][$country]['regions'][$element['region']])) {
                                         $result['continents'][$continent]['countries'][$country]['regions'][$element['region']] = array(
+                                            'id' => $element['regionid'],
                                             'states' => array()
                                         );
                                     }
                                     if ($options['ordered']) {
-                                        array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
+                                        array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state'], 'id' => $element['stateid'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
                                     } else {
-                                        array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state']));
+                                        array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state'], 'id' => $element['stateid']));
                                     }
 
                                     break;
@@ -383,17 +385,17 @@ class iTag {
                     }
                 } else {
                     if ($element['region']) {
-                        $regions[$element['region']] = $element['region'];
+                        $regions[] = array('name' => $element['region'], 'id' => $element['regionid']);
                     }
                     if ($options['ordered']) {
-                        array_push($states, array('name' => $element['state'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
+                        array_push($states, array('name' => $element['state'], 'id' => $element['stateid'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
                     } else {
-                        array_push($states, array('name' => $element['state']));
+                        array_push($states, array('name' => $element['state'], 'id' => $element['stateid']));
                     }
                 }
             }
             if (count($regions) > 0) {
-                $result['regions'] = array_keys($regions);
+                $result['regions'] = $regions;
             }
             if (count($states) > 0) {
                 $result['states'] = $states;
@@ -408,12 +410,12 @@ class iTag {
                  * Do not process if $footprint is more than 2x2 degrees
                  */
                 $bbox = $this->bbox($footprint);
-                if (abs($bbox['ulx'] - $bbox['lrx']) > 2 || abs($bbox['uly'] - $bbox['lry']) > 2) {
+                if (abs($bbox['ulx'] - $bbox['lrx']) >  2 || abs($bbox['uly'] - $bbox['lry']) > 2) {
                     return $result;
                 }
-                $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM geoname g LEFT OUTER JOIN " . $this->schema . ".worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY g.name";
+                $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM " . $this->gazetteerSchema . ".geoname g LEFT OUTER JOIN " . $this->schema . ".worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY g.name";
             } else {
-                $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM geoname g LEFT OUTER JOIN " . $this->schema . ".worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) and g.fcode in ('PPLA','PPLC') ORDER BY g.name";
+                $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM " . $this->gazetteerSchema . ".geoname g LEFT OUTER JOIN " . $this->schema . ".worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) and g.fcode in ('PPLA','PPLC') ORDER BY g.name";
             }
             $results = pg_query($this->dbh, $query);
             $cities = array();
@@ -1290,7 +1292,7 @@ class iTag {
             310 => "Forest",
             320 => "Herbaceous",
             330 => "Desert",
-            335 => "Snow and ice",
+            335 => "Ice",
             400 => "Flooded",
             500 => "Water"
         );
