@@ -55,10 +55,29 @@ class iTag {
     /**
      * Constructor
      * 
-     * @param DatabaseHandler $dbh : Database handler on the iTag database 
+     * @param array $options : database configuration array 
      */
-    public function __construct($dbh) {
-        $this->dbh = $dbh;
+    public function __construct($options) {
+        
+        if (isset($options['dbh'])) {
+            $this->dbh = $options['dbh'];
+        }
+        else {
+            try {
+                $this->dbh = pg_connect(join(' ', array(
+                    'host=' . (isset($options['host']) ? $options['host'] : 'localhost'),
+                    'port=' . (isset($options['port']) ? $options['port'] : '5432'),
+                    'dbname=' . (isset($options['dbname']) ? $options['dbname'] : 'itag'),
+                    'user=' . (isset($options['user']) ? $options['user'] : 'itag'),
+                    'password=' . (isset($options['password']) ? $options['password'] : 'itag'),
+                )));
+                if (!$this->dbh) {
+                    throw new Exception();
+                }
+            } catch (Exception $e) {
+                throw new Exception(__METHOD__ . ' - Database connection error', 500);
+            }
+        }
     }
     
     /**

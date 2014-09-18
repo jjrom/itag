@@ -47,11 +47,12 @@ Edit the PostreSQL postgresql.conf and be sure that postgres accept tcp_ip conne
 Step by step
 ------------
 
-1. Unzip data
+1. Get data
         
         # Note : $ITAG_HOME **must be** an absolute path (not relative !)
+        git clone https://github.com/jjrom/itag-data.git $ITAG_DATA
         cd $ITAG_HOME/_install
-        unzip data.zip
+        unzip $ITAG_DATA/data.zip
 
 2. Install database
 
@@ -104,22 +105,23 @@ Step by step
         #
         # $ITAG_HOME/_install/installWikipediaDB.sh -D $GEONAMES_DIR/wikipedia
     
-4. Configure
+4. Precompute landcover
 
-Edit $ITAG_HOME/config/config.php (just follow the comments !)
-
-5. Precompute landcover
-
-Go to ["Global Land Cover 2000" global product] (http://bioval.jrc.ec.europa.eu/products/glc2000/products.php) and download glc2000 GeoTIFF file
+        Go to ["Global Land Cover 2000" global product] (http://bioval.jrc.ec.europa.eu/products/glc2000/products.php) and download glc2000 GeoTIFF file
 
         $ITAG_HOME/_install/computeLandCover.php -I path_to_glc2000_tif_image
+
+5. Deploy application
+
+        $ITAG_HOME/_install/deploy.sh -s $ITAG_HOME> -t $ITAG_TARGET
+
 
 Note : depending on your server performance, the landcover computation can take a long time (more than two hours)
 
 Using iTag
 ==========
 
-We suppose that $ITAG_HOME is accessible to http://localhost/itag/ in Apache.
+We suppose that $ITAG_TARGET is accessible to http://localhost/itag/ in Apache.
 
 To tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output, open this url within you browser
     

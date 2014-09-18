@@ -42,7 +42,7 @@
  */
 
 function autoload($className) {
-    foreach (array('include/', 'include/itag/') as $current_dir) {
+    foreach (array('include/', 'include/iTag/') as $current_dir) {
         $path = $current_dir . sprintf('%s.php', $className);
         if (file_exists($path)) {
             include $path;
@@ -169,13 +169,6 @@ try {
         throw new Exception('Missing mandatory configuration file', 500);
     }
     $config = IniParser::read($iniFile);
-    $config['database']['host'] = isset($config['database']['host']) ? $config['database']['host'] : 'localhost';
-    $config['database']['port'] = isset($config['database']['port']) ? $config['database']['port'] : '5432';
-    $config['database']['dbname'] = isset($config['database']['dbname']) ? $config['database']['dbname'] : 'itag';
-    $config['database']['user'] = isset($config['database']['user']) ? $config['database']['user'] : 'itag';
-    $config['database']['password'] = isset($config['database']['password']) ? $config['database']['password'] : 'itag';
-    $dbh = pg_connect('host=' . $config['database']['host'] . ' dbname=' . $config['database']['dbname'] . ' user=' . $config['database']['user'] . ' password=' . $config['database']['password'] . ' port=' . $config['database']['port']);
-    
     
     /*
      * User request
@@ -206,7 +199,7 @@ try {
     /*
      * Launch iTag
      */
-    $itag = new iTag($dbh);
+    $itag = new iTag($config['database']);
     echo json_format($itag->tag($footprint, $options), trueOrFalse($http_param['pretty']));
     
 } catch (Exception $e) {
