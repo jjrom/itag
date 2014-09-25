@@ -83,24 +83,24 @@ psql -d $DB -U $SUPERUSER -f $postgis -h $HOSTNAME
 psql -d $DB -U $SUPERUSER -f $projections -h $HOSTNAME
 
 ###### ADMIN ACCOUNT CREATION ######
-psql -U $SUPERUSER -d template1 -h $HOSTNAME << EOF
+psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 CREATE USER $USER WITH PASSWORD '$PASSWORD' NOCREATEDB
 EOF
 
 # Create unaccent function
-psql -U $SUPERUSER -d template1 -h $HOSTNAME << EOF
+psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 CREATE OR REPLACE FUNCTION unaccent(text)
 RETURNS text
 IMMUTABLE
 STRICT
 LANGUAGE SQL
-AS $$
+AS \$$
 SELECT translate(
-    $1,
+    \$1,
     'ææ̆áàâãäåāăąạắằẵÀÁÂÃÄÅĀĂĄÆəèééêëēĕėęěệÈÉÊĒĔĖĘĚıìíîïìĩīĭịÌÍÎÏÌĨĪĬİḩòóồôõöōŏőợộÒÓÔÕÖŌŎŐØùúûüũūŭůưửÙÚÛÜŨŪŬŮČÇçćĉčċøơßýÿñşšŠŞŚŒŻŽžźżœðÝŸ¥µđÐĐÑŁţğġħňĠĦ',
     'aaaaaaaaaaaaaaaAAAAAAAAAAeeeeeeeeeeeeEEEEEEEEiiiiiiiiiiIIIIIIIIIhoooooooooooOOOOOOOOOuuuuuuuuuuUUUUUUUUCCcccccoosyynssSSSOZZzzzooYYYudDDNLtgghnGH'
 );
-$$;
+\$$;
 EOF
 
 # Rights
