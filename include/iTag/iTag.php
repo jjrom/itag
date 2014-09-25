@@ -413,8 +413,9 @@ class iTag {
                 if (abs($bbox['ulx'] - $bbox['lrx']) >  2 || abs($bbox['uly'] - $bbox['lry']) > 2) {
                     return $result;
                 }
-                $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM " . $this->gazetteerSchema . ".geoname g LEFT OUTER JOIN " . $this->schema . ".worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) ORDER BY g.name";
-            } else {
+                $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM " . $this->gazetteerSchema . ".geoname g LEFT OUTER JOIN " . $this->schema . ".worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) and g.fcode in ('PPL', 'PPLC', 'PPLA', 'PPLA2', 'PPL3', 'PPL4', 'STLMT') ORDER BY g.name";
+            }
+            else {
                 $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM " . $this->gazetteerSchema . ".geoname g LEFT OUTER JOIN " . $this->schema . ".worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) and g.fcode in ('PPLA','PPLC') ORDER BY g.name";
             }
             $results = pg_query($this->dbh, $query);
