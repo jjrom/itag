@@ -307,16 +307,25 @@ class iTag {
             }
             while ($element = pg_fetch_assoc($results)) {
                 if ($options['hierarchical']) {
-                    if (!isset($continents[$element['continent']])) {
-                        $continents[$element['continent']] = array(
+                    $index = -1;
+                    for ($i = count($continents); $i--;) {
+                        if ($continents[$i]['name'] === $element['continent']) {
+                            $index = $i;
+                            break;
+                        }
+                    }
+                    if ($index === -1) {
+                        array_push($continents, array(
+                            'name' => $element['continent'],
                             'id' => $element['continentid'],
                             'countries' => array()
-                        );
+                        ));
+                        $index = count($continents) - 1;
                     }
                     if ($options['ordered']) {
-                        array_push($continents[$element['continent']]['countries'], array('name' => $element['name'], 'id' => $element['id'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
+                        array_push($continents[$index]['countries'], array('name' => $element['name'], 'id' => $element['id'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
                     } else {
-                        array_push($continents[$element['continent']]['countries'], array('name' => $element['name'], 'id' => $element['id']));
+                        array_push($continents[$index]['countries'], array('name' => $element['name'], 'id' => $element['id']));
                     }
                 } else {
                     $continents[] = array('name' => $element['continent'], 'id' => $element['continentid']);
@@ -358,24 +367,42 @@ class iTag {
                      * Set regions under countries
                      */
                     if ($options['countries']) {
-                        foreach (array_keys($result['continents']) as $continent) {
-                            foreach (array_keys($result['continents'][$continent]['countries']) as $country) {
-                                if ($result['continents'][$continent]['countries'][$country]['name'] === $this->getCountryName($element['isoa3'])) {
-
-                                    if (!isset($result['continents'][$continent]['countries'][$country]['regions'])) {
-                                        $result['continents'][$continent]['countries'][$country]['regions'] = array();
+                        for ($i = count($result['continents']); $i--;) {
+                            for ($j = count($result['continents'][$i]['countries']); $j--;) {
+                                if ($result['continents'][$i]['countries'][$j]['name'] === $this->getCountryName($element['isoa3'])) {
+                                    if (!isset($result['continents'][$i]['countries'][$j]['regions'])) {
+                                        $result['continents'][$i]['countries'][$j]['regions'] = array();
                                     }
-
-                                    if (!isset($result['continents'][$continent]['countries'][$country]['regions'][$element['region']])) {
-                                        $result['continents'][$continent]['countries'][$country]['regions'][$element['region']] = array(
-                                            'id' => $element['regionid'],
-                                            'states' => array()
-                                        );
+                                    $index = -1;
+                                    for ($k = count($result['continents'][$i]['countries'][$j]['regions']); $k--;) {
+                                        if (!$element['regionid'] && !isset($result['continents'][$i]['countries'][$j]['regions'][$k]['regionid'])) {
+                                            $index = $k;
+                                            break;
+                                        }
+                                        else if ($result['continents'][$i]['countries'][$j]['regions'][$k]['regionid'] === $element['regionid']) {
+                                            $index = $k;
+                                            break;
+                                        }
+                                    }
+                                    if ($index === -1) {
+                                        if (!isset($element['regionid']) || !$element['regionid']) {
+                                            array_push($result['continents'][$i]['countries'][$j]['regions'], array(
+                                                'states' => array()
+                                            ));
+                                        }
+                                        else {
+                                            array_push($result['continents'][$i]['countries'][$j]['regions'], array(
+                                                'name' => $element['region'],
+                                                'id' => $element['regionid'],
+                                                'states' => array()
+                                            ));
+                                        }
+                                        $index = count($continents) - 1;
                                     }
                                     if ($options['ordered']) {
-                                        array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state'], 'id' => $element['stateid'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
+                                        array_push($result['continents'][$i]['countries'][$j]['regions'][$index]['states'], array('name' => $element['state'], 'id' => $element['stateid'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
                                     } else {
-                                        array_push($result['continents'][$continent]['countries'][$country]['regions'][$element['region']]['states'], array('name' => $element['state'], 'id' => $element['stateid']));
+                                        array_push($result['continents'][$i]['countries'][$j]['regions'][$index]['states'], array('name' => $element['state'], 'id' => $element['stateid']));
                                     }
 
                                     break;
