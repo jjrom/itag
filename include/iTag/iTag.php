@@ -1056,6 +1056,7 @@ class iTag {
             'JOR' => 'Jordan',
             'JP' => 'Japan',
             'JPN' => 'Japan',
+            'KAS' => 'Kashmir',
             'KAZ' => 'Kazakhstan',
             'KE' => 'Kenya',
             'KEN' => 'Kenya',
