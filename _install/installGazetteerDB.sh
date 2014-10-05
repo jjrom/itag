@@ -136,6 +136,10 @@ COPY gazetteer.alternatename (alternatenameid,geonameid,isolanguage,alternatenam
 -- Countries
 COPY gazetteer.countryinfo (iso_alpha2,iso_alpha3,iso_numeric,fips_code,name,capital,areainsqkm,population,continent,tld,currencycode,currencyname,phone,postalcode,postalcoderegex,languages,geonameid,neighbors,equivfipscode) from '$DATADIR/countryInfo.txt' NULL AS '' ENCODING 'UTF8';
 
+-- We only need Populated place and administrative areas
+CREATE INDEX idx_fclass_country ON gazetteer.geoname (fclass);
+DELETE FROM gazetteer.geoname WHERE fclass NOT IN ('P', 'A');
+
 -- PostGIS
 SELECT AddGeometryColumn ('gazetteer','geoname','geom',4326,'POINT',2);
 UPDATE gazetteer.geoname SET geom = ST_PointFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
@@ -149,7 +153,6 @@ CREATE INDEX idx_geoname_countryname ON gazetteer.geoname ((lower(countryname)))
 -- Text search
 CREATE INDEX idx_geoname_name ON gazetteer.geoname (lower(unaccent(name)));
 CREATE INDEX idx_geoname_country ON gazetteer.geoname (country);
-CREATE INDEX idx_fclass_country ON gazetteer.geoname (fclass);
 
 CREATE INDEX idx_alternatename_isolanguage ON gazetteer.alternatename (isolanguage);
 DELETE FROM gazetteer.alternatename WHERE isolanguage IS NULL;
