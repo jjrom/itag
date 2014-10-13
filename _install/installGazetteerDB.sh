@@ -65,7 +65,7 @@ fi
 if [ "$DROPFIRST" = "YES" ]
 then
 psql -d $DB -U $SUPERUSER << EOF
-DROP SCHEMA gazetteer CASCADE;
+DROP SCHEMA IF EXISTS gazetteer CASCADE;
 EOF
 fi
 
