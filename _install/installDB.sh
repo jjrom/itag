@@ -42,7 +42,7 @@ DROPFIRST=NO
 DB=itag
 USER=itag
 HOSTNAME=localhost
-usage="## iTag database installation\n\n  Usage $0 -d <PostGIS directory> -p [itag user password] [-s <database SUPERUSER> -F -H <server HOSTNAME>]\n\n  -d : absolute path to the directory containing postgis.sql\n  -s : database SUPERUSER (default "postgres")\n  -F : WARNING - suppress existing itag database\n  -H : postgres server hostname (default localhost)"
+usage="## iTag database installation\n\n  Usage $0 -d <PostGIS directory (otherwise 'EXTENSION' is used)> -p [itag user password] [-s <database SUPERUSER> -F -H <server HOSTNAME>]\n\n  -d : absolute path to the directory containing postgis.sql\n  -s : database SUPERUSER (default "postgres")\n  -F : WARNING - suppress existing itag database\n  -H : postgres server hostname (default localhost)"
 while getopts "d:s:p:hFH:" options; do
     case $options in
         d ) ROOTDIR=`echo $OPTARG`;;
@@ -57,11 +57,6 @@ while getopts "d:s:p:hFH:" options; do
             exit 1;;
     esac
 done
-if [ "$ROOTDIR" = "" ]
-then
-    echo -e $usage
-    exit 1
-fi
 if [ "$DROPFIRST" = "YES" ]
 then
     dropdb -U $SUPERUSER $DB -h $HOSTNAME
@@ -72,15 +67,23 @@ then
     exit 1
 fi
 
-# Example : $ROOTDIR = /usr/local/pgsql/share/contrib/postgis-1.5/
-postgis=`echo $ROOTDIR/postgis.sql`
-projections=`echo $ROOTDIR/spatial_ref_sys.sql`
-
-# Make db POSTGIS compliant
+# Create DB
 createdb $DB -U $SUPERUSER -h $HOSTNAME
 createlang -U $SUPERUSER plpgsql $DB -h $HOSTNAME
-psql -d $DB -U $SUPERUSER -f $postgis -h $HOSTNAME
-psql -d $DB -U $SUPERUSER -f $projections -h $HOSTNAME
+
+# Make db POSTGIS compliant
+if [ "$ROOTDIR" = "" ]
+then
+    psql -d $DB -U $SUPERUSER -h $HOSTNAME -c "CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology;"
+else
+    # Example : $ROOTDIR = /usr/local/pgsql/share/contrib/postgis-1.5/
+    postgis=`echo $ROOTDIR/postgis.sql`
+    projections=`echo $ROOTDIR/spatial_ref_sys.sql`
+    psql -d $DB -U $SUPERUSER -f $postgis -h $HOSTNAME
+    psql -d $DB -U $SUPERUSER -f $projections -h $HOSTNAME
+
+fi
+
 
 ###### ADMIN ACCOUNT CREATION ######
 psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
