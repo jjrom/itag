@@ -59,7 +59,7 @@ Step by step
         # Note : "password" must be the same as 
         # the value of DB_PASSWORD key in $ITAG_HOME/config/config.php
         
-        $ITAG_HOME/_install/itagInstallDB.sh -F -d <path_to_postgis_directory> -p password
+        $ITAG_HOME/_install/installDB.sh -F -d <path_to_postgis_directory> -p password
 
 3. Populate database
         
