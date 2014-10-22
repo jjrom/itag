@@ -78,7 +78,7 @@ EOF
 # ================== POLITICAL =====================
 
 ## Insert Continents
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/continents/continent.shp datasources.continents | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/continents/continent.shp datasources.continents | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d itag  -U $SUPERUSER $HOSTNAME<< EOF
 CREATE INDEX idx_continents_name ON datasources.continents (continent);
 EOF
@@ -116,14 +116,14 @@ CREATE INDEX idx_countries_geom ON datasources.countries USING gist(geom);
 EOF
 
 ## Insert Cities
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/cities/cities.shp datasources.cities | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/cities/cities.shp datasources.cities | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
 UPDATE datasources.cities set country='The Gambia' WHERE country='Gambia';
 CREATE INDEX idx_cities_name ON datasources.cities (name);
 EOF
 
 ## French departments
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/france/deptsfrance.shp datasources.deptsfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/france/deptsfrance.shp datasources.deptsfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
 UPDATE datasources.deptsfrance set nom_dept=initcap(nom_dept);
 UPDATE datasources.deptsfrance set nom_dept=replace(nom_dept, '-De-', '-de-');
@@ -140,7 +140,7 @@ CREATE INDEX idx_deptsfrance_region ON datasources.deptsfrance (nom_region);
 EOF
 
 ## French communes
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/commfrance.shp datasources.commfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -d -W UTF8 -s 4326 -I $DATADIR/political/france/commfrance.shp datasources.commfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
 UPDATE datasources.commfrance set nom_comm=initcap(nom_comm);
 UPDATE datasources.commfrance set nom_comm=replace(nom_comm, '-Sur-', '-sur-');
@@ -155,14 +155,14 @@ CREATE INDEX idx_commfrance_comm ON datasources.commfrance (nom_comm);
 EOF
 
 ## French arrondissements
-shp2pgsql -d -W LATIN1 -s 4326 -I $DATADIR/political/france/arrsfrance.shp datasources.arrsfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -d -W UTF8 -s 4326 -I $DATADIR/political/france/arrsfrance.shp datasources.arrsfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
 UPDATE datasources.arrsfrance set nom_chf=initcap(nom_chf);
 CREATE INDEX idx_arrsfrance_arrs ON datasources.arrsfrance (nom_chf);
 EOF
 
 ## World administrative level 1 (i.e. states for USA, departements for France)
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp datasources.worldadm1level | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp datasources.worldadm1level | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB -U $SUPERUSER  $HOSTNAME << EOF
 CREATE INDEX idx_worldadm1level_geom ON datasources.worldadm1level USING gist(geom);
 EOF
@@ -170,10 +170,10 @@ EOF
 
 # =================== GEOPHYSICAL ==================
 ## Insert plates
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/plates/plates.shp datasources.plates | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/plates/plates.shp datasources.plates | psql -d $DB -U $SUPERUSER $HOSTNAME
 
 ## Insert faults
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP datasources.faults | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP datasources.faults | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB  -U $SUPERUSER $HOSTNAME << EOF
 DELETE FROM datasources.faults WHERE type IS NULL;
 UPDATE datasources.faults set type='Thrust fault' WHERE type='thrust-fault';
@@ -183,7 +183,7 @@ UPDATE datasources.faults set type='Rift' WHERE type='rift';
 EOF
 
 ## Insert volcanoes
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP datasources.volcanoes | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP datasources.volcanoes | psql -d $DB -U $SUPERUSER $HOSTNAME
 
 # ==================== LANDCOVER =====================
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
@@ -197,27 +197,27 @@ EOF
 
 # ===== UNUSUED ======
 ## Insert glaciers
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp datasources.glaciers | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp datasources.glaciers | psql -d $DB -U $SUPERUSER $HOSTNAME
 ## DOWNLOAD THIS INSTEAD - http://nsidc.org/data/docs/noaa/g01130_glacier_inventory/#data_descriptions
 
 ## Major earthquakes since 1900
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp datasources.earthquakes | psql -d $DB -U $SUPERUSER $HOSTNAME
+#shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp datasources.earthquakes | psql -d $DB -U $SUPERUSER $HOSTNAME
  
 ## Insert airport
-#shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp datasources.airports | psql -d $DB -U $SUPERUSER $HOSTNAME
+#shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp datasources.airports | psql -d $DB -U $SUPERUSER $HOSTNAME
 
 
 # GRANT RIGHTS TO itag USER
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 GRANT ALL ON SCHEMA datasources to $USER;
-GRANT SELECT on datasources.airports to $USER;
+#GRANT SELECT on datasources.airports to $USER;
 GRANT SELECT on datasources.cities to $USER;
 GRANT SELECT on datasources.deptsfrance to $USER;
 GRANT SELECT on datasources.commfrance to $USER;
 GRANT SELECT on datasources.worldadm1level to $USER;
 GRANT SELECT on datasources.continents to $USER;
 GRANT SELECT on datasources.countries to $USER;
-GRANT SELECT on datasources.earthquakes to $USER;
+#GRANT SELECT on datasources.earthquakes to $USER;
 GRANT SELECT on datasources.glaciers to $USER;
 GRANT SELECT on datasources.plates to $USER;
 GRANT SELECT on datasources.faults to $USER;
