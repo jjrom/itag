@@ -28,9 +28,9 @@ Prerequesites
 -------------
 
 * PHP (v5.3+) command line
-* PostgreSQL (v9.0+)
+* PostgreSQL (v9.0+) with **unaccent** extension
 * PostGIS (v1.5.1+)
-* GDAL (v1.8+) with python support (for land cover preparation)
+* GDAL (v1.8+) with **python** support (for land cover preparation only)
 
 Note: iTag could work with lower version of the specified requirements.
 However there is no guaranty of success and unwanted result may occured !

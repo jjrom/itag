@@ -92,18 +92,14 @@ EOF
 
 # Create unaccent function
 psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
-CREATE OR REPLACE FUNCTION unaccent(text)
-RETURNS text
-IMMUTABLE
-STRICT
-LANGUAGE SQL
-AS \$$
-SELECT translate(
-    \$1,
-    'ææ̆áàâãäåāăąạắằẵÀÁÂÃÄÅĀĂĄÆəèééêëēĕėęěệÈÉÊĒĔĖĘĚıìíîïìĩīĭịÌÍÎÏÌĨĪĬİḩòóồôõöōŏőợộÒÓÔÕÖŌŎŐØùúûüũūŭůưửÙÚÛÜŨŪŬŮČÇçćĉčċøơßýÿñşšŠŞŚŒŻŽžźżœðÝŸ¥µđÐĐÑŁţğġħňĠĦ',
-    'aaaaaaaaaaaaaaaAAAAAAAAAAeeeeeeeeeeeeEEEEEEEEiiiiiiiiiiIIIIIIIIIhoooooooooooOOOOOOOOOuuuuuuuuuuUUUUUUUUCCcccccoosyynssSSSOZZzzzooYYYudDDNLtgghnGH'
-);
-\$$;
+
+--
+-- Use unaccent function from postgresql >= 9
+-- Set it as IMMUTABLE to use it in index
+--
+CREATE EXTENSION unaccent;
+ALTER FUNCTION unaccent(text) IMMUTABLE;
+
 EOF
 
 # Rights
