@@ -210,14 +210,14 @@ shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.sh
 # GRANT RIGHTS TO itag USER
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 GRANT ALL ON SCHEMA datasources to $USER;
-#GRANT SELECT on datasources.airports to $USER;
+--GRANT SELECT on datasources.airports to $USER;
 GRANT SELECT on datasources.cities to $USER;
 GRANT SELECT on datasources.deptsfrance to $USER;
 GRANT SELECT on datasources.commfrance to $USER;
 GRANT SELECT on datasources.worldadm1level to $USER;
 GRANT SELECT on datasources.continents to $USER;
 GRANT SELECT on datasources.countries to $USER;
-#GRANT SELECT on datasources.earthquakes to $USER;
+--GRANT SELECT on datasources.earthquakes to $USER;
 GRANT SELECT on datasources.glaciers to $USER;
 GRANT SELECT on datasources.plates to $USER;
 GRANT SELECT on datasources.faults to $USER;
