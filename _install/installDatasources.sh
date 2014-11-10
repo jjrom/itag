@@ -185,6 +185,9 @@ EOF
 ## Insert volcanoes
 shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP datasources.volcanoes | psql -d $DB -U $SUPERUSER $HOSTNAME
 
+## Insert Rivers
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/ne_50m_rivers_lake_centerlines/ne_50m_rivers_lake_centerlines.shp datasources.rivers | psql -d $DB -U $SUPERUSER $HOSTNAME
+
 # ==================== LANDCOVER =====================
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 CREATE TABLE datasources.landcover (
@@ -218,6 +221,7 @@ GRANT SELECT on datasources.worldadm1level to $USER;
 GRANT SELECT on datasources.continents to $USER;
 GRANT SELECT on datasources.countries to $USER;
 --GRANT SELECT on datasources.earthquakes to $USER;
+GRANT SELECT on datasources.rivers to $USER;
 GRANT SELECT on datasources.glaciers to $USER;
 GRANT SELECT on datasources.plates to $USER;
 GRANT SELECT on datasources.faults to $USER;
