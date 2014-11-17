@@ -41,7 +41,7 @@ Configure postgresql
 Edit the PostreSQL postgresql.conf and be sure that postgres accept tcp_ip connection.
 
         # Uncomment these two lines within postgesql.conf
-        listen_adresses = 'localhost'
+        listen_addresses = 'localhost'
         port = 5432
 
 Step by step
