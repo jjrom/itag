@@ -1057,6 +1057,7 @@ class iTag {
             'ITA' => 'Italy',
             'JAM' => 'Jamaica',
             'JE' => 'Jersey',
+            'JEY' => 'Jersey',
             'JM' => 'Jamaica',
             'JO' => 'Jordan',
             'JOR' => 'Jordan',
