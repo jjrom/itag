@@ -162,13 +162,13 @@ header('Content-Type: application/json');
 try {
     
     /*
-     * Read itag.ini configuration file
+     * Read config.php configuration file
      */
-    $iniFile = realpath(dirname(__FILE__)) . '/include/itag.ini';
-    if (!file_exists($iniFile)) {
-        throw new Exception('Missing mandatory configuration file', 500);
+    $configFile = realpath(dirname(__FILE__)) . '/include/config.php';
+    if (!file_exists($configFile)) {
+        throw new Exception(__METHOD__ . 'Missing mandatory configuration file', 500);
     }
-    $config = IniParser::read($iniFile);
+    $config = include($configFile);
     
     /*
      * User request

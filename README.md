@@ -57,7 +57,7 @@ Step by step
 2. Install database
 
         # Note : "password" must be the same as 
-        # the value of DB_PASSWORD key in $ITAG_HOME/include/itag.ini
+        # the value of DB_PASSWORD key in $ITAG_HOME/include/config.php
         
         $ITAG_HOME/_install/installDB.sh -F -d <path_to_postgis_directory> -p password
 
