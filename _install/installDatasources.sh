@@ -164,6 +164,7 @@ EOF
 ## World administrative level 1 (i.e. states for USA, departements for France)
 shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp datasources.worldadm1level | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB -U $SUPERUSER  $HOSTNAME << EOF
+UPDATE datasources.worldadm1level SET name='Seine-et-Marne' WHERE name='Seien-et-Marne';
 CREATE INDEX idx_worldadm1level_geom ON datasources.worldadm1level USING gist(geom);
 EOF
 
