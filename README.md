@@ -93,7 +93,7 @@ Step by step
         unzip allCountries.zip
         unzip alternateNames.zip
         # Remove unwanted comment from countryInfo.txt
-        grep -v "#" countryInfo.txt > tmp.txt
+        grep -v "^#" countryInfo.txt > tmp.txt
         mv tmp.txt countryInfo.txt
         $ITAG_HOME/_install/installGazetter.sh -F -D $GEONAMES_DIR
 
