@@ -13,9 +13,9 @@ iTag is a library to tag a footprint with the following information :
 * land cover (i.e. forest, water, urban, cultivated, herbaceous, desert, snow, flooded)
 * population count
 
-You can access an online instance [here] (http://mapshup.info/itag) as a web service.
+You can access an online instance [here] (http://mapshup.com/projects/itag) as a web service.
 
-See [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597) and access trough [mapshup] (http://mapshup.info)
+See [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597) and access trough [mapshup] (http://mapshup.com/projects/mapshup)
 
 iTag is used by [RESTo - REstful Semantic search Tool for geOspatial] (http://github.com/jjrom/resto)
 
@@ -125,7 +125,7 @@ We suppose that $ITAG_TARGET is accessible to http://localhost/itag/ in Apache.
 
 To tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output, open this url within you browser
     
-        http://localhost/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
+        http://localhost/itag/?geophysical=true&countries=true&cities=all&pretty=true&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
 
 Available parameters for Web service are :
 * &continents=true
@@ -139,16 +139,16 @@ Available parameters for Web service are :
 * &ordered=true
 * &pretty=true
 
-You can check this [running instance] (http://mapshup.info/itag/)
+You can check this [running instance] (http://mapshup.com/projects/itag/)
 
 
 Examples :
 
     Tag footprint on Toulouse with geophysical information and all cities with a pretty GeoJSON output
     
-        http://mapshup.info/itag/?geophysical=true&countries=true&cities=all&output=pretty&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
+        http://mapshup.com/projects/itag/?geophysical=true&countries=true&cities=all&pretty=true&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
 
 
     Tag footprint intersecting France, Italy and Switzerland with cities, regions and states. Hierarchical result as pretty GeoJSON output
     
-        http://mapshup.info/itag/?regions=true&hierarchical=true&ordered=true&countries=true&cities=all&output=pretty&footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))
+        http://mapshup.com/projects/itag/?regions=true&hierarchical=true&ordered=true&countries=true&cities=all&pretty=true&footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))
