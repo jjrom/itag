@@ -113,7 +113,7 @@ Step by step
 
 5. Deploy application
 
-        $ITAG_HOME/_install/deploy.sh -s $ITAG_HOME> -t $ITAG_TARGET
+        $ITAG_HOME/_install/deploy.sh -s $ITAG_HOME -t $ITAG_TARGET
 
 
 Note : depending on your server performance, the landcover computation can take a long time (more than two hours)
