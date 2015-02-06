@@ -189,3 +189,49 @@ function polygonize($footprint, $dbh, $config) {
     pg_query($dbh, 'DROP TABLE ' . $tmpTable);
     
 }
+
+/**
+ *
+ * Returns bounding box [ulx, uly, lrx, lry] from a WKT
+ *
+ * ULx,ULy
+ *    +------------------+
+ *    |                  |
+ *    |                  |
+ *    |                  |
+ *    |                  |
+ *    +------------------+
+ *                     LRx,LRy
+ *
+ * Example of WKT POLYGON :
+ *     POLYGON((-180.0044642857 89.9955356663,-180.0044642857 87.9955356727,-178.0044642921 87.9955356727,-178.0044642921 89.9955356663,-180.0044642857 89.9955356663))
+ *
+ * @param <string> $wkt : WKT
+ * @return string : random table name
+ *
+ */
+function bbox($wkt) {
+    $ulx = 180.0;
+    $uly = -90.0;
+    $lrx = -180.0;
+    $lry = 90.0;
+    $rep = array("(", ")", "multi", "polygon", "point", "linestring");
+    $pairs = preg_split('/,/', str_replace($rep, "", strtolower($wkt)));
+    for ($i = 0; $i < count($pairs); $i++) {
+        $coords = preg_split('/ /', trim($pairs[$i]));
+        $x = floatval($coords[0]);
+        $y = floatval($coords[1]);
+        if ($x < $ulx) {
+            $ulx = $x;
+        } else if ($x > $lrx) {
+            $lrx = $x;
+        }
+        if ($y > $uly) {
+            $uly = $y;
+        } else if ($y < $lry) {
+            $lry = $y;
+        }
+    }
+
+    return array('ulx' => $ulx, 'uly' => $uly, 'lrx' => $lrx, 'lry' => $lry);
+}
