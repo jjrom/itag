@@ -105,6 +105,7 @@ EOF
 # Rights
 psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 ALTER DATABASE $DB OWNER TO $USER;
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 GRANT ALL ON geometry_columns to $USER;
 GRANT ALL ON geography_columns to $USER;
 GRANT SELECT on spatial_ref_sys to $USER;
