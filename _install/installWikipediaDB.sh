@@ -77,7 +77,6 @@ CREATE INDEX idx_wk_id ON gazetteer.wk (id);
 CREATE INDEX idx_wikipedia_geom ON gazetteer.wikipedia USING GIST(geom);
 CREATE INDEX idx_geonames_ds_nameorid ON gazetteer.geoname_ds (nameorid);
 -- User rights
-GRANT SELECT ON gazetteer.geoname_ds TO $USER;
 GRANT SELECT ON gazetteer.wikipedia TO $USER;
 GRANT SELECT ON gazetteer.wk TO $USER;
 EOF
