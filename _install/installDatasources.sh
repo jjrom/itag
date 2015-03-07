@@ -110,6 +110,7 @@ UPDATE datasources.countries set name='Solomon Islands' WHERE iso_a3 = 'SLB';
 UPDATE datasources.countries set name='Western Sahara' WHERE iso_a3 = 'ESH';
 UPDATE datasources.countries set name='Ivory Coast' WHERE iso_a3 = 'CIV';
 UPDATE datasources.countries set name='Laos' WHERE iso_a3 = 'LAO';
+UPDATE  datasources.countries set name='United States of America' WHERE name='United States';
 
 CREATE INDEX idx_countries_name ON datasources.countries (name);
 CREATE INDEX idx_countries_geom ON datasources.countries USING gist(geom);
