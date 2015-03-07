@@ -148,7 +148,7 @@ CREATE INDEX idx_geoname_geom ON gazetteer.geoname USING gist(geom);
 -- Add countryname to speed up iTag
 ALTER TABLE gazetteer.geoname ADD COLUMN countryname VARCHAR(200);
 UPDATE gazetteer.geoname SET countryname=(SELECT name FROM datasources.countries WHERE gazetteer.geoname.country = countries.iso_a2 LIMIT 1);
-CREATE INDEX idx_geoname_countryname ON gazetteer.geoname ((lower(countryname)));
+CREATE INDEX idx_geoname_countryname ON gazetteer.geoname ((lower(unaccent(countryname))));
 
 -- Text search
 CREATE INDEX idx_geoname_name ON gazetteer.geoname (lower(unaccent(name)));
