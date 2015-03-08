@@ -99,7 +99,6 @@ psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 --
 CREATE EXTENSION unaccent;
 ALTER FUNCTION unaccent(text) IMMUTABLE;
-EOF
 
 --
 -- Create function normalize
@@ -110,6 +109,7 @@ CREATE OR REPLACE FUNCTION normalize(text)
 RETURNS text AS $$ 
 SELECT replace(lower(unaccent($1)),' ','-') 
 $$ LANGUAGE sql;
+EOF
 
 # Rights
 psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
