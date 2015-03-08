@@ -148,17 +148,17 @@ CREATE INDEX idx_geoname_geom ON gazetteer.geoname USING gist(geom);
 -- Add countryname to speed up iTag
 ALTER TABLE gazetteer.geoname ADD COLUMN countryname VARCHAR(200);
 UPDATE gazetteer.geoname SET countryname=(SELECT name FROM datasources.countries WHERE gazetteer.geoname.country = countries.iso_a2 LIMIT 1);
-CREATE INDEX idx_geoname_countryname ON gazetteer.geoname ((lower(unaccent(countryname))));
+CREATE INDEX idx_geoname_countryname ON gazetteer.geoname (normalize(countryname));
 
 -- Text search
-CREATE INDEX idx_geoname_name ON gazetteer.geoname (lower(unaccent(name)));
-CREATE INDEX idx_geoname_like_name ON gazetteer.geoname (lower(unaccent(name)) varchar_pattern_ops);
+CREATE INDEX idx_geoname_name ON gazetteer.geoname (normalize(name));
+CREATE INDEX idx_geoname_like_name ON gazetteer.geoname (normalize(name)) varchar_pattern_ops);
 CREATE INDEX idx_geoname_country ON gazetteer.geoname (country);
 
 CREATE INDEX idx_alternatename_isolanguage ON gazetteer.alternatename (isolanguage);
 DELETE FROM gazetteer.alternatename WHERE isolanguage IS NULL;
-CREATE INDEX idx_alternatename_alternatename ON gazetteer.alternatename (lower(unaccent(alternatename)));
-CREATE INDEX idx_alternatename_like_alternatename ON gazetteer.alternatename (lower(unaccent(alternatename)) varchar_pattern_ops);
+CREATE INDEX idx_alternatename_alternatename ON gazetteer.alternatename (normalize(alternatename));
+CREATE INDEX idx_alternatename_like_alternatename ON gazetteer.alternatename (normalize(alternatename)) varchar_pattern_ops);
 
 -- Constraints
 ALTER TABLE ONLY gazetteer.alternatename ADD CONSTRAINT pk_alternatenameid PRIMARY KEY (alternatenameid);

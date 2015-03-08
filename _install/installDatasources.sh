@@ -167,8 +167,8 @@ shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/ne_10m_admin_1_states
 psql -d $DB -U $SUPERUSER  $HOSTNAME << EOF
 UPDATE datasources.worldadm1level SET name='Seine-et-Marne' WHERE name='Seien-et-Marne';
 CREATE INDEX idx_worldadm1level_geom ON datasources.worldadm1level USING gist(geom);
-CREATE INDEX idx_worldadm1level_name ON datasources.worldadm1level (lower(unaccent(name)));
-CREATE INDEX idx_worldadm1level_region ON datasources.worldadm1level (lower(unaccent(region)));
+CREATE INDEX idx_worldadm1level_name ON datasources.worldadm1level (normalize(name));
+CREATE INDEX idx_worldadm1level_region ON datasources.worldadm1level (normalize(region));
 EOF
 
 

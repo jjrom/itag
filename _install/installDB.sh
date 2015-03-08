@@ -99,8 +99,17 @@ psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
 --
 CREATE EXTENSION unaccent;
 ALTER FUNCTION unaccent(text) IMMUTABLE;
-
 EOF
+
+--
+-- Create function normalize
+-- This function will return input text
+-- in lower case, without accents and with spaces replaced as '-'
+--
+CREATE OR REPLACE FUNCTION normalize(text) 
+RETURNS text AS $$ 
+SELECT replace(lower(unaccent($1)), ' ','-') 
+$$ LANGUAGE sql;
 
 # Rights
 psql -U $SUPERUSER -d $DB -h $HOSTNAME << EOF
