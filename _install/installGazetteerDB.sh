@@ -152,13 +152,13 @@ CREATE INDEX idx_geoname_countryname ON gazetteer.geoname (normalize(countryname
 
 -- Text search
 CREATE INDEX idx_geoname_name ON gazetteer.geoname (normalize(name));
-CREATE INDEX idx_geoname_like_name ON gazetteer.geoname (normalize(name)) varchar_pattern_ops);
+CREATE INDEX idx_geoname_like_name ON gazetteer.geoname (normalize(name) varchar_pattern_ops);
 CREATE INDEX idx_geoname_country ON gazetteer.geoname (country);
 
 CREATE INDEX idx_alternatename_isolanguage ON gazetteer.alternatename (isolanguage);
 DELETE FROM gazetteer.alternatename WHERE isolanguage IS NULL;
 CREATE INDEX idx_alternatename_alternatename ON gazetteer.alternatename (normalize(alternatename));
-CREATE INDEX idx_alternatename_like_alternatename ON gazetteer.alternatename (normalize(alternatename)) varchar_pattern_ops);
+CREATE INDEX idx_alternatename_like_alternatename ON gazetteer.alternatename (normalize(alternatename) varchar_pattern_ops);
 
 -- Constraints
 ALTER TABLE ONLY gazetteer.alternatename ADD CONSTRAINT pk_alternatenameid PRIMARY KEY (alternatenameid);
