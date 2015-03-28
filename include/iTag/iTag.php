@@ -969,6 +969,7 @@ class iTag {
             'GEO' => 'Georgia',
             'GF' => 'French Guiana',
             'GG' => 'Guernsey',
+            'GGY' => 'Guernsey',
             'GH' => 'Ghana',
             'GHA' => 'Ghana',
             'GI' => 'Gibraltar',
@@ -1399,5 +1400,5 @@ class iTag {
         return $dbh;
         
     }
-    
+  
 }
