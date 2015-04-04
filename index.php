@@ -2,7 +2,7 @@
 /*
  * Copyright 2013 Jérôme Gasperi
  *
- * iTag licenses this file to you under the Apache License,
+ * Licensedunder the Apache License,
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
