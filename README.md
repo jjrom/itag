@@ -1,5 +1,7 @@
 # iTag
 
+[![Code Climate](https://codeclimate.com/github/jjrom/itag/badges/gpa.svg)](https://codeclimate.com/github/jjrom/itag)
+
 Semantic enhancement of Earth Observation data
 
 iTag is a library to tag a footprint with the following information :
