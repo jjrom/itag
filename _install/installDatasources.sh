@@ -42,6 +42,18 @@ then
     exit 1
 fi
 
+# Set Data paths
+## Political
+COUNTRIES=$DATADIR/ne_10m_admin_0_countries.shp
+WORLDADM1LEVEL=$DATADIR/ne_10m_admin_1_states_provinces.shp
+## Geology
+PLATES=$DATADIR/hotspots/plates.shp
+FAULTS=$DATADIR/hotspots/FAULTS.SHP
+VOLCANOS=$DATADIR/hotspots/VOLCANO.SHP
+GLACIERS=$DATADIR/ne_10m_glaciated_areas.shp datasources.glaciers
+# Hydrology
+RIVERS=$DATADIR/ne_10m_rivers_lake_centerlines.shp
+
 ##### DROP SCHEMA FIRST ######
 if [ "$DROPFIRST" = "YES" ]
 then
@@ -56,24 +68,9 @@ EOF
 
 # ================== POLITICAL =====================
 
-## Insert Continents
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/continents/continent.shp datasources.continents | psql -d $DB -U $SUPERUSER $HOSTNAME
-psql -d itag  -U $SUPERUSER $HOSTNAME<< EOF
-CREATE INDEX idx_continents_name ON datasources.continents (continent);
-EOF
-
 ## Insert Countries
-shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $DATADIR/political/countries/ne_110m_admin_0_countries.shp datasources.countries | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $COUNTRIES datasources.countries | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB  -U $SUPERUSER $HOSTNAME << EOF
---
--- This is for WorldCountries not for ne_110m_admin_0_countries
--- UPDATE datasources.countries set name='Congo' WHERE iso_3166_3='ZAR';
--- UPDATE datasources.countries set name='Macedonia' WHERE iso_3166_3='MKD';
---
--- Optimisation : predetermine continent for each country
--- ALTER TABLE datasources.countries ADD COLUMN continent VARCHAR(13);
--- UPDATE datasources.countries SET continent = (SELECT continent FROM datasources.continents WHERE st_intersects(continents.geom, countries.geom) LIMIT 1);
---
 UPDATE datasources.countries set name='Bosnia and Herzegovina' WHERE iso_a3 = 'BIH';
 UPDATE datasources.countries set name='Central African Republic' WHERE iso_a3 = 'CAF';
 UPDATE datasources.countries set name='Czech Republic' WHERE iso_a3 = 'CZE';
@@ -89,60 +86,13 @@ UPDATE datasources.countries set name='Solomon Islands' WHERE iso_a3 = 'SLB';
 UPDATE datasources.countries set name='Western Sahara' WHERE iso_a3 = 'ESH';
 UPDATE datasources.countries set name='Ivory Coast' WHERE iso_a3 = 'CIV';
 UPDATE datasources.countries set name='Laos' WHERE iso_a3 = 'LAO';
-UPDATE  datasources.countries set name='United States of America' WHERE name='United States';
-
-CREATE INDEX idx_countries_name ON datasources.countries (name);
+UPDATE datasources.countries set name='United States of America' WHERE name='United States';
+CREATE INDEX idx_countries_name ON datasources.countries (normalize(name));
 CREATE INDEX idx_countries_geom ON datasources.countries USING gist(geom);
 EOF
 
-## Insert Cities
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/cities/cities.shp datasources.cities | psql -d $DB -U $SUPERUSER $HOSTNAME
-psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
-UPDATE datasources.cities set country='The Gambia' WHERE country='Gambia';
-CREATE INDEX idx_cities_name ON datasources.cities (name);
-EOF
-
-## French departments
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/france/deptsfrance.shp datasources.deptsfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
-psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
-UPDATE datasources.deptsfrance set nom_dept=initcap(nom_dept);
-UPDATE datasources.deptsfrance set nom_dept=replace(nom_dept, '-De-', '-de-');
-UPDATE datasources.deptsfrance set nom_dept=replace(nom_dept, ' De ', ' de ');
-UPDATE datasources.deptsfrance set nom_dept=replace(nom_dept, 'D''', 'd''');
-UPDATE datasources.deptsfrance set nom_dept=replace(nom_dept, '-Et-', '-et-');
-UPDATE datasources.deptsfrance set nom_region=initcap(nom_region);
-UPDATE datasources.deptsfrance set nom_region='Ile-de-France' WHERE nom_region='Ile-De-France';
-UPDATE datasources.deptsfrance set nom_region='Nord-Pas-de-Calais' WHERE nom_region='Nord-Pas-De-Calais';
-UPDATE datasources.deptsfrance set nom_region='Pays de la Loire' WHERE nom_region='Pays De La Loire';
-UPDATE datasources.deptsfrance set nom_region='Provence-Alpes-Cote d''Azur' WHERE nom_region='Provence-Alpes-Cote D''Azur';
-CREATE INDEX idx_deptsfrance_dept ON datasources.deptsfrance (nom_dept);
-CREATE INDEX idx_deptsfrance_region ON datasources.deptsfrance (nom_region);
-EOF
-
-## French communes
-shp2pgsql -d -W UTF8 -s 4326 -I $DATADIR/political/france/commfrance.shp datasources.commfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
-psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
-UPDATE datasources.commfrance set nom_comm=initcap(nom_comm);
-UPDATE datasources.commfrance set nom_comm=replace(nom_comm, '-Sur-', '-sur-');
-UPDATE datasources.commfrance set nom_comm=replace(nom_comm, '-De-', '-de-');
-UPDATE datasources.commfrance set nom_comm=replace(nom_comm, ' De ', ' de ');
-UPDATE datasources.commfrance set nom_comm=replace(nom_comm, 'D''', 'd''');
-UPDATE datasources.commfrance set nom_comm=replace(nom_comm, '-Et-', '-et-');
-UPDATE datasources.commfrance set nom_comm=replace(nom_comm, '-Le-', '-le-');
-UPDATE datasources.commfrance set nom_comm=replace(nom_comm, '-La-', '-la-');
-UPDATE datasources.commfrance set nom_comm=replace(nom_comm, '-Les-', '-les-');
-CREATE INDEX idx_commfrance_comm ON datasources.commfrance (nom_comm);
-EOF
-
-## French arrondissements
-shp2pgsql -d -W UTF8 -s 4326 -I $DATADIR/political/france/arrsfrance.shp datasources.arrsfrance | psql -d $DB -U $SUPERUSER $HOSTNAME
-psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
-UPDATE datasources.arrsfrance set nom_chf=initcap(nom_chf);
-CREATE INDEX idx_arrsfrance_arrs ON datasources.arrsfrance (nom_chf);
-EOF
-
 ## World administrative level 1 (i.e. states for USA, departements for France)
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/political/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp datasources.worldadm1level | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $WORLDADM1LEVEL datasources.worldadm1level | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB -U $SUPERUSER  $HOSTNAME << EOF
 UPDATE datasources.worldadm1level SET name='Seine-et-Marne' WHERE name='Seien-et-Marne';
 CREATE INDEX idx_worldadm1level_geom ON datasources.worldadm1level USING gist(geom);
@@ -150,13 +100,12 @@ CREATE INDEX idx_worldadm1level_name ON datasources.worldadm1level (normalize(na
 CREATE INDEX idx_worldadm1level_region ON datasources.worldadm1level (normalize(region));
 EOF
 
-
-# =================== GEOPHYSICAL ==================
+# =================== GEOLOGY ==================
 ## Insert plates
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/plates/plates.shp datasources.plates | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $PLATES datasources.plates | psql -d $DB -U $SUPERUSER $HOSTNAME
 
 ## Insert faults
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/faults/FAULTS.SHP datasources.faults | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $FAULTS datasources.faults | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB  -U $SUPERUSER $HOSTNAME << EOF
 DELETE FROM datasources.faults WHERE type IS NULL;
 UPDATE datasources.faults set type='Thrust fault' WHERE type='thrust-fault';
@@ -166,10 +115,14 @@ UPDATE datasources.faults set type='Rift' WHERE type='rift';
 EOF
 
 ## Insert volcanoes
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/volcanoes/VOLCANO.SHP datasources.volcanoes | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $VOLCANOES datasources.volcanoes | psql -d $DB -U $SUPERUSER $HOSTNAME
 
+## Insert glaciers
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $GLACIERS datasources.glaciers | psql -d $DB -U $SUPERUSER $HOSTNAME
+
+# =================== HYDROLOGY ==================
 ## Insert Rivers
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/ne_50m_rivers_lake_centerlines/ne_50m_rivers_lake_centerlines.shp datasources.rivers | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $RIVERS datasources.rivers | psql -d $DB -U $SUPERUSER $HOSTNAME
 
 # ==================== LANDCOVER =====================
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
@@ -181,33 +134,57 @@ SELECT AddGeometryColumn ('datasources','landcover','wkb_geometry',4326,'POLYGON
 CREATE INDEX landcover_geometry_idx ON datasources.landcover USING gist (wkb_geometry);
 EOF
 
-# ===== UNUSUED ======
-## Insert glaciers
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/glaciers/Glacier.shp datasources.glaciers | psql -d $DB -U $SUPERUSER $HOSTNAME
-## DOWNLOAD THIS INSTEAD - http://nsidc.org/data/docs/noaa/g01130_glacier_inventory/#data_descriptions
+# =================== GPW ============================
+psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
+CREATE TABLE glp15ag60 (
+    gid                 VARCHAR(8) PRIMARY KEY,
+    pcount              INTEGER
+);
+SELECT AddGeometryColumn('glp15ag60','footprint','4326','POLYGON',2);
 
-## Major earthquakes since 1900
-#shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/geophysical/earthquakes/MajorEarthquakes.shp datasources.earthquakes | psql -d $DB -U $SUPERUSER $HOSTNAME
- 
-## Insert airport
-#shp2pgsql -g geom -d -W UTF8 -s 4326 -I $DATADIR/amenities/airports/export_airports.shp datasources.airports | psql -d $DB -U $SUPERUSER $HOSTNAME
+-- ===============================
+-- Population 2015 0.5x0.5 degrees
+-- ===============================
+CREATE TABLE glp15ag30 (
+    gid                 VARCHAR(8) PRIMARY KEY,
+    pcount              INTEGER
+);
+SELECT AddGeometryColumn('glp15ag30','footprint','4326','POLYGON',2);
 
+-- =================================
+-- Population 2015 0.25x0.25 degrees
+-- =================================
+CREATE TABLE glp15ag15 (
+    gid                 VARCHAR(8) PRIMARY KEY,
+    pcount              INTEGER
+);
+SELECT AddGeometryColumn('glp15ag15','footprint','4326','POLYGON',2);
+
+-- ===================================
+-- Population 2015 2.5x2.5 arc minutes
+-- ===================================
+CREATE TABLE glp15ag (
+    gid                 VARCHAR(8) PRIMARY KEY,
+    pcount              INTEGER
+);
+SELECT AddGeometryColumn('glp15ag','footprint','4326','POLYGON',2);
+EOF
 
 # GRANT RIGHTS TO itag USER
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 GRANT ALL ON SCHEMA datasources to $USER;
---GRANT SELECT on datasources.airports to $USER;
-GRANT SELECT on datasources.cities to $USER;
-GRANT SELECT on datasources.deptsfrance to $USER;
-GRANT SELECT on datasources.commfrance to $USER;
 GRANT SELECT on datasources.worldadm1level to $USER;
 GRANT SELECT on datasources.continents to $USER;
 GRANT SELECT on datasources.countries to $USER;
---GRANT SELECT on datasources.earthquakes to $USER;
 GRANT SELECT on datasources.rivers to $USER;
 GRANT SELECT on datasources.glaciers to $USER;
 GRANT SELECT on datasources.plates to $USER;
 GRANT SELECT on datasources.faults to $USER;
 GRANT SELECT on datasources.volcanoes to $USER;
 GRANT SELECT on datasources.landcover to $USER;
+GRANT ALL ON SCHEMA gpw TO itag;
+GRANT SELECT ON gpw.glp15ag to itag;
+GRANT SELECT ON gpw.glp15ag15 to itag;
+GRANT SELECT ON gpw.glp15ag30 to itag;
+GRANT SELECT ON gpw.glp15ag60 to itag;
 EOF

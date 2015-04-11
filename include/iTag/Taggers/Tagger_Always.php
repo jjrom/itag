@@ -15,39 +15,28 @@
  * under the License.
  */
 
-return array(
-    
-    /*
-     * General configuration
+class Tagger_Always extends Tagger {
+
+    /**
+     * Constructor
+     * 
+     * @param DatabaseHandler $dbh
+     * @param array $config
      */
-    'general' => array(
-        'areaLimit' => 9
-    ),
+    public function __construct($dbh, $config) {
+        parent::__construct($dbh, $config);
+    }
     
-    /*
-     * Database configuration
+    /**
+     * TODO Tag metadata
+     * 
+     * @param array $metadata
+     * @param array $options
+     * @return array
+     * @throws Exception
      */
-    'database' => array(
-        
-        /*
-         * Database name
-         */
-        'dbname' => 'itag',
-        
-        /*
-         * Host - if not specified socket connection
-         */
-        //'host' => 'localhost',
-        
-        /*
-         * Port
-         */
-        'port' => '5432',
-        
-        /*
-         * Database user with READ privileges 
-         */
-        'user' => 'itag',
-        'password' => 'itag'
-    )
-);
+    public function tag($metadata, $options = array()) {
+        return array();
+    }
+    
+}

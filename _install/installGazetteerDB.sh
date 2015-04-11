@@ -20,7 +20,7 @@ SUPERUSER=postgres
 DROPFIRST=NO
 DB=itag
 USER=itag
-usage="## iTag Gazetteer installation\n\n  Usage $0 -D <data directory> [-d <database name> -s <database SUPERUSER> -F]\n\n  -D : absolute path to the data directory containing geonames data (i.e. allCountries.zip, alternateNames.zip, countryInfo.txt, iso-languagecodes.txt).\n  -s : database SUPERUSER ($SUPERUSER)\n  -d : database name ($DB)\n  -F : drop schema gazetteer first\n"
+usage="## iTag Gazetteer installation\n\n  Usage $0 -D <data directory> [-d <database name> -s <database SUPERUSER> -F]\n\n  -D : absolute path to the data directory containing geonames data (i.e. allCountries.zip, alternateNames.zip).\n  -s : database SUPERUSER ($SUPERUSER)\n  -d : database name ($DB)\n  -F : drop schema gazetteer first\n"
 while getopts "D:d:s:u:hF" options; do
     case $options in
         D ) DATADIR=`echo $OPTARG`;;
@@ -84,36 +84,12 @@ CREATE TABLE gazetteer.alternatename (
     isColloquial boolean,
     isHistoric boolean
  );
-CREATE TABLE gazetteer.countryinfo (
-    iso_alpha2 char(2),
-    iso_alpha3 char(3),
-    iso_numeric integer,
-    fips_code text,
-    name text,
-    capital text,
-    areainsqkm double precision,
-    population integer,
-    continent text,
-    tld text,
-    currencycode text,
-    currencyname text,
-    phone text,
-    postalcode text,
-    postalcoderegex text,
-    languages text,
-    geonameId int,
-    neighbors text,
-    equivfipscode text
-);
 
 -- Toponyms (english)
 COPY gazetteer.geoname (geonameid,name,asciiname,alternatenames,latitude,longitude,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,gtopo30,timezone,moddate) FROM '$DATADIR/allCountries.txt' NULL AS '' ENCODING 'UTF8';
 
 -- Toponyms (other languages) 
 COPY gazetteer.alternatename (alternatenameid,geonameid,isolanguage,alternatename,ispreferredname,isshortname,iscolloquial,ishistoric) from '$DATADIR/alternateNames.txt' NULL AS '' ENCODING 'UTF8';
-
--- Countries
-COPY gazetteer.countryinfo (iso_alpha2,iso_alpha3,iso_numeric,fips_code,name,capital,areainsqkm,population,continent,tld,currencycode,currencyname,phone,postalcode,postalcoderegex,languages,geonameid,neighbors,equivfipscode) from '$DATADIR/countryInfo.txt' NULL AS '' ENCODING 'UTF8';
 
 -- We only need Populated place and administrative areas
 CREATE INDEX idx_fclass_country ON gazetteer.geoname (fclass);
@@ -142,12 +118,10 @@ CREATE INDEX idx_alternatename_like_alternatename ON gazetteer.alternatename (no
 -- Constraints
 ALTER TABLE ONLY gazetteer.alternatename ADD CONSTRAINT pk_alternatenameid PRIMARY KEY (alternatenameid);
 ALTER TABLE ONLY gazetteer.geoname ADD CONSTRAINT pk_geonameid PRIMARY KEY (geonameid);
-ALTER TABLE ONLY gazetteer.countryinfo ADD CONSTRAINT pk_iso_alpha2 PRIMARY KEY (iso_alpha2);
 
 -- User rights
 GRANT ALL ON SCHEMA gazetteer TO $USER;
 GRANT SELECT ON gazetteer.geoname to $USER;
 GRANT SELECT ON gazetteer.alternatename to $USER;
-GRANT SELECT ON gazetteer.countryinfo to $USER;
 
 EOF
