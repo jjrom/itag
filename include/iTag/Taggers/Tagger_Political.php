@@ -627,41 +627,49 @@ class Tagger_Political extends Tagger {
             for ($j = count($continents[$i]['countries']); $j--;) {
                 $countryName = isset($this->countryNames[$element['isoa3']]) ? $this->countryNames[$element['isoa3']] : null;
                 if (isset($countryName) && ($continents[$i]['countries'][$j]['name'] === $countryName)) {
-                    if (!isset($continents[$i]['countries'][$j]['regions'])) {
-                        $continents[$i]['countries'][$j]['regions'] = array();
-                    }
-                    $index = -1;
-                    for ($k = count($continents[$i]['countries'][$j]['regions']); $k--;) {
-                        if (!$element['regionid'] && !isset($continents[$i]['countries'][$j]['regions'][$k]['id'])) {
-                            $index = $k;
-                            break;
-                        }
-                        else if (isset($continents[$i]['countries'][$j]['regions'][$k]['id']) && $continents[$i]['countries'][$j]['regions'][$k]['id'] === $element['regionid']) {
-                            $index = $k;
-                            break;
-                        }
-                    }
-                    if ($index === -1) {
-                        if (!isset($element['regionid']) || !$element['regionid']) {
-                            array_push($continents[$i]['countries'][$j]['regions'], array(
-                                'states' => array()
-                            ));
-                        }
-                        else {
-                            array_push($continents[$i]['countries'][$j]['regions'], array(
-                                'name' => $element['region'],
-                                'id' => 'region:' . $element['regionid'],
-                                'states' => array()
-                            ));
-                        }
-                        $index = count($continents[$i]['countries'][$j]['regions']) - 1;
-                    }
-                    if (isset($continents[$i]['countries'][$j]['regions'][$index]['states'])) {
-                        array_push($continents[$i]['countries'][$j]['regions'][$index]['states'], array('name' => $element['state'], 'id' => 'state:' . $element['stateid'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
-                    }
+                    $this->addRegionsToCountry($continents[$i]['countries'][$j], $element);
                     break;
                 }
             }
+        }
+    }
+    
+    /**
+     * Add regions/states under countries
+     * 
+     * @param array $country
+     * @param array $element
+     */
+    private function addRegionsToCountry(&$country, $element) {
+        if (!isset($country['regions'])) {
+            $country['regions'] = array();
+        }
+        $index = -1;
+        for ($k = count($country['regions']); $k--;) {
+            if (!$element['regionid'] && !isset($country['regions'][$k]['id'])) {
+                $index = $k;
+                break;
+            } else if (isset($country['regions'][$k]['id']) && $country['regions'][$k]['id'] === $element['regionid']) {
+                $index = $k;
+                break;
+            }
+        }
+        if ($index === -1) {
+            if (!isset($element['regionid']) || !$element['regionid']) {
+                array_push($country['regions'], array(
+                    'states' => array()
+                ));
+            } else {
+                array_push($country['regions'], array(
+                    'name' => $element['region'],
+                    'id' => 'region:' . $element['regionid'],
+                    'states' => array()
+                ));
+            }
+            $index = count($country['regions']) - 1;
+        }
+        if (isset($country['regions'][$index]['states'])) {
+            array_push($country['regions'][$index]['states'], array('name' => $element['state'], 'id' => 'state:' . $element['stateid'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
         }
     }
     
