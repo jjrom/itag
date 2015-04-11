@@ -17,6 +17,9 @@
 
 class Tagger_Political extends Tagger {
     
+    const COUNTRIES = 1;
+    const REGIONS = 2;
+    
     private $countryNames = array(
         'AD' => 'Andorra',
         'AND' => 'Andorra',
@@ -525,12 +528,12 @@ class Tagger_Political extends Tagger {
         /*
          * Add continents and countries
          */
-        $this->addCountries($continents, $footprint);
+        $this->add($continents, $footprint, Tagger_Political::COUNTRIES);
         
         /*
          * Add regions/states
          */
-        $this->addRegions($continents, $footprint);
+        $this->add($continents, $footprint, Tagger_Political::REGIONS);
         
         /*
          * Add cities
@@ -549,30 +552,28 @@ class Tagger_Political extends Tagger {
     }
     
     /**
-     * Add continents/countries to political array
+     * Add continents/countries or regions/states to political array
      * 
      * @param array $continents
      * @param string $footprint
+     * @param integer $what
+     * 
      */
-    private function addCountries(&$continents, $footprint) {
-        $query = 'SELECT name as name, normalize(name) as id, continent as continent, normalize(continent) as continentid, ' . $this->postgisArea('st_intersection(geom, ST_GeomFromText(\'' . $footprint . '\', 4326))') . ' as area, ' . $this->postgisArea('ST_GeomFromText(\'' . $footprint . '\', 4326)') . ' as totalarea FROM datasources.countries WHERE st_intersects(geom, ST_GeomFromText(\'' . $footprint . '\', 4326)) ORDER BY area DESC';
-        $results = $this->query($query);
-        while ($element = pg_fetch_assoc($results)) {
-            $this->addCountriesToContinents($continents, $element);
+    private function add(&$continents, $footprint, $what) {
+        if ($what === Tagger_Political::COUNTRIES) {
+            $query = 'SELECT name as name, normalize(name) as id, continent as continent, normalize(continent) as continentid, ' . $this->postgisArea('st_intersection(geom, ST_GeomFromText(\'' . $footprint . '\', 4326))') . ' as area, ' . $this->postgisArea('ST_GeomFromText(\'' . $footprint . '\', 4326)') . ' as totalarea FROM datasources.countries WHERE st_intersects(geom, ST_GeomFromText(\'' . $footprint . '\', 4326)) ORDER BY area DESC';
         }
-    }
-
-    /**
-     * Add regions/states to political array
-     * 
-     * @param array $continents
-     * @param string $footprint
-     */
-    private function addRegions(&$continents, $footprint) {
-        $query = 'SELECT region, name as state, normalize(name) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea('st_intersection(geom, ST_GeomFromText(\'' . $footprint . '\', 4326))') . ' as area, ' . $this->postgisArea('ST_GeomFromText(\'' . $footprint . '\', 4326)') . ' as totalarea FROM datasources.worldadm1level WHERE st_intersects(geom, ST_GeomFromText(\'' . $footprint . '\', 4326)) ORDER BY area DESC';
+        else {
+            $query = 'SELECT region, name as state, normalize(name) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea('st_intersection(geom, ST_GeomFromText(\'' . $footprint . '\', 4326))') . ' as area, ' . $this->postgisArea('ST_GeomFromText(\'' . $footprint . '\', 4326)') . ' as totalarea FROM datasources.worldadm1level WHERE st_intersects(geom, ST_GeomFromText(\'' . $footprint . '\', 4326)) ORDER BY area DESC';
+        }
         $results = $this->query($query);
         while ($element = pg_fetch_assoc($results)) {
-            $this->addRegionsToCountries($continents, $element);       
+            if ($what === Tagger_Political::COUNTRIES) {
+                $this->addCountriesToContinents($continents, $element);
+            }
+            else {
+                $this->addRegionsToCountries($continents, $element);
+            }
         }
     }
     
