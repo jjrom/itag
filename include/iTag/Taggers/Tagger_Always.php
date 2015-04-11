@@ -36,7 +36,96 @@ class Tagger_Always extends Tagger {
      * @throws Exception
      */
     public function tag($metadata, $options = array()) {
-        return array();
+        $keywords = array();
+        if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp']) && isset($metadata['footprint'])) {
+            $keywords[] = $this->getSeason($metadata['timestamp'], $metadata['footprint']);
+        }
+        return array(
+            'keywords' => $keywords
+        );
     }
     
+    /**
+     * 
+     * @param string $timestamp
+     * @param string $footprint
+     */
+    private function getSeason($timestamp, $footprint) {
+        
+        /*
+         * Get month and day
+         */
+        $month = intval(substr($timestamp, 5, 2));
+        $day = intval(substr($timestamp, 8, 2));
+        
+        if ($this->isSpring($month, $day)) {
+            return 'season:spring';
+        }
+        
+        else if ($this->isSummer($month, $day)) {
+            return 'season:summer';
+        }
+        
+        else if ($this->isAutumn($month, $day)) {
+            return 'season:autumn';
+        }
+        
+        else {
+            return 'season:winter';
+        }
+        
+    }
+    
+    /**
+     * Return true if season is winter
+     * 
+     * @param integer $month
+     * @param integer $day
+     * @return type
+     */
+    private function isSpring($month, $day) {
+        return $this->isSeason($month, $day, array(3, 6));
+    }
+    
+    /**
+     * Return true if season is winter
+     * 
+     * @param integer $month
+     * @param integer $day
+     * @return type
+     */
+    private function isSummer($month, $day) {
+        return $this->isSeason($month, $day, array(6, 9));
+    }
+    
+    /**
+     * Return true if season is winter
+     * 
+     * @param integer $month
+     * @param integer $day
+     * @return type
+     */
+    private function isAutumn($month, $day) {
+        return $this->isSeason($month, $day, array(9, 12));
+    }
+    
+    /**
+     * Return true if month/day are inside magics bounds 
+     * 
+     * @param integer $month
+     * @param integer $day
+     * @return type
+     */
+    private function isSeason($month, $day, $magics) {
+        if ($month > $magics[0] && $month < $magics[1]) {
+            return true;
+        }
+        if ($month === $magics[0] && $day > 20) {
+            return true;
+        }
+        if ($month === $magics[1] && $day < 21) {
+            return true;
+        }
+        return true;
+    }
 }

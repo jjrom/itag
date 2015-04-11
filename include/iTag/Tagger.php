@@ -151,6 +151,48 @@ abstract class Tagger {
     }
     
     /**
+     * 
+     * Return true if input date string is a valid timestamp,
+     * i.e. an ISO 8601 formatted date with at least YYYY-MM-DD
+     * Accepted forms are :
+     * 
+     *      YYYY-MM-DD
+     *      YYYY-MM-DDTHH:MM:SS
+     *      YYYY-MM-DDTHH:MM:SSZ
+     *      YYYY-MM-DDTHH:MM:SS.sssss
+     *      YYYY-MM-DDTHH:MM:SS.sssssZ
+     *      YYYY-MM-DDTHH:MM:SS+HHMM
+     *      YYYY-MM-DDTHH:MM:SS-HHMM
+     *      YYYY-MM-DDTHH:MM:SS.sssss+HHMM
+     *      YYYY-MM-DDTHH:MM:SS.sssss-HHMM
+     * 
+     * @param {String} $dateStr
+     *    
+     */
+    protected function isValidTimeStamp($dateStr) {
+
+        /**
+         * Construct the regex to match all ISO 8601 format date case
+         * The regex is constructed as a combination of all pattern       
+         */
+        return preg_match('/^' . join('$|^', array(
+                    '\d{4}-\d{2}-\d{2}', // YYYY-MM-DD
+                    '\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}', // YYYY-MM-DDTHH:MM:SS
+                    '\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}Z', // YYYY-MM-DDTHH:MM:SSZ
+                    '\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}' . '' . '[\+|\-]\d{2}\:\d{2}', // YYYY-MM-DDTHH:MM:SS +HH:MM or -HH:MM
+                    '\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}' . '' . '[,|\.]\d+', // YYYY-MM-DDTHH:MM:SS(. or ,)n
+                    '\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}' . '' . '[,|\.]\d+' . 'Z', // YYYY-MM-DDTHH:MM:SS(. or ,)nZ
+                    '\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}' . '' . '[,|\.]\d+' . '' . '[\+|\-]\d{2}\:\d{2}', // // YYYY-MM-DDTHH:MM:SS(. or ,)n +HH:MM or -HH:MM
+                    '\d{4}\d{2}\d{2}', // YYYYMMDD
+                    '\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}', // YYYYMMDDTHHMMSS
+                    '\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}' . 'Z', // YYYYMMDDTHHMMSSZ
+                    '\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}' . '' . '[\+|\-]\d{2}\d{2}', // YYYYMMDDTHHMMSSZ +HHMM or -HHMM
+                    '\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}' . '' . '[\+|\-]\d{2}\d{2}' . 'Z', // // YYYYMMDDTHHMMSSZ(. or ,)nZ
+                    '\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}' . '' . '[,|\.]\d+' . '' . '[\+|\-]\d{2}\d{2}' // YYYYMMDDTHHMMSSZ(. or ,)n +HHMM or -HHMM
+                )) . '$/i', $dateStr);
+    }
+
+    /**
      * Subcomputation of area 
      * 
      * @param array $a
