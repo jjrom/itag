@@ -56,17 +56,6 @@ abstract class Tagger {
      * @throws Exception
      */
     abstract public function tag($metadata, $options = array());
-       
-    /**
-     * Throws exception
-     * 
-     * @param string $message
-     * @param integer $code
-     * @throws Exception
-     */
-    protected function error($message = 'Database Connection Error', $code = 500) {
-        throw new Exception($message, $code);
-    }
 
     /**
      * Return true if either W-E or N-S length of the footprint
@@ -99,7 +88,7 @@ abstract class Tagger {
     protected function query($query) {
         $results = pg_query($this->dbh, $query);
         if (!isset($results)) {
-            $this->error();
+            throw new Exception('Database Connection Error', 500);
         }
         return $results;
     }

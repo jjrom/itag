@@ -29,6 +29,14 @@ class Tagger_Always extends Tagger {
         )
     );
     
+    /*
+     * Well known areas
+     */
+    private $areas = array(
+        'tropical' => 'ST_GeomFromText(\'POLYGON((-180 -23.43731,-180 23.43731,180 23.43731,180 -23.43731,-180 -23.43731))\', 4326)',
+        'southern' => 'ST_GeomFromText(\'POLYGON((-180 -23.43731,-180 -90,180 -90,180 -23.43731,-180 -23.43731))\', 4326)',
+    );
+    
     /**
      * Constructor
      * 
@@ -49,28 +57,50 @@ class Tagger_Always extends Tagger {
      */
     public function tag($metadata, $options = array()) {
         
-        $keywords = array(
-            'keywords' => array()
-        );
-        if (!isset($metadata['footprint'])) {
-            return $keywords;
-        }
+        $keywords = array();
         
         /*
          * Season
          */
         if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp']) ) {
-            $keywords['keywords'][] = $this->getSeason($metadata['timestamp'], $metadata['footprint']);
+            $keywords[] = $this->getSeason($metadata['timestamp'], $metadata['footprint']);
         }
         
         /*
          * Coastal status
          */
         if ($this->isCoastal($metadata['footprint'])) {
-            $keywords['keywords'][] = 'location:coastal';
+            $keywords[] = 'location:coastal';
         }
        
-        return $keywords;
+        
+        return array(
+            'keywords' => array_merge($keywords, $this->getLocation($metadata['footprint']))
+        );
+        
+    }
+    
+    /**
+     * Return location of footprint i.e.
+     *  - location:equatorial
+     *  - location:northern
+     *  - location:southern
+     * 
+     * @param string $footprint
+     */
+    private function getLocation($footprint) {
+        $locations = array();
+        if ($this->isEquatorial($footprint)) {
+            $locations[] = 'location:equatorial';
+        }
+        else if ($this->isSouthern($footprint)) {
+            $locations[] = 'location:southern';
+        }
+        else {
+            $locations[] = 'location:northern';
+        }
+        
+        return $locations;
     }
     
     /**
@@ -80,11 +110,27 @@ class Tagger_Always extends Tagger {
      */
     private function isCoastal($footprint) {
         $query = 'SELECT gid FROM datasources.coastlines WHERE ST_Crosses(ST_GeomFromText(\'' . $footprint . '\', 4326), geom) OR ST_Contains(ST_GeomFromText(\'' . $footprint . '\', 4326), geom)';
-        $results = pg_fetch_all($this->query($query));
-        if (empty($results)) {
-            return false;
-        }
-        return true;
+        return $this->hasResults($query);
+    }
+    
+    /**
+     * Return true if footprint overlaps equatorial area
+     * 
+     * @param string $footprint
+     */
+    private function isEquatorial($footprint) {
+        $query = 'SELECT 1 WHERE ST_Crosses(ST_GeomFromText(\'' . $footprint . '\', 4326), ' . $this->areas['tropical'] . ') OR ST_Contains(' . $this->areas['tropical'] . ', ST_GeomFromText(\'' . $footprint . '\', 4326)) LIMIT 1';
+        return $this->hasResults($query);
+    }
+    
+    /**
+     * Return true if footprint overlaps equatorial area
+     * 
+     * @param string $footprint
+     */
+    private function isSouthern($footprint) {
+        $query = 'SELECT 1 WHERE ST_Crosses(ST_GeomFromText(\'' . $footprint . '\', 4326), ' . $this->areas['southern'] . ') OR ST_Contains(' . $this->areas['southern'] . ', ST_GeomFromText(\'' . $footprint . '\', 4326)) LIMIT 1';
+        return $this->hasResults($query);
     }
     
     /**
@@ -168,6 +214,20 @@ class Tagger_Always extends Tagger {
         }
         if ($month === $magics[1] && $day < 21) {
             return true;
+        }
+        return true;
+    }
+    
+    /**
+     * Return true is query returns result.
+     * 
+     * @param string $query
+     * @return boolean
+     */
+    private function hasResults($query) {
+        $results = pg_fetch_all($this->query($query));
+        if (empty($results)) {
+            return false;
         }
         return true;
     }
