@@ -588,7 +588,6 @@ class Tagger_Political extends Tagger {
         $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM gazetteer.geoname g LEFT OUTER JOIN datasources.worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) and g.fcode in " . $codes . " ORDER BY g.name";
         $results = $this->query($query);
         while ($element = pg_fetch_assoc($results)) {
-            print_r($element);
             $this->addCitiesToStates($continents, $element);       
         }
     }
@@ -603,7 +602,6 @@ class Tagger_Political extends Tagger {
         foreach (array_keys($continents) as $continent) {
             foreach (array_keys($continents[$continent]['countries']) as $country) {
                 if ($continents[$continent]['countries'][$country]['name'] === $element['country']) {
-                    print_r($continents[$continent]['countries'][$country]['regions'][$element['region']]);
                     foreach (array_keys($continents[$continent]['countries'][$country]['regions'][$element['region']]['states']) as $state) {
                         if ($continents[$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['name'] === $element['state']) {
                             if (!isset($continents[$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['cities'])) {
