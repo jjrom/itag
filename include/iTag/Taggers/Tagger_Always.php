@@ -17,6 +17,18 @@
 
 class Tagger_Always extends Tagger {
 
+    /*
+     * Data references
+     */
+    public $references = array(
+        array(
+            'dataset' => 'Coastline',
+            'author' => 'Natural Earth',
+            'license' => 'Free of Charge',
+            'url' => 'http://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-coastline/'
+        )
+    );
+    
     /**
      * Constructor
      * 
@@ -36,16 +48,47 @@ class Tagger_Always extends Tagger {
      * @throws Exception
      */
     public function tag($metadata, $options = array()) {
-        $keywords = array();
-        if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp']) && isset($metadata['footprint'])) {
-            $keywords[] = $this->getSeason($metadata['timestamp'], $metadata['footprint']);
-        }
-        return array(
-            'keywords' => $keywords
+        
+        $keywords = array(
+            'keywords' => array()
         );
+        if (!isset($metadata['footprint'])) {
+            return $keywords;
+        }
+        
+        /*
+         * Season
+         */
+        if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp']) ) {
+            $keywords['keywords'][] = $this->getSeason($metadata['timestamp'], $metadata['footprint']);
+        }
+        
+        /*
+         * Coastal status
+         */
+        if ($this->isCoastal($metadata['footprint'])) {
+            $keywords['keywords'][] = 'location:coastal';
+        }
+       
+        return $keywords;
     }
     
     /**
+     * Return true if footprint overlaps a coastline
+     * 
+     * @param string $footprint
+     */
+    private function isCoastal($footprint) {
+        $query = 'SELECT gid FROM datasources.coastlines WHERE ST_Crosses(ST_GeomFromText(\'' . $footprint . '\', 4326), geom) OR ST_Contains(ST_GeomFromText(\'' . $footprint . '\', 4326), geom)';
+        $results = pg_fetch_all($this->query($query));
+        if (empty($results)) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Return season keyword
      * 
      * @param string $timestamp
      * @param string $footprint

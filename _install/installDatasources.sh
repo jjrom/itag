@@ -43,6 +43,8 @@ then
 fi
 
 # Set Data paths
+## Always
+COASTLINES=$DATADIR/ne_10m_coastline.shp
 ## Political
 COUNTRIES=$DATADIR/ne_10m_admin_0_countries.shp
 WORLDADM1LEVEL=$DATADIR/ne_10m_admin_1_states_provinces.shp
@@ -65,6 +67,11 @@ fi
 psql -d $DB -U $SUPERUSER << EOF
 CREATE SCHEMA datasources;
 EOF
+
+# ================== ALWAYS =====================
+## Insert Coastlines
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $COASTLINES datasources.coastlines | psql -d $DB -U $SUPERUSER $HOSTNAME
+CREATE INDEX idx_coastlines_geom ON datasources.coastlines USING gist(geom);
 
 # ================== POLITICAL =====================
 
@@ -173,6 +180,7 @@ EOF
 # GRANT RIGHTS TO itag USER
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 GRANT ALL ON SCHEMA datasources to $USER;
+GRANT SELECT on datasources.coastlines to $USER;
 GRANT SELECT on datasources.worldadm1level to $USER;
 GRANT SELECT on datasources.continents to $USER;
 GRANT SELECT on datasources.countries to $USER;

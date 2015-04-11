@@ -41,6 +41,14 @@ First create the $ITAG_DATA directory
     export ITAG_DATA=$ITAG_HOME/data
     mkdir $ITAG_DATA
 
+#### General data
+
+Retrieve coastlines from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/)
+        
+        cd $ITAG_DATA
+        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_coastline.zip
+        unzip ne_10m_coastline.zip
+
 #### Political data
 
 Retrieve countries from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/)

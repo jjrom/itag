@@ -20,6 +20,24 @@ class Tagger_Political extends Tagger {
     const COUNTRIES = 1;
     const REGIONS = 2;
     
+    /*
+     * Data references
+     */
+    public $references = array(
+        array(
+            'dataset' => 'Admin level 0 - Countries',
+            'author' => 'Natural Earth',
+            'license' => 'Free of Charge',
+            'url' => 'http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/'
+        ),
+        array(
+            'dataset' => 'Admin level 1 - States, Provinces',
+            'author' => 'Natural Earth',
+            'license' => 'Free of Charge',
+            'url' => 'http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/'
+        )
+    );
+    
     private $countryNames = array(
         'AD' => 'Andorra',
         'AND' => 'Andorra',
@@ -471,24 +489,6 @@ class Tagger_Political extends Tagger {
         'ZWE' => 'Zimbabwe'
     );
 
-    /*
-     * Data references
-     */
-    public $references = array(
-        array(
-            'dataset' => 'Admin level 0 - Countries',
-            'author' => 'Natural Earth',
-            'license' => 'Free of Charge',
-            'url' => 'http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/'
-        ),
-        array(
-            'dataset' => 'Admin level 1 - States, Provinces',
-            'author' => 'Natural Earth',
-            'license' => 'Free of Charge',
-            'url' => 'http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/'
-        )
-    );
-    
     /**
      * Constructor
      * 
