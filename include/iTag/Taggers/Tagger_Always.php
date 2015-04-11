@@ -89,18 +89,16 @@ class Tagger_Always extends Tagger {
      * @param string $footprint
      */
     private function getLocation($footprint) {
-        $locations = array();
-        if ($this->isEquatorial($footprint)) {
-            $locations[] = 'location:equatorial';
+        $location = 'location:northern';
+        foreach (array_values(array('tropical', 'southern')) as $value) {
+            if ($this->isEquatorialOrSouthern($footprint, $value)) {
+                $location = 'location:' . $value;
+                break;
+            }
         }
-        else if ($this->isSouthern($footprint)) {
-            $locations[] = 'location:southern';
-        }
-        else {
-            $locations[] = 'location:northern';
-        }
-        
-        return $locations;
+        return array(
+            $location
+        );
     }
     
     /**
@@ -117,19 +115,10 @@ class Tagger_Always extends Tagger {
      * Return true if footprint overlaps equatorial area
      * 
      * @param string $footprint
+     * @param string $type
      */
-    private function isEquatorial($footprint) {
-        $query = 'SELECT 1 WHERE ST_Crosses(ST_GeomFromText(\'' . $footprint . '\', 4326), ' . $this->areas['tropical'] . ') OR ST_Contains(' . $this->areas['tropical'] . ', ST_GeomFromText(\'' . $footprint . '\', 4326)) LIMIT 1';
-        return $this->hasResults($query);
-    }
-    
-    /**
-     * Return true if footprint overlaps equatorial area
-     * 
-     * @param string $footprint
-     */
-    private function isSouthern($footprint) {
-        $query = 'SELECT 1 WHERE ST_Crosses(ST_GeomFromText(\'' . $footprint . '\', 4326), ' . $this->areas['southern'] . ') OR ST_Contains(' . $this->areas['southern'] . ', ST_GeomFromText(\'' . $footprint . '\', 4326)) LIMIT 1';
+    private function isEquatorialOrSouthern($footprint, $type) {
+        $query = 'SELECT 1 WHERE ST_Crosses(ST_GeomFromText(\'' . $footprint . '\', 4326), ' . $this->areas[$type] . ') OR ST_Contains(' . $this->areas[$type] . ', ST_GeomFromText(\'' . $footprint . '\', 4326)) LIMIT 1';
         return $this->hasResults($query);
     }
     
