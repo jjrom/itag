@@ -33,8 +33,22 @@ class Tagger_Always extends Tagger {
      * Well known areas
      */
     private $areas = array(
-        'tropical' => 'ST_GeomFromText(\'POLYGON((-180 -23.43731,-180 23.43731,180 23.43731,180 -23.43731,-180 -23.43731))\', 4326)',
-        'southern' => 'ST_GeomFromText(\'POLYGON((-180 -23.43731,-180 -90,180 -90,180 -23.43731,-180 -23.43731))\', 4326)',
+        'equatorial' => array(
+            'operator' => 'ST_Crosses',
+            'geometry' => 'ST_GeomFromText(\'LINESTRING(-180 0,180 0)\', 4326)'
+        ),
+        'tropical' => array(
+            'operator' => 'ST_Contains',
+            'geometry' => 'ST_GeomFromText(\'POLYGON((-180 -23.43731,-180 23.43731,180 23.43731,180 -23.43731,-180 -23.43731))\', 4326)'
+        ),
+        'southern' => array(
+            'operator' => 'ST_Contains',
+            'geometry' => 'ST_GeomFromText(\'POLYGON((-180 0,-180 -90,180 -90,180 0,-180 0))\', 4326)'
+        ),
+        'northern' => array(
+            'operator' => 'ST_Contains',
+            'geometry' => 'ST_GeomFromText(\'POLYGON((-180 0,-180 90,180 90,180 0,-180 0))\', 4326)'
+        )
     );
     
     /**
@@ -57,14 +71,11 @@ class Tagger_Always extends Tagger {
      */
     public function tag($metadata, $options = array()) {
         
-        $keywords = array();
-        
         /*
-         * Season
+         * Relative location on earth
          */
-        if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp']) ) {
-            $keywords[] = $this->getSeason($metadata['timestamp'], $metadata['footprint']);
-        }
+        $locations = $this->getLocations($metadata['footprint']);
+        $keywords = $locations;
         
         /*
          * Coastal status
@@ -73,32 +84,36 @@ class Tagger_Always extends Tagger {
             $keywords[] = 'location:coastal';
         }
        
+        /*
+         * Season
+         */
+        if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp']) ) {
+            $keywords[] = $this->getSeason($metadata['timestamp'], in_array('location:southern', $locations));
+        }
         
         return array(
-            'keywords' => array_merge($keywords, $this->getLocation($metadata['footprint']))
+            'keywords' => $keywords
         );
         
     }
     
     /**
-     * Return location of footprint i.e.
+     * Return locations of footprint i.e.
      *  - location:equatorial
+     *  - location:tropical
      *  - location:northern
      *  - location:southern
      * 
      * @param string $footprint
      */
-    private function getLocation($footprint) {
-        $location = 'location:northern';
-        foreach (array_values(array('tropical', 'southern')) as $value) {
-            if ($this->isEquatorialOrSouthern($footprint, $value)) {
-                $location = 'location:' . $value;
-                break;
+    private function getLocations($footprint) {
+        $locations = array();
+        foreach ($this->areas as $key => $value) {
+            if ($this->isETNS($footprint, $value)) {
+                $locations[] = 'location:' . $key;
             }
         }
-        return array(
-            $location
-        );
+        return $locations;
     }
     
     /**
@@ -112,13 +127,13 @@ class Tagger_Always extends Tagger {
     }
     
     /**
-     * Return true if footprint overlaps equatorial area
+     * Return true if footprint overlaps Equatorial, Tropical, Southern or Northern areas
      * 
      * @param string $footprint
-     * @param string $type
+     * @param array $what
      */
-    private function isEquatorialOrSouthern($footprint, $type) {
-        $query = 'SELECT 1 WHERE ST_Crosses(ST_GeomFromText(\'' . $footprint . '\', 4326), ' . $this->areas[$type] . ') OR ST_Contains(' . $this->areas[$type] . ', ST_GeomFromText(\'' . $footprint . '\', 4326)) LIMIT 1';
+    private function isETNS($footprint, $what) {
+        $query = 'SELECT 1 WHERE ' . $what['operator'] . '(' . $what['geometry'] . ', ST_GeomFromText(\'' . $footprint . '\', 4326)) LIMIT 1';
         return $this->hasResults($query);
     }
     
@@ -126,9 +141,9 @@ class Tagger_Always extends Tagger {
      * Return season keyword
      * 
      * @param string $timestamp
-     * @param string $footprint
+     * @param boolean $southern
      */
-    private function getSeason($timestamp, $footprint) {
+    private function getSeason($timestamp, $southern = false) {
         
         /*
          * Get month and day
@@ -137,19 +152,19 @@ class Tagger_Always extends Tagger {
         $day = intval(substr($timestamp, 8, 2));
         
         if ($this->isSpring($month, $day)) {
-            return 'season:spring';
+            return $southern ? 'season:autumn' : 'season:spring';
         }
         
         else if ($this->isSummer($month, $day)) {
-            return 'season:summer';
+            return $southern ? 'season:winter' : 'season:summer';
         }
         
         else if ($this->isAutumn($month, $day)) {
-            return 'season:autumn';
+            return $southern ? 'season:spring' : 'season:autumn';
         }
         
         else {
-            return 'season:winter';
+            return $southern ? 'season:summer' : 'season:winter';
         }
         
     }
