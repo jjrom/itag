@@ -21,7 +21,7 @@ iTag is used by [RESTo - REstful Semantic search Tool for geOspatial] (http://gi
 
 * PHP (v5.3+) command line
 * PostgreSQL (v9.0+) with **unaccent** extension
-* PostGIS (v1.5.1+)
+* PostGIS (v2.0+)
 * GDAL (v1.8+) with **python** support (for land cover preparation only)
 
 Note: iTag could work with lower version of the specified requirements.
