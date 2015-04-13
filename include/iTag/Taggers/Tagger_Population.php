@@ -59,7 +59,7 @@ class Tagger_Population extends Tagger {
      * @return integer
      */
     public function process($footprint) {
-        $query = 'SELECT pcount FROM gpw.' . $this->getTableName() . ' WHERE ST_intersects(footprint, ST_GeomFromText(\'' . $footprint . '\', 4326))';
+        $query = 'SELECT pcount FROM gpw.' . $this->getTableName() . ' WHERE ST_intersects(footprint, ' . $this->postgisGeomFromText($footprint) . ')';
         $results = $this->query($query);
         $total = 0;
         while ($counts = pg_fetch_assoc($results)) {

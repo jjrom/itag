@@ -70,7 +70,7 @@ abstract class Tagger {
      * @param float $area (in square kilometers)
      */
     protected function isValidArea($area) {
-        return $this->area > $this->config['areaLimit'] ? false : true;
+        return $area > $this->config['areaLimit'] ? false : true;
     }
     
     /**
@@ -106,6 +106,49 @@ abstract class Tagger {
      */
     protected function postgisArea($geometry) {
         return 'st_area(geography(' . $geometry . '))';
+    }
+    
+    /**
+     * Return postgis WKT function
+     * 
+     * @param string $geom
+     * 
+     */
+    protected function postgisAsWKT($geom) {
+        return 'st_astext(' . $geom . ')';
+    }
+    
+    /**
+     * Return postgis intersection function
+     * 
+     * @param string $geomA
+     * @param string $geomB
+     * 
+     */
+    protected function postgisIntersection($geomA, $geomB) {
+        return 'st_intersection(' . $geomA . ',' . $geomB . ')';
+    }
+    
+    /**
+     * Return postgis intersection function
+     * 
+     * @param string $geom
+     * @param boolean $preserveTopology
+     * 
+     */
+    protected function postgisSimplify($geom, $preserveTopology = false) {
+        return $this->config['geometryTolerance'] > 0 ? 'ST_Simplify' . ($preserveTopology ? 'PreserveTopology' : '') . '(' . $geom . ',' . $this->config['geometryTolerance'] . ')' : $geom;
+    }
+    
+    /**
+     * Return postgis intersection function
+     * 
+     * @param string $footprint
+     * @param string $srid
+     * 
+     */
+    protected function postgisGeomFromText($footprint, $srid = '4326') {
+        return 'ST_GeomFromText(\'' . $footprint . '\', ' . $srid . ')';
     }
     
     /**

@@ -26,7 +26,18 @@ return array(
          * Maximum area allowed (in square kilometers)
          * for LandCover computation 
          */
-        'areaLimit' => 100000
+        'areaLimit' => 200000,
+        
+        /*
+         * Return WKT geometries
+         */
+        'returnGeometries' => true,
+        
+        /*
+         * Tolerance value for simplication (in degrees)
+         */
+        'geometryTolerance' => 0.1
+        
     ),
     
     /*
