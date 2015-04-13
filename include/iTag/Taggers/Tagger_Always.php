@@ -92,9 +92,21 @@ class Tagger_Always extends Tagger {
         }
         
         return array(
+            'area' => $this->getArea($metadata['footprint']),
             'keywords' => $keywords
         );
         
+    }
+    
+    /**
+     * Return footprint area in square meters
+     * 
+     * @param string $footprint
+     */
+    private function getArea($footprint) {
+        $query = 'SELECT ' . $this->postgisArea('ST_GeomFromText(\'' . $footprint . '\', 4326)') . ' as area';
+        $result = pg_fetch_assoc($this->query($query));
+        return $this->toSquareKm($result['area']);
     }
     
     /**

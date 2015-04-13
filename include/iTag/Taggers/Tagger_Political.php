@@ -508,13 +508,14 @@ class Tagger_Political extends Tagger {
      * @throws Exception
      */
     public function tag($metadata, $options = array()) {
+        parent::tag($metadata, $options);
         return $this->process($metadata['footprint'], $options);
     }
     
     /**
      * Compute intersected information from input WKT footprint
      * 
-     * @param string footprint
+     * @param string $footprint
      * @param array $options
      * 
      */
@@ -561,10 +562,10 @@ class Tagger_Political extends Tagger {
      */
     private function add(&$continents, $footprint, $what) {
         if ($what === Tagger_Political::COUNTRIES) {
-            $query = 'SELECT name as name, normalize(name) as id, continent as continent, normalize(continent) as continentid, ' . $this->postgisArea('st_intersection(geom, ST_GeomFromText(\'' . $footprint . '\', 4326))') . ' as area, ' . $this->postgisArea('ST_GeomFromText(\'' . $footprint . '\', 4326)') . ' as totalarea FROM datasources.countries WHERE st_intersects(geom, ST_GeomFromText(\'' . $footprint . '\', 4326)) ORDER BY area DESC';
+            $query = 'SELECT name as name, normalize(name) as id, continent as continent, normalize(continent) as continentid, ' . $this->postgisArea('st_intersection(geom, ST_GeomFromText(\'' . $footprint . '\', 4326))') . ' as area FROM datasources.countries WHERE st_intersects(geom, ST_GeomFromText(\'' . $footprint . '\', 4326)) ORDER BY area DESC';
         }
         else {
-            $query = 'SELECT region, name as state, normalize(name) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea('st_intersection(geom, ST_GeomFromText(\'' . $footprint . '\', 4326))') . ' as area, ' . $this->postgisArea('ST_GeomFromText(\'' . $footprint . '\', 4326)') . ' as totalarea FROM datasources.worldadm1level WHERE st_intersects(geom, ST_GeomFromText(\'' . $footprint . '\', 4326)) ORDER BY area DESC';
+            $query = 'SELECT region, name as state, normalize(name) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea('st_intersection(geom, ST_GeomFromText(\'' . $footprint . '\', 4326))') . ' as area FROM datasources.worldadm1level WHERE st_intersects(geom, ST_GeomFromText(\'' . $footprint . '\', 4326)) ORDER BY area DESC';
         }
         $results = $this->query($query);
         while ($element = pg_fetch_assoc($results)) {
@@ -585,7 +586,7 @@ class Tagger_Political extends Tagger {
      * @param string $what : 'all' means all cities; main cities otherwise
      */
     private function addCities(&$continents, $footprint, $what) {
-        $codes = $what === 'all' && $this->isValidArea($footprint) ? "('PPL', 'PPLC', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'STLMT')" : "('PPLA','PPLC')";
+        $codes = $what === 'all' && $this->isValidArea($this->area) ? "('PPL', 'PPLC', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'STLMT')" : "('PPLA','PPLC')";
         $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM gazetteer.geoname g LEFT OUTER JOIN datasources.worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, ST_GeomFromText('" . $footprint . "', 4326)) and g.fcode in " . $codes . " ORDER BY g.name";
         $results = $this->query($query);
         while ($element = pg_fetch_assoc($results)) {
@@ -669,7 +670,7 @@ class Tagger_Political extends Tagger {
             $index = count($country['regions']) - 1;
         }
         if (isset($country['regions'][$index]['states'])) {
-            array_push($country['regions'][$index]['states'], array('name' => $element['state'], 'id' => 'state:' . $element['stateid'], 'pcover' => $this->percentage($element['area'], $element['totalarea'])));
+            array_push($country['regions'][$index]['states'], array('name' => $element['state'], 'id' => 'state:' . $element['stateid'], 'pcover' => $this->percentage($this->toSquareKm($element['area']), $this->area)));
         }
     }
     
@@ -698,7 +699,7 @@ class Tagger_Political extends Tagger {
         array_push($continents[$index]['countries'], array(
             'name' => $element['name'],
             'id' => 'country:' . $element['id'],
-            'pcover' => $this->percentage($element['area'], $element['totalarea'])
+            'pcover' => $this->percentage($this->toSquareKm($element['area']), $this->area)
         ));
     }
 

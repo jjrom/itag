@@ -104,6 +104,7 @@ class Tagger_LandCover extends Tagger {
      * @throws Exception
      */
     public function tag($metadata, $options = array()) {
+        parent::tag($metadata, $options);
         return $this->process($metadata['footprint']);
     }
     
@@ -120,7 +121,7 @@ class Tagger_LandCover extends Tagger {
          * Do not process if footprint area is greater
          * than the maximum area allowed
          */
-        if (!$this->isValidArea($footprint)) {
+        if (!$this->isValidArea($this->area)) {
             return array(
                 'landCover' => array()
             );
@@ -136,7 +137,6 @@ class Tagger_LandCover extends Tagger {
          */
         return array(
             'landCover' => array(
-                'area' => $this->toSquareKm($rawLandCover['area']),
                 'landUse' => $this->getLandUse($rawLandCover),
                 'landUseDetails' => $this->getLandUseDetails($rawLandCover)
         ));
@@ -148,16 +148,14 @@ class Tagger_LandCover extends Tagger {
      * @param array $rawLandCover
      */
     private function getLandUse($rawLandCover) {
-        
         $sums = array();
         foreach ($this->linkage as $key => $value) {
-            $sums[$key] = $this->sum($rawLandCover['classes'], $value);
+            $sums[$key] = $this->sum($rawLandCover, $value);
         }
         arsort($sums);
-        
         $landUse = array();
         foreach ($sums as $key => $val) {
-            $pcover = $this->percentage($val, $rawLandCover['area']);
+            $pcover = $this->percentage($this->toSquareKm($val), $this->area);
             if ($val !== 0 && $pcover > 10) {
                 $name = isset($this->clcClassNames[$key]) ? $this->clcClassNames[$key] : 'unknown';
                 array_push($landUse, array(
@@ -180,7 +178,7 @@ class Tagger_LandCover extends Tagger {
      */
     private function getLandUseDetails($rawLandCover) {
         $landUseDetails = array();
-        foreach ($rawLandCover['classes'] as $key => $val) {
+        foreach ($rawLandCover as $key => $val) {
             if ($val !== 0) {
                 $name = isset($this->glcClassNames[$key]) ? $this->glcClassNames[$key] : 'unknown';
                 array_push($landUseDetails, array(
@@ -189,7 +187,7 @@ class Tagger_LandCover extends Tagger {
                     'parentId' => 'landuse:' . strtolower($this->getCLCParent($key)),
                     'code' => $key,
                     'area' => $this->toSquareKm($val),
-                    'pcover' => $this->percentage($val, $rawLandCover['area'])
+                    'pcover' => $this->percentage($this->toSquareKm($val), $this->area)
                 ));
             }
         }
@@ -203,14 +201,10 @@ class Tagger_LandCover extends Tagger {
      * @return array
      */
     private function retrieveRawLandCover($footprint) {
-        
         $classes = array();
-        
         $geom = 'ST_GeomFromText(\'' . $footprint . '\', 4326)';
-        $query = 'SELECT dn as dn, ' . $this->postgisArea($geom) . ' as totalarea, ' . $this->postgisArea('st_intersection(wkb_geometry, ' . $geom . ')') . ' as area FROM datasources.landcover WHERE st_intersects(wkb_geometry, ' . $geom . ')';
-        
+        $query = 'SELECT dn as dn, ' . $this->postgisArea('st_intersection(wkb_geometry, ' . $geom . ')') . ' as area FROM datasources.landcover WHERE st_intersects(wkb_geometry, ' . $geom . ')';
         $results = $this->query($query);
-        $totalarea = 0;
         while ($result = pg_fetch_assoc($results)) {
             if (isset($classes[$result['dn']])) {
                 $classes[$result['dn']] += $result['area'];
@@ -218,13 +212,9 @@ class Tagger_LandCover extends Tagger {
             else {
                 $classes[$result['dn']] = $result['area'];
             }
-            $totalarea = $result['totalarea'];
         }
         
-        return array(
-            'area' => $totalarea,
-            'classes' => $classes
-        );
+        return $classes;
     }
     
     /**

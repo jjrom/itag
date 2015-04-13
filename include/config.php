@@ -21,7 +21,12 @@ return array(
      * General configuration
      */
     'general' => array(
-        'areaLimit' => 9
+        
+        /*
+         * Maximum area allowed (in square kilometers)
+         * for LandCover computation 
+         */
+        'areaLimit' => 100000
     ),
     
     /*
