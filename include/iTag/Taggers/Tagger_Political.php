@@ -489,6 +489,11 @@ class Tagger_Political extends Tagger {
         'ZWE' => 'Zimbabwe'
     );
 
+    /*
+     * Compute toponyms : 'main', 'all', null
+     */
+    private $addToponyms = 'main';
+    
     /**
      * Constructor
      * 
@@ -522,6 +527,13 @@ class Tagger_Political extends Tagger {
     private function process($footprint, $options) {
 
         /*
+         * Toponyms
+         */
+        if (isset($options['toponyms'])) {
+            $this->addToponyms = $options['toponyms'];
+        }
+        
+        /*
          * Initialize empty array
          */
         $continents = array();
@@ -535,14 +547,6 @@ class Tagger_Political extends Tagger {
          * Add regions/states
          */
         $this->add($continents, $footprint, Tagger_Political::REGIONS);
-        
-        /*
-         * Add cities
-         * TODO : not working
-         */
-        if (isset($options['cities'])) {
-            $this->addCities($continents, $footprint, $options['cities']);
-        }
         
         return array(
             'political' => array(
@@ -566,7 +570,7 @@ class Tagger_Political extends Tagger {
             $query = 'SELECT name as name, normalize(name) as id, continent as continent, normalize(continent) as continentid, ' . $this->postgisArea($this->postgisIntersection('geom', $geom)) . ' as area FROM datasources.countries WHERE st_intersects(geom, ' . $geom . ') ORDER BY area DESC';
         }
         else {
-            $query = 'SELECT region, name as state, normalize(name) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea($this->postgisIntersection('geom', $geom)) . ' as area FROM datasources.worldadm1level WHERE st_intersects(geom, ' . $geom . ') ORDER BY area DESC';
+            $query = 'SELECT region, name as state, normalize(name) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea($this->postgisIntersection('geom', $geom)) . ' as area, ' . $this->postgisIntersection('geom', $geom) . ' as wkb_geom FROM datasources.worldadm1level WHERE st_intersects(geom, ' . $geom . ') ORDER BY area DESC';
         }
         $results = $this->query($query);
         while ($element = pg_fetch_assoc($results)) {
@@ -575,45 +579,6 @@ class Tagger_Political extends Tagger {
             }
             else {
                 $this->addRegionsToCountries($continents, $element);
-            }
-        }
-    }
-    
-    /**
-     * Add cities to political array
-     * 
-     * @param array $continents
-     * @param string $footprint
-     * @param string $what : 'all' means all cities; main cities otherwise
-     */
-    private function addCities(&$continents, $footprint, $what) {
-        $codes = $what === 'all' && $this->isValidArea($this->area) ? "('PPL', 'PPLC', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'STLMT')" : "('PPLA','PPLC')";
-        $query = "SELECT g.name, g.countryname as country, d.region as region, d.name as state, d.adm0_a3 as isoa3 FROM gazetteer.geoname g LEFT OUTER JOIN datasources.worldadm1level d ON g.country || '.' || g.admin2 = d.gn_a1_code WHERE st_intersects(g.geom, " . $this->postgisGeomFromText($footprint) . ") and g.fcode in " . $codes . " ORDER BY g.name";
-        $results = $this->query($query);
-        while ($element = pg_fetch_assoc($results)) {
-            $this->addCitiesToStates($continents, $element);       
-        }
-    }
-    
-    /**
-     * Add cities under states
-     * 
-     * @param array $continents
-     * @param array $element
-     */
-    private function addCitiesToStates(&$continents, $element) {
-        foreach (array_keys($continents) as $continent) {
-            foreach (array_keys($continents[$continent]['countries']) as $country) {
-                if ($continents[$continent]['countries'][$country]['name'] === $element['country']) {
-                    foreach (array_keys($continents[$continent]['countries'][$country]['regions'][$element['region']]['states']) as $state) {
-                        if ($continents[$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['name'] === $element['state']) {
-                            if (!isset($continents[$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['cities'])) {
-                                $continents[$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['cities'] = array();
-                            }
-                            array_push($continents[$continent]['countries'][$country]['regions'][$element['region']]['states'][$state]['cities'], $element['name']);
-                        }
-                    }
-                }
             }
         }
     }
@@ -651,27 +616,26 @@ class Tagger_Political extends Tagger {
             if (!$element['regionid'] && !isset($country['regions'][$k]['id'])) {
                 $index = $k;
                 break;
-            } else if (isset($country['regions'][$k]['id']) && $country['regions'][$k]['id'] === $element['regionid']) {
+            }
+            else if (isset($country['regions'][$k]['id']) && $country['regions'][$k]['id'] === $element['regionid']) {
                 $index = $k;
                 break;
             }
         }
+        
+        /*
+         * Add region
+         */
         if ($index === -1) {
-            if (!isset($element['regionid']) || !$element['regionid']) {
-                array_push($country['regions'], array(
-                    'states' => array()
-                ));
-            } else {
-                array_push($country['regions'], array(
-                    'name' => $element['region'],
-                    'id' => 'region:' . $element['regionid'],
-                    'states' => array()
-                ));
-            }
+            $this->mergeRegion($country['regions'], $element);
             $index = count($country['regions']) - 1;
         }
+        
+        /*
+         * Add state (and toponyms)
+         */
         if (isset($country['regions'][$index]['states'])) {
-            array_push($country['regions'][$index]['states'], array('name' => $element['state'], 'id' => 'state:' . $element['stateid'], 'pcover' => $this->percentage($this->toSquareKm($element['area']), $this->area)));
+            $this->mergeState($country['regions'][$index]['states'], $element);
         }
     }
     
@@ -703,5 +667,68 @@ class Tagger_Political extends Tagger {
             'pcover' => $this->percentage($this->toSquareKm($element['area']), $this->area)
         ));
     }
+    
+    /**
+     * Merge region to country array
+     * 
+     * @param array $country
+     * @param array $element
+     */
+    private function mergeRegion(&$regions, $element) {
+        if (!isset($element['regionid']) || !$element['regionid']) {
+            array_push($regions, array(
+                'states' => array()
+            ));
+        }
+        else {
+            array_push($regions, array(
+                'name' => $element['region'],
+                'id' => 'region:' . $element['regionid'],
+                'states' => array()
+            ));
+        }
+    }
 
+    /**
+     * Merge state to region array
+     * 
+     * @param array $country
+     * @param array $element
+     */
+    private function mergeState(&$states, $element) {
+        $state = array(
+            'name' => $element['state'],
+            'id' => 'state:' . $element['stateid'],
+            'pcover' => $this->percentage($this->toSquareKm($element['area']), $this->area)
+        );
+        
+        if ($this->addToponyms) {
+            $state['toponyms'] = $this->getToponyms($element['wkb_geom']);
+        }
+        
+        array_push($states, $state);
+    }
+    
+    /**
+     * Add toponyms to political array
+     * 
+     * @param string $wkb geometry as wkb
+     */
+    private function getToponyms($wkb) {
+        $toponyms = array();
+        $codes = $this->addToponyms === 'all' && $this->isValidArea($this->area) ? "('PPL', 'PPLC', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'STLMT')" : "('PPLA','PPLC')";
+        $query = 'SELECT name, longitude, latitude, fcode, population FROM gazetteer.geoname WHERE st_intersects(geom, \'' . $wkb .  '\') AND fcode IN ' . $codes . ' ORDER BY CASE fcode WHEN \'PPLC\' then 1 WHEN \'PPLG\' then 2 WHEN \'PPLA\' then 3 WHEN \'PPLA2\' then 4 WHEN \'PPLA4\' then 5 WHEN \'PPL\' then 6 ELSE 7 END ASC, population DESC';
+        $results = $this->query($query);
+        while ($result = pg_fetch_assoc($results)) {
+            $toponyms[] = array(
+                'name' => $result['name'],
+                'geo:lon' => (integer) $result['longitude'],
+                'geo:lat' => (integer) $result['latitude'],
+                'fcode' => $result['fcode'],
+                'population' => (integer) $result['population']
+            );      
+        }
+        return $toponyms;
+    }
+    
 }
