@@ -44,23 +44,24 @@ fi
 
 # Set Data paths
 ## Always
-COASTLINES=$DATADIR/ne_10m_coastline.shp
+COASTLINES=$DATADIR/ne_10m_coastline/ne_10m_coastline.shp
 ## Political
-COUNTRIES=$DATADIR/ne_10m_admin_0_countries.shp
-WORLDADM1LEVEL=$DATADIR/ne_10m_admin_1_states_provinces.shp
+COUNTRIES=$DATADIR/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp
+WORLDADM1LEVEL=$DATADIR/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp
 ## Geology
 PLATES=$DATADIR/hotspots/plates.shp
 FAULTS=$DATADIR/hotspots/FAULTS.SHP
-VOLCANOS=$DATADIR/hotspots/VOLCANO.SHP
-GLACIERS=$DATADIR/ne_10m_glaciated_areas.shp datasources.glaciers
+VOLCANOES=$DATADIR/hotspots/VOLCANO.SHP
+GLACIERS=$DATADIR/ne_10m_glaciated_areas/ne_10m_glaciated_areas.shp
 # Hydrology
-RIVERS=$DATADIR/ne_10m_rivers_lake_centerlines.shp
+RIVERS=$DATADIR/ne_10m_rivers_lake_centerlines/ne_10m_rivers_lake_centerlines.shp
 
 ##### DROP SCHEMA FIRST ######
 if [ "$DROPFIRST" = "YES" ]
 then
 psql -d $DB -U $SUPERUSER << EOF
 DROP SCHEMA IF EXISTS datasources CASCADE;
+DROP SCHEMA IF EXISTS gpw CASCADE;
 EOF
 fi
 
@@ -71,7 +72,9 @@ EOF
 # ================== ALWAYS =====================
 ## Insert Coastlines
 shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $COASTLINES datasources.coastlines | psql -d $DB -U $SUPERUSER $HOSTNAME
+psql -d $DB  -U $SUPERUSER $HOSTNAME << EOF
 CREATE INDEX idx_coastlines_geom ON datasources.coastlines USING gist(geom);
+EOF
 
 # ================== POLITICAL =====================
 
@@ -129,7 +132,7 @@ shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $GLACIERS datasources.glaciers | psql 
 
 # =================== HYDROLOGY ==================
 ## Insert Rivers
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $RIVERS datasources.rivers | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $RIVERS datasources.rivers | psql -d $DB -U $SUPERUSER $HOSTNAME
 
 # ==================== LANDCOVER =====================
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
@@ -143,38 +146,39 @@ EOF
 
 # =================== GPW ============================
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
-CREATE TABLE glp15ag60 (
+CREATE SCHEMA gpw;
+CREATE TABLE gpw.glp15ag60 (
     gid                 VARCHAR(8) PRIMARY KEY,
     pcount              INTEGER
 );
-SELECT AddGeometryColumn('glp15ag60','footprint','4326','POLYGON',2);
+SELECT AddGeometryColumn('gpw', 'glp15ag60','footprint','4326','POLYGON',2);
 
 -- ===============================
 -- Population 2015 0.5x0.5 degrees
 -- ===============================
-CREATE TABLE glp15ag30 (
+CREATE TABLE gpw.glp15ag30 (
     gid                 VARCHAR(8) PRIMARY KEY,
     pcount              INTEGER
 );
-SELECT AddGeometryColumn('glp15ag30','footprint','4326','POLYGON',2);
+SELECT AddGeometryColumn('gpw', 'glp15ag30','footprint','4326','POLYGON',2);
 
 -- =================================
 -- Population 2015 0.25x0.25 degrees
 -- =================================
-CREATE TABLE glp15ag15 (
+CREATE TABLE gpw.glp15ag15 (
     gid                 VARCHAR(8) PRIMARY KEY,
     pcount              INTEGER
 );
-SELECT AddGeometryColumn('glp15ag15','footprint','4326','POLYGON',2);
+SELECT AddGeometryColumn('gpw', 'glp15ag15','footprint','4326','POLYGON',2);
 
 -- ===================================
 -- Population 2015 2.5x2.5 arc minutes
 -- ===================================
-CREATE TABLE glp15ag (
+CREATE TABLE gpw.glp15ag (
     gid                 VARCHAR(8) PRIMARY KEY,
     pcount              INTEGER
 );
-SELECT AddGeometryColumn('glp15ag','footprint','4326','POLYGON',2);
+SELECT AddGeometryColumn('gpw', 'glp15ag','footprint','4326','POLYGON',2);
 EOF
 
 # GRANT RIGHTS TO itag USER
@@ -182,7 +186,6 @@ psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 GRANT ALL ON SCHEMA datasources to $USER;
 GRANT SELECT on datasources.coastlines to $USER;
 GRANT SELECT on datasources.worldadm1level to $USER;
-GRANT SELECT on datasources.continents to $USER;
 GRANT SELECT on datasources.countries to $USER;
 GRANT SELECT on datasources.rivers to $USER;
 GRANT SELECT on datasources.glaciers to $USER;
