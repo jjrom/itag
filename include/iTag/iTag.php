@@ -37,7 +37,7 @@ class iTag {
      * Configuration
      */
     private $config = array(
-        'areaLimit' => 9
+        'areaLimit' => 200000
     );
     
     /**
