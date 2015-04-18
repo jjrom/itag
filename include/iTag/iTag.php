@@ -100,6 +100,11 @@ class iTag {
             }
         }
         
+        /*
+         * Close database handler
+         */
+        pg_close($this->dbh);
+        
         return array(
             'footprint' => $metadata['footprint'],
             'timestamp' => isset($metadata['timestamp']) ? $metadata['timestamp'] : null,
