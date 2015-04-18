@@ -31,7 +31,7 @@ return array(
         /*
          * Return WKT geometries
          */
-        'returnGeometries' => true,
+        'returnGeometries' => false,
         
         /*
          * Tolerance value for simplication (in degrees)
