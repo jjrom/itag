@@ -47,7 +47,7 @@ fi
 COASTLINES=$DATADIR/ne_10m_coastline/ne_10m_coastline.shp
 ## Political
 COUNTRIES=$DATADIR/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp
-WORLDADM1LEVEL=$DATADIR/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp
+STATES=$DATADIR/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp
 ## Geology
 PLATES=$DATADIR/hotspots/plates.shp
 FAULTS=$DATADIR/hotspots/FAULTS.SHP
@@ -102,12 +102,27 @@ CREATE INDEX idx_countries_geom ON datasources.countries USING gist(geom);
 EOF
 
 ## World administrative level 1 (i.e. states for USA, departements for France)
-shp2pgsql -g geom -d -W UTF8 -s 4326 -I $WORLDADM1LEVEL datasources.worldadm1level | psql -d $DB -U $SUPERUSER $HOSTNAME
+shp2pgsql -g geom -d -W UTF8 -s 4326 -I $STATES datasources.states | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB -U $SUPERUSER  $HOSTNAME << EOF
-UPDATE datasources.worldadm1level SET name='Seine-et-Marne' WHERE name='Seien-et-Marne';
-CREATE INDEX idx_worldadm1level_geom ON datasources.worldadm1level USING gist(geom);
-CREATE INDEX idx_worldadm1level_name ON datasources.worldadm1level (normalize(name));
-CREATE INDEX idx_worldadm1level_region ON datasources.worldadm1level (normalize(region));
+UPDATE datasources.states SET name='Seine-et-Marne' WHERE name='Seien-et-Marne';
+CREATE INDEX idx_states_geom ON datasources.states USING gist(geom);
+CREATE INDEX idx_states_name ON datasources.states (normalize(name));
+CREATE INDEX idx_states_region ON datasources.states (normalize(region));
+EOF
+
+## Regions created from states table
+psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
+--
+-- Some explanation here
+--
+--   Regions geometries are computed from the union of the geometries
+--   of their respective states.
+--   Since states boundaries do not fit perfectly, the geometry union is
+--   simplified. A buffer is then applied to correct invalid geometries
+--
+CREATE TABLE datasources.regions AS (SELECT region as name, admin, iso_a2, st_buffer(st_simplify(st_union(geom), 0.01), 0) as geom from datasources.states where region is NOT NULL group by region,admin,iso_a2);
+CREATE INDEX idx_regions_geom ON datasources.regions USING gist(geom);
+CREATE INDEX idx_regions_name ON datasources.regions (normalize(name));
 EOF
 
 # =================== GEOLOGY ==================
@@ -185,7 +200,8 @@ EOF
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 GRANT ALL ON SCHEMA datasources to $USER;
 GRANT SELECT on datasources.coastlines to $USER;
-GRANT SELECT on datasources.worldadm1level to $USER;
+GRANT SELECT on datasources.states to $USER;
+GRANT SELECT on datasources.regions to $USER;
 GRANT SELECT on datasources.countries to $USER;
 GRANT SELECT on datasources.rivers to $USER;
 GRANT SELECT on datasources.glaciers to $USER;
