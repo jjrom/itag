@@ -46,6 +46,7 @@ fi
 ## Always
 COASTLINES=$DATADIR/ne_10m_coastline/ne_10m_coastline.shp
 ## Political
+CONTINENTS=$DATADIR/hotspots/continent.shp
 COUNTRIES=$DATADIR/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp
 STATES=$DATADIR/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp
 ## Geology
@@ -77,6 +78,9 @@ CREATE INDEX idx_coastlines_geom ON datasources.coastlines USING gist(geom);
 EOF
 
 # ================== POLITICAL =====================
+
+## Insert Continents
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $CONTINENTS datasources.continents | psql -d $DB -U $SUPERUSER $HOSTNAME
 
 ## Insert Countries
 shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $COUNTRIES datasources.countries | psql -d $DB -U $SUPERUSER $HOSTNAME
@@ -203,6 +207,7 @@ GRANT SELECT on datasources.coastlines to $USER;
 GRANT SELECT on datasources.states to $USER;
 GRANT SELECT on datasources.regions to $USER;
 GRANT SELECT on datasources.countries to $USER;
+GRANT SELECT on datasources.continents to $USER;
 GRANT SELECT on datasources.rivers to $USER;
 GRANT SELECT on datasources.glaciers to $USER;
 GRANT SELECT on datasources.plates to $USER;
