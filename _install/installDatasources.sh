@@ -214,9 +214,9 @@ GRANT SELECT on datasources.plates to $USER;
 GRANT SELECT on datasources.faults to $USER;
 GRANT SELECT on datasources.volcanoes to $USER;
 GRANT SELECT on datasources.landcover to $USER;
-GRANT ALL ON SCHEMA gpw TO itag;
-GRANT SELECT ON gpw.glp15ag to itag;
-GRANT SELECT ON gpw.glp15ag15 to itag;
-GRANT SELECT ON gpw.glp15ag30 to itag;
-GRANT SELECT ON gpw.glp15ag60 to itag;
+GRANT ALL ON SCHEMA gpw TO $USER;
+GRANT SELECT ON gpw.glp15ag to $USER;
+GRANT SELECT ON gpw.glp15ag15 to $USER;
+GRANT SELECT ON gpw.glp15ag30 to $USER;
+GRANT SELECT ON gpw.glp15ag60 to $USER;
 EOF
