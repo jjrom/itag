@@ -114,10 +114,10 @@ distros that enable SELinux by default you should run the following commands as 
 Run the following commands 
 
         # General datasources
-        $ITAG_HOME/_install/installDataSources.sh -F -D $ITAG_DATA
+        $ITAG_HOME/_install/installDatasources.sh -F -D $ITAG_DATA
         
         # Gazetteer
-        $ITAG_HOME/_install/installGazetter.sh -F -D $GEONAMES_DIR
+        $ITAG_HOME/_install/installGazetterDB.sh -F -D $GEONAMES_DIR
         
         # Wikipedia
         # This step is optional and can only be performed if you have the geolocated wikipedia data (which probably you don't have :)
