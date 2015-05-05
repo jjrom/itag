@@ -37,7 +37,22 @@ class iTag {
      * Configuration
      */
     private $config = array(
-        'areaLimit' => 200000
+        
+        /*
+         * Maximum area allowed (in square kilometers)
+         * for LandCover computation 
+         */
+        'areaLimit' => 200000,
+        
+        /*
+         * Return WKT geometries
+         */
+        'returnGeometries' => false,
+        
+        /*
+         * Tolerance value for simplication (in degrees)
+         */
+        'geometryTolerance' => 0.1
     );
     
     /**
