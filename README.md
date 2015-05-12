@@ -113,7 +113,7 @@ Run the following commands
         $ITAG_HOME/_install/installDatasources.sh -F -D $ITAG_DATA
         
         # Gazetteer
-        $ITAG_HOME/_install/installGazetterDB.sh -F -D $GEONAMES_DIR
+        $ITAG_HOME/_install/installGazetteerDB.sh -F -D $GEONAMES_DIR
         
         # Wikipedia
         # This step is optional and can only be performed if you have the geolocated wikipedia data (which probably you don't have :)
