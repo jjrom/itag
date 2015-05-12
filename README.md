@@ -66,10 +66,6 @@ Retrieve World Administrative Level 1 data from [Natural Earth](http://www.natur
 Retrieve toponyms from [geonames](http://geonames.org)
 
         cd $ITAG_DATA
-        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip
-        unzip ne_10m_admin_0_countries.zip
-        
-        # Geonames
         wget http://download.geonames.org/export/dump/allCountries.zip
         wget http://download.geonames.org/export/dump/alternateNames.zip
         unzip allCountries.zip
