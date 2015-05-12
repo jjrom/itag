@@ -44,18 +44,18 @@ fi
 
 # Set Data paths
 ## Always
-COASTLINES=$DATADIR/ne_10m_coastline/ne_10m_coastline.shp
+COASTLINES=$DATADIR/ne_10m_coastline.shp
 ## Political
 CONTINENTS=$DATADIR/hotspots/continent.shp
-COUNTRIES=$DATADIR/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp
-STATES=$DATADIR/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp
+COUNTRIES=$DATADIR/ne_10m_admin_0_countries.shp
+STATES=$DATADIR/ne_10m_admin_1_states_provinces.shp
 ## Geology
 PLATES=$DATADIR/hotspots/plates.shp
 FAULTS=$DATADIR/hotspots/FAULTS.SHP
 VOLCANOES=$DATADIR/hotspots/VOLCANO.SHP
-GLACIERS=$DATADIR/ne_10m_glaciated_areas/ne_10m_glaciated_areas.shp
+GLACIERS=$DATADIR/ne_10m_glaciated_areas.shp
 # Hydrology
-RIVERS=$DATADIR/ne_10m_rivers_lake_centerlines/ne_10m_rivers_lake_centerlines.shp
+RIVERS=$DATADIR/ne_10m_rivers_lake_centerlines.shp
 
 ##### DROP SCHEMA FIRST ######
 if [ "$DROPFIRST" = "YES" ]
