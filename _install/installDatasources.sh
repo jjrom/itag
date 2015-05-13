@@ -85,22 +85,49 @@ shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $CONTINENTS datasources.continents | p
 ## Insert Countries
 shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $COUNTRIES datasources.countries | psql -d $DB -U $SUPERUSER $HOSTNAME
 psql -d $DB  -U $SUPERUSER $HOSTNAME << EOF
+ALTER TABLE datasources.countries ALTER COLUMN name TYPE TEXT;
+UPDATE datasources.countries set name='Antigua and Barbuda' WHERE iso_a3 = 'ATG';
+UPDATE datasources.countries set name='Ashmore and Cartier Islands' WHERE name = 'Ashmore and Cartier Is.';
 UPDATE datasources.countries set name='Bosnia and Herzegovina' WHERE iso_a3 = 'BIH';
+UPDATE datasources.countries set name='British Indian Ocean Territory' WHERE iso_a3 = 'IOT';
+UPDATE datasources.countries set name='British Virgin Islands' WHERE iso_a3 = 'VGB';
+UPDATE datasources.countries set name='Cayman Islands' WHERE iso_a3 = 'CYM';
 UPDATE datasources.countries set name='Central African Republic' WHERE iso_a3 = 'CAF';
+UPDATE datasources.countries set name='Clipperton Island' WHERE name = 'Clipperton I.';
+UPDATE datasources.countries set name='Cook Islands' WHERE iso_a3 = 'COK';
+UPDATE datasources.countries set name='Coral Sea Islands' WHERE name = 'Coral Sea Is.';
 UPDATE datasources.countries set name='Czech Republic' WHERE iso_a3 = 'CZE';
 UPDATE datasources.countries set name='Congo' WHERE iso_a3 = 'COD';
+UPDATE datasources.countries set name='Curaçao' WHERE iso_a3 = 'CUW';
 UPDATE datasources.countries set name='North Korea' WHERE iso_a3 = 'PRK';
 UPDATE datasources.countries set name='Dominican Republic' WHERE iso_a3 = 'DOM';
 UPDATE datasources.countries set name='Equatorial Guinea' WHERE iso_a3 = 'GNQ';
 UPDATE datasources.countries set name='Falkland Islands' WHERE iso_a3 = 'FLK';
+UPDATE datasources.countries set name='Faroe Islands' WHERE iso_a3 = 'FRO';
+UPDATE datasources.countries set name='French Polynesia' WHERE iso_a3 = 'PYF';
 UPDATE datasources.countries set name='French Southern and Antarctic Lands' WHERE iso_a3 = 'ATF';
-UPDATE datasources.countries set name='Northern Cyprus' WHERE name = 'N. Cyprus';
-UPDATE datasources.countries set name='South Sudan' WHERE iso_a3 = 'SSD';
-UPDATE datasources.countries set name='Solomon Islands' WHERE iso_a3 = 'SLB';
-UPDATE datasources.countries set name='Western Sahara' WHERE iso_a3 = 'ESH';
+UPDATE datasources.countries set name='Heard Island and McDonald Islands' WHERE iso_a3 = 'HMD';
+UPDATE datasources.countries set name='Indian Ocean Territories' WHERE name = 'Indian Ocean Ter.';
 UPDATE datasources.countries set name='Ivory Coast' WHERE iso_a3 = 'CIV';
 UPDATE datasources.countries set name='Laos' WHERE iso_a3 = 'LAO';
+UPDATE datasources.countries set name='Marshall Islands' WHERE iso_a3 = 'MHL';
+UPDATE datasources.countries set name='Northern Mariana Islands' WHERE iso_a3 = 'MNP';
+UPDATE datasources.countries set name='Pitcairn Islands' WHERE iso_a3 = 'PCN';
+UPDATE datasources.countries set name='South Georgia and South Sandwich Islands' WHERE iso_a3 = 'SGS';
+UPDATE datasources.countries set name='Spratly Islands' WHERE name = 'Spratly Is.';
+UPDATE datasources.countries set name='Saint-Barthélemy' WHERE iso_a3 = 'BLM';
+UPDATE datasources.countries set name='Saint Kitts and Nevis' WHERE iso_a3 = 'KNA';
+UPDATE datasources.countries set name='Saint Pierre and Miquelon' WHERE iso_a3 = 'SPM';
+UPDATE datasources.countries set name='Saint Vincent and the Grenadines' WHERE iso_a3 = 'VCT';
+UPDATE datasources.countries set name='São Tomé and Príncipe' WHERE iso_a3 = 'STP';
+UPDATE datasources.countries set name='South Sudan' WHERE iso_a3 = 'SSD';
+UPDATE datasources.countries set name='Solomon Islands' WHERE iso_a3 = 'SLB';
+UPDATE datasources.countries set name='Turks and Caicos Islands' WHERE iso_a3 = 'TCA';
+UPDATE datasources.countries set name='United States Minor Outlying Islands' WHERE iso_a3 = 'UMI';
 UPDATE datasources.countries set name='United States of America' WHERE name='United States';
+UPDATE datasources.countries set name='United States Virgin Islands' WHERE iso_a3 = 'VIR';
+UPDATE datasources.countries set name='Western Sahara' WHERE iso_a3 = 'ESH';
+UPDATE datasources.countries set name='Wallis and Futuna' WHERE iso_a3 = 'WLF';
 CREATE INDEX idx_countries_name ON datasources.countries (normalize(name));
 CREATE INDEX idx_countries_geom ON datasources.countries USING gist(geom);
 EOF
