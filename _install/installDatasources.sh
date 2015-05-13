@@ -118,6 +118,7 @@ UPDATE datasources.countries set name='Spratly Islands' WHERE name = 'Spratly Is
 UPDATE datasources.countries set name='Saint-Barthélemy' WHERE iso_a3 = 'BLM';
 UPDATE datasources.countries set name='Saint Kitts and Nevis' WHERE iso_a3 = 'KNA';
 UPDATE datasources.countries set name='Saint Pierre and Miquelon' WHERE iso_a3 = 'SPM';
+UPDATE datasources.countries set name='Saint-Martin' WHERE iso_a3 = 'MAF';
 UPDATE datasources.countries set name='Saint Vincent and the Grenadines' WHERE iso_a3 = 'VCT';
 UPDATE datasources.countries set name='São Tomé and Príncipe' WHERE iso_a3 = 'STP';
 UPDATE datasources.countries set name='South Sudan' WHERE iso_a3 = 'SSD';
@@ -128,6 +129,12 @@ UPDATE datasources.countries set name='United States of America' WHERE name='Uni
 UPDATE datasources.countries set name='United States Virgin Islands' WHERE iso_a3 = 'VIR';
 UPDATE datasources.countries set name='Western Sahara' WHERE iso_a3 = 'ESH';
 UPDATE datasources.countries set name='Wallis and Futuna' WHERE iso_a3 = 'WLF';
+
+UPDATE datasources.countries set iso_a2='FR', iso_a3='FRA' WHERE name = 'France';
+UPDATE datasources.countries set iso_a2='XK', iso_a3='UNK' WHERE name = 'Kosovo';
+UPDATE datasources.countries set iso_a2='NO', iso_a3='NOR' WHERE name = 'Norway';
+UPDATE datasources.countries set iso_a3='CPT' WHERE name = 'Clipperton Island';
+
 CREATE INDEX idx_countries_name ON datasources.countries (normalize(name));
 CREATE INDEX idx_countries_geom ON datasources.countries USING gist(geom);
 EOF
