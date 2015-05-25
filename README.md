@@ -113,15 +113,15 @@ Run the following commands
         $ITAG_HOME/_install/installDatasources.sh -F -D $ITAG_DATA
         
         # Gazetteer
-        $ITAG_HOME/_install/installGazetteerDB.sh -F -D $GEONAMES_DIR
+        $ITAG_HOME/_install/installGazetteerDB.sh -F -D $ITAG_DATA
         
         # Wikipedia
         # This step is optional and can only be performed if you have the geolocated wikipedia data (which probably you don't have :)
         # In case of, these are the steps to follow in order to install this database within iTag
         #
-        # Put the geolocated wikipedia data in $GEONAMES_DIR/wikipedia directory, then run the command
+        # Put the geolocated wikipedia data in $ITAG_DATA/wikipedia directory, then run the command
         #
-        $ITAG_HOME/_install/installWikipediaDB.sh -D $GEONAMES_DIR/wikipedia
+        $ITAG_HOME/_install/installWikipediaDB.sh -D $ITAG_DATA/wikipedia
     
 ### Install landcover database
 
