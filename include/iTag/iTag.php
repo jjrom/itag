@@ -19,7 +19,7 @@ class iTag {
     /*
      * iTag version
      */
-    const version = '3.0.5';
+    const version = '3.0.6';
     
     /*
      * Database handler
