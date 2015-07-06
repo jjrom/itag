@@ -93,7 +93,7 @@ COPY gazetteer.alternatename (alternatenameid,geonameid,isolanguage,alternatenam
 
 -- We only need Populated place and administrative areas
 CREATE INDEX idx_fclass_country ON gazetteer.geoname (fclass);
-DELETE FROM gazetteer.geoname WHERE fclass NOT IN ('P', 'A');
+-- DELETE FROM gazetteer.geoname WHERE fclass NOT IN ('P', 'A');
 
 -- PostGIS
 SELECT AddGeometryColumn ('gazetteer','geoname','geom',4326,'POINT',2);
@@ -116,8 +116,8 @@ CREATE INDEX idx_alternatename_alternatename ON gazetteer.alternatename (normali
 CREATE INDEX idx_alternatename_like_alternatename ON gazetteer.alternatename (normalize(alternatename) varchar_pattern_ops);
 
 -- Constraints
-ALTER TABLE ONLY gazetteer.alternatename ADD CONSTRAINT pk_alternatenameid PRIMARY KEY (alternatenameid);
-ALTER TABLE ONLY gazetteer.geoname ADD CONSTRAINT pk_geonameid PRIMARY KEY (geonameid);
+-- ALTER TABLE ONLY gazetteer.alternatename ADD CONSTRAINT pk_alternatenameid PRIMARY KEY (alternatenameid);
+-- ALTER TABLE ONLY gazetteer.geoname ADD CONSTRAINT pk_geonameid PRIMARY KEY (geonameid);
 
 -- User rights
 GRANT ALL ON SCHEMA gazetteer TO $USER;

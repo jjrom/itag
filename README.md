@@ -93,6 +93,13 @@ Retrieve rivers data from [Natural Earth](http://www.naturalearthdata.com/downlo
         wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_rivers_lake_centerlines.zip
         unzip ne_10m_rivers_lake_centerlines.zip
         
+#### Other data (i.e. marine areas, mountains area, etc.)
+        
+        # Marine areas
+        cd $ITAG_DATA
+        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_geography_marine_polys.zip
+        unzip ne_10m_geography_marine_polys.zip
+
 ### Install database
 
         # Note : "password" must be the same as 

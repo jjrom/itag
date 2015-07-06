@@ -56,6 +56,8 @@ VOLCANOES=$DATADIR/hotspots/VOLCANO.SHP
 GLACIERS=$DATADIR/ne_10m_glaciated_areas.shp
 # Hydrology
 RIVERS=$DATADIR/ne_10m_rivers_lake_centerlines.shp
+# Other
+MARINEAREAS=$DATADIR/ne_10m_geography_marine_polys.shp
 
 ##### DROP SCHEMA FIRST ######
 if [ "$DROPFIRST" = "YES" ]
@@ -187,6 +189,35 @@ shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $GLACIERS datasources.glaciers | psql 
 ## Insert Rivers
 shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $RIVERS datasources.rivers | psql -d $DB -U $SUPERUSER $HOSTNAME
 
+# =================== OTHER ==================
+## Insert Physicals data
+shp2pgsql -g geom -d -W LATIN1 -s 4326 -I $MARINEAREAS datasources.physical | psql -d $DB -U $SUPERUSER $HOSTNAME
+psql -d $DB  -U $SUPERUSER $HOSTNAME << EOF
+DELETE FROM datasources.physical WHERE name IS NULL;
+UPDATE datasources.physical set name='Arctic Ocean',name_fr='Océan Arctique' WHERE name='ARCTIC OCEAN';
+UPDATE datasources.physical set name='Beaufort Sea' WHERE name='Beaufort  Sea';
+UPDATE datasources.physical set name='Bransfield Strait' WHERE name='Bransfield Str.';
+UPDATE datasources.physical set name='Davis Strait' WHERE name='Davis  Strait';
+UPDATE datasources.physical set name='Cumberland Sd.' WHERE name='Cumberland Bay';
+UPDATE datasources.physical set name='Denmark Strait' WHERE name='Denmark  Strait';
+UPDATE datasources.physical set name='Gulf St Vincent' WHERE name='Gulf St. Vincent';
+UPDATE datasources.physical set name='Gulf of Anadyr' WHERE name='Gulf of Anadyr''';
+UPDATE datasources.physical set name='Gulf of Saint Lawrence' WHERE name='Gulf of St. Lawrence';
+UPDATE datasources.physical set name='Indian Ocean',name_fr='Océan Indien' WHERE name='INDIAN OCEAN';
+UPDATE datasources.physical set name='North Atlantic Ocean',name_fr='Océan Atlantique Nord' WHERE name='NORTH ATLANTIC OCEAN';
+UPDATE datasources.physical set name='North Pacific Ocean',name_fr='Océan Pacifique Nord' WHERE name='NORTH PACIFIC OCEAN';
+UPDATE datasources.physical set name='Ross Sea' WHERE name='Ross  Sea';
+UPDATE datasources.physical set name='South Atlantic Ocean',name_fr='Océan Atlantique Sud' WHERE name='SOUTH ATLANTIC OCEAN';
+UPDATE datasources.physical set name='South Pacific Ocean',name_fr='Océan Pacifique Sud' WHERE name='SOUTH PACIFIC OCEAN';
+UPDATE datasources.physical set name='Southern Ocean',name_fr='Océan Antarctique' WHERE name='SOUTHERN OCEAN';
+UPDATE datasources.physical set name='St Helena Bay' WHERE name='St. Helena Bay';
+UPDATE datasources.physical set name='St Lawrence River' WHERE name='St. Lawrence River';
+UPDATE datasources.physical set name='Tasman Sea' WHERE name='Tasman  Sea';
+UPDATE datasources.physical set name='Weddell Sea' WHERE name='Weddell  Sea';
+UPDATE datasources.physical set name='White Sea' WHERE name='White  Sea';
+CREATE INDEX idx_physical_name ON datasources.physical (normalize(name));
+EOF
+
 # ==================== LANDCOVER =====================
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 CREATE TABLE datasources.landcover (
@@ -248,6 +279,7 @@ GRANT SELECT on datasources.plates to $USER;
 GRANT SELECT on datasources.faults to $USER;
 GRANT SELECT on datasources.volcanoes to $USER;
 GRANT SELECT on datasources.landcover to $USER;
+GRANT SELECT on datasources.physical to $USER;
 GRANT ALL ON SCHEMA gpw TO $USER;
 GRANT SELECT ON gpw.glp15ag to $USER;
 GRANT SELECT ON gpw.glp15ag15 to $USER;
