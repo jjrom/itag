@@ -30,15 +30,12 @@ class Tagger_Hydrology extends Tagger_Generic {
     );
     
     /*
-     * Default features to tag
+     * Columns mapping per table
      */
-    protected $defaultFeatures = array('rivers');
-    
-    /*
-     * Return feature corresponding column name
-     */
-    protected $columnNames = array(
-        'rivers' => 'name'
+    protected $columnsMapping = array(
+        'rivers' => array(
+            'name' => 'name'
+        )
     );
     
     /**
@@ -61,7 +58,7 @@ class Tagger_Hydrology extends Tagger_Generic {
      */
     public function tag($metadata, $options = array()) {
         return array(
-            'hydrology' => $this->process($metadata['footprint'], $options)
+            'hydrology' => parent::tag($metadata, $options)
         );
     }
     
