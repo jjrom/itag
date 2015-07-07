@@ -269,17 +269,27 @@ EOF
 psql -U $SUPERUSER -d $DB $HOSTNAME << EOF
 GRANT ALL ON SCHEMA datasources to $USER;
 GRANT SELECT on datasources.coastlines to $USER;
+GRANT SELECT ON datasources.coastlines_gid_seq TO $USER;
 GRANT SELECT on datasources.states to $USER;
+GRANT SELECT ON datasources.states_gid_seq TO $USER;
 GRANT SELECT on datasources.regions to $USER;
 GRANT SELECT on datasources.countries to $USER;
+GRANT SELECT ON datasources.countries_gid_seq TO $USER;
 GRANT SELECT on datasources.continents to $USER;
+GRANT SELECT ON datasources.continents_gid_seq TO $USER;
 GRANT SELECT on datasources.rivers to $USER;
+GRANT SELECT ON datasources.rivers_gid_seq TO $USER;
 GRANT SELECT on datasources.glaciers to $USER;
+GRANT SELECT ON datasources.glaciers_gid_seq TO $USER;
 GRANT SELECT on datasources.plates to $USER;
+GRANT SELECT ON datasources.plates_gid_seq TO $USER;
 GRANT SELECT on datasources.faults to $USER;
+GRANT SELECT ON datasources.faults_gid_seq TO $USER;
 GRANT SELECT on datasources.volcanoes to $USER;
+GRANT SELECT ON datasources.volcanoes_gid_seq TO $USER;
 GRANT SELECT on datasources.landcover to $USER;
 GRANT SELECT on datasources.physical to $USER;
+GRANT SELECT ON datasources.physical_gid_seq TO $USER;
 GRANT ALL ON SCHEMA gpw TO $USER;
 GRANT SELECT ON gpw.glp15ag to $USER;
 GRANT SELECT ON gpw.glp15ag15 to $USER;
