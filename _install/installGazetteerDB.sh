@@ -106,6 +106,7 @@ UPDATE gazetteer.geoname SET countryname=(SELECT name FROM datasources.countries
 CREATE INDEX idx_geoname_countryname ON gazetteer.geoname (normalize(countryname));
 
 -- Text search
+CREATE INDEX idx_geoname_id ON gazetteer.geoname (geonameid);
 CREATE INDEX idx_geoname_name ON gazetteer.geoname (normalize(name));
 CREATE INDEX idx_geoname_like_name ON gazetteer.geoname (normalize(name) varchar_pattern_ops);
 CREATE INDEX idx_geoname_country ON gazetteer.geoname (country);
