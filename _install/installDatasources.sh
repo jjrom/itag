@@ -198,11 +198,13 @@ UPDATE datasources.physical set name='Arctic Ocean',name_fr='Océan Arctique' WH
 UPDATE datasources.physical set name='Beaufort Sea' WHERE name='Beaufort  Sea';
 UPDATE datasources.physical set name='Bransfield Strait' WHERE name='Bransfield Str.';
 UPDATE datasources.physical set name='Davis Strait' WHERE name='Davis  Strait';
+UPDATE datasources.physical set name='Caribbean Sea' WHERE name='Caribbean  Sea';
 UPDATE datasources.physical set name='Cumberland Sd.' WHERE name='Cumberland Bay';
 UPDATE datasources.physical set name='Denmark Strait' WHERE name='Denmark  Strait';
 UPDATE datasources.physical set name='Gulf St Vincent' WHERE name='Gulf St. Vincent';
 UPDATE datasources.physical set name='Gulf of Anadyr' WHERE name='Gulf of Anadyr''';
 UPDATE datasources.physical set name='Gulf of Saint Lawrence' WHERE name='Gulf of St. Lawrence';
+UPDATE datasources.physical set name='Gulf of Suez' WHERE name='Gulf of  Suez';
 UPDATE datasources.physical set name='Indian Ocean',name_fr='Océan Indien' WHERE name='INDIAN OCEAN';
 UPDATE datasources.physical set name='North Atlantic Ocean',name_fr='Océan Atlantique Nord' WHERE name='NORTH ATLANTIC OCEAN';
 UPDATE datasources.physical set name='North Pacific Ocean',name_fr='Océan Pacifique Nord' WHERE name='NORTH PACIFIC OCEAN';
@@ -215,6 +217,13 @@ UPDATE datasources.physical set name='St Lawrence River' WHERE name='St. Lawrenc
 UPDATE datasources.physical set name='Tasman Sea' WHERE name='Tasman  Sea';
 UPDATE datasources.physical set name='Weddell Sea' WHERE name='Weddell  Sea';
 UPDATE datasources.physical set name='White Sea' WHERE name='White  Sea';
+-- Merge polygons
+UPDATE datasources.physical SET geom=(select st_multi(st_union(geom)) FROM datasources.physical WHERE name='Gulf of Anadyr') WHERE gid=159;
+DELETE FROM datasources.physical WHERE gid=271;
+UPDATE datasources.physical SET geom=(select st_multi(st_union(geom)) FROM datasources.physical WHERE name='Mediterranean Sea') WHERE gid=15;
+DELETE FROM datasources.physical WHERE gid=63;
+UPDATE datasources.physical SET geom=(select st_multi(st_union(geom)) FROM datasources.physical where name='Ross Sea') WHERE gid=27;
+DELETE FROM datasources.physical WHERE gid=30;
 CREATE INDEX idx_physical_name ON datasources.physical (normalize(name));
 EOF
 
