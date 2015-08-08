@@ -1,6 +1,8 @@
 # iTag
 
 [![Code Climate](https://codeclimate.com/github/jjrom/itag/badges/gpa.svg)](https://codeclimate.com/github/jjrom/itag)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/jjrom/itag.svg)](http://isitmaintained.com/project/jjrom/itag "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/jjrom/itag.svg)](http://isitmaintained.com/project/jjrom/itag "Percentage of issues still open")
 
 Semantic enhancement of Earth Observation data
 
