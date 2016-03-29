@@ -43,7 +43,7 @@ error_reporting(E_PARSE);
 
 // This application can only be called from a shell
 if (!empty($_SERVER['SHELL'])) {
-    $help = "\n## Usage : php gpw2pgsql.php -f <ascii_grid_file>\n\n    Note: the ascii_grid_file is one of glp15ag.asc/glp15ag15.asc/glp15ag30.asc/glp15ag60.asc files downloaded from http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/data-download\n\n";
+    $help = "\n## Usage : php installGPW.php -f <ascii_grid_file>\n\n    Note: the ascii_grid_file is one of glp15ag.asc/glp15ag15.asc/glp15ag30.asc/glp15ag60.asc files downloaded from http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/data-download\n\n";
     $options = getopt("f:h");
     foreach ($options as $option => $value) {
         if ($option === "f") {
