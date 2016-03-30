@@ -134,7 +134,7 @@ Run the following commands
     
 ### Install landcover database
 
-Download the world glc2000 GeoTIFF file from ["Global Land Cover 2000" global product](http://bioval.jrc.ec.europa.eu/products/glc2000/products.php)
+Download the world glc2000 GeoTIFF file from ["Global Land Cover 2000" - global product](http://forobs.jrc.ec.europa.eu/products/glc2000/products.php)
 
 Then run the following :
 
