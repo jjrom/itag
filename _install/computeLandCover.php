@@ -21,14 +21,15 @@
  * iTag - prepare landcover database from GLC2000 TIF image
  */
 
-$help  = "\nUSAGE : computeLandCover.php [options] -I <path to GLC2000 TIF file>\n";
+$help  = "## iTag Global Land Cover 2000 compute and installation\n\n Usage computeLandCover.php [options] -I <path to GLC2000 TIF file>\n\n";
 $help .= "OPTIONS:\n";
-$help .= "   -P [path] : path to gdal_polygonize.py \n";
-$help .= "   -T [path] : path to gdal_translate \n";
-$help .= "   -p : postgresql superuser password\n";
+$help .= "   -P [path] : path to gdal_polygonize.py\n";
+$help .= "   -T [path] : path to gdal_translate\n";
+$help .= "   -H : postgres server hostname (default localhost)\n";
+$help .= "   -d : iTag database name (default itag)\n";
 $help .= "   -s : postgresql superuser (default postgres)\n";
-$help .= "   -s : iTag database name (default itag)\n";
-$help .= "\n\n";
+$help .= "   -p : postgresql superuser password\n";
+$help .= "\n";
 $hostname = 'localhost';
 $superuser = 'postgres';
 $password = 'postgres';
