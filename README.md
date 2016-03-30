@@ -134,22 +134,32 @@ Run the following commands
     
 ### Install landcover database
 
-Download the world glc2000 GeoTIFF file from ["Global Land Cover 2000" global product](http://bioval.jrc.ec.europa.eu/products/glc2000/products.php)
+Download the world glc2000 GeoTIFF file from ["Global Land Cover 2000" - global product](http://forobs.jrc.ec.europa.eu/products/glc2000/products.php)
 
 Then run the following :
 
-        $ITAG_HOME/_install/computeLandCover.php -I path_to_glc2000_tif_image
+**Attention** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
+
+        $ITAG_HOME/_install/computeLandCover.php -p postgres_user_pass -I path_to_glc2000_tif_image
+
+**Tip** : maybe you have to indicate the location of gdal tools (check -T and -P swich)
 
 **Note** : depending on your server performance, the landcover computation can take a long time (more than two hours)
 
 ### Install Gridded Population of the World database
 
-Download the Gridded Population of the World from [SEDAC](http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/metadata)
+Download most recent "Population Count Grid Future" (or "Population Count Grid") product of the whole World from [SEDAC](http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/data-download) in ASCII Grid format (*.ascii or *.asc). All four resolutions (1°, 1/2°, 1/4° and 2.5′) are needed!
+
 Then run the following :
 
-        $ITAG_HOME/_install/installGPW.php -f asciigridfile
+**Attention** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
 
-**Note** : this take a loooooong time
+        $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag60.asc
+        $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag30.asc
+        $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag15.asc
+        $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag.asc
+
+**Note** : this take a loooooong time (more than four hours)
 
 ### Deploy application
 
