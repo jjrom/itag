@@ -35,22 +35,43 @@ function getPgDB($connectionString) {
 
 //=============================================
 
-// Includes
-include_once '../include/config.php';
-
 // Remove PHP NOTICE
 error_reporting(E_PARSE);
 
+$help  = "## iTag Gridded Population of the World installation\n\n Usage installGPW.php [options] -f <GPW ascii grid file>\n\n";
+$help .= "OPTIONS:\n";
+$help .= "   -f : the GPW ascii grid file (one of glp15ag.asc/glp15ag15.asc/glp15ag30.asc/glp15ag60.asc\n\tfiles downloaded from http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/data-download)\n";
+$help .= "   -H : postgres server hostname (default localhost)\n";
+$help .= "   -d : iTag database name (default itag)\n";
+$help .= "   -s : postgresql superuser (default postgres)\n";
+$help .= "   -p : postgresql superuser password\n";
+$help .= "\n";
+$hostname = 'localhost';
+$dbname = 'itag';
+$superuser = 'postgres';
+$password = 'postgres';
+
 // This application can only be called from a shell
 if (!empty($_SERVER['SHELL'])) {
-    $help = "\n## Usage : php gpw2pgsql.php -f <ascii_grid_file>\n\n    Note: the ascii_grid_file is one of glp15ag.asc/glp15ag15.asc/glp15ag30.asc/glp15ag60.asc files downloaded from http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/data-download\n\n";
-    $options = getopt("f:h");
+    $options = getopt("f:d:s:p:H:h");
     foreach ($options as $option => $value) {
         if ($option === "f") {
             $gpwfile = $value;
 
             // Tablename is based on file name (e.g. "glp15ag15" for glp15ag15.asc file name)
             $tablename = substr(basename($gpwfile), 0, -4);
+        }
+        if ($option === "H") {
+            $hostname = $value;
+        }
+        if ($option === "d") {
+            $dbname = $value;
+        }
+        if ($option === "s") {
+            $superuser = $value;
+        }
+        if ($option === "p") {
+            $password = $value;
         }
         if ($option === "h") {
             echo $help;
@@ -68,14 +89,14 @@ if (!empty($_SERVER['SHELL'])) {
 }
 
 // Connect to database
-$dbh = getPgDB("host=" . DB_HOST . " dbname=" . DB_NAME . " user=" . DB_USER . " password=" . DB_PASSWORD);
+$dbh = getPgDB("host=$hostname dbname=$dbname user=$superuser password=$password");
 if (!$dbh) {
     echo "\nFATAL : No connection to database\n\n";
     exit(0);
 }
 
 // Delete content of tablename
-echo "### Delete table * " . $tablename . " * content\n";
+echo "### Delete table '$tablename' content (if exist)\n";
 pg_query($dbh, "CREATE SCHEMA IF NOT EXISTS gpw");
 pg_query($dbh, "DELETE FROM gpw." . $tablename);
 pg_query($dbh, "DROP INDEX gpw.footprint_" . $tablename . "_idx");
@@ -97,11 +118,9 @@ pg_query($dbh, "DROP INDEX gpw.pcount" . $tablename . "_idx");
 //
 $handle = fopen($gpwfile, "r");
 if ($handle) {
-
     $count = -7;
 
     while (($line = fgets($handle)) !== false) {
-
         $count++;
         $rowpadded = str_pad($count, 4, "0", STR_PAD_LEFT);
 
@@ -164,15 +183,15 @@ if ($handle) {
         }
     }
 } else {
-    echo "\nFATAL : Cannot read file " . $gpwfile . "\n\n";
+    echo "\nFATAL : Cannot read file '$gpwfile'\n\n";
     exit(0);
 }
 
-echo "### Create spatial index on table * " . $tablename . " * \n";
+echo "### Create spatial index on table '$tablename' \n";
 pg_query("CREATE INDEX footprint_" . $tablename . "_idx ON gpw." . $tablename . " USING btree (footprint)");
 
-echo "### Create population count index on table * " . $tablename . " * \n";
-pg_query("CREATE INDEX pcount_" . $tablename . "_idx ON gpw." . $tablename . " (pcount)");
+echo "### Create population count index on table '$tablename'\n";
+pg_query("CREATE INDEX pcount_" . $tablename . "_idx ON gpw." . $tablename . " USING btree (pcount)");
 
-echo "\nData successfully stored within * " . $tablename . " * of " . DB_NAME . "database\n\n";
+echo "\nData successfully stored within '$tablename' of '$dbname' database\n\n";
 exit(0);
