@@ -138,7 +138,9 @@ Download the world glc2000 GeoTIFF file from ["Global Land Cover 2000" - global 
 
 Then run the following :
 
-        $ITAG_HOME/_install/computeLandCover.php -I path_to_glc2000_tif_image
+        $ITAG_HOME/_install/computeLandCover.php -p postgres_user_pass -I path_to_glc2000_tif_image
+
+**Tip** : maybe you have to indicate the location of gdal tools (check -T and -P swich)
 
 **Note** : depending on your server performance, the landcover computation can take a long time (more than two hours)
 
