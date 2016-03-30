@@ -144,12 +144,16 @@ Then run the following :
 
 ### Install Gridded Population of the World database
 
-Download the Gridded Population of the World from [SEDAC](http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/metadata)
+Download most recent "Population Count Grid Future" (or "Population Count Grid") product of the whole World from [SEDAC](http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/data-download) in ASCII Grid format (*.ascii or *.asc). All four resolutions (1°, 1/2°, 1/4° and 2.5′) are needed!
+
 Then run the following :
 
-        $ITAG_HOME/_install/installGPW.php -f asciigridfile
+        $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag60.asc
+        $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag30.asc
+        $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag15.asc
+        $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag.asc
 
-**Note** : this take a loooooong time
+**Note** : this take a loooooong time (more than four hours)
 
 ### Deploy application
 
