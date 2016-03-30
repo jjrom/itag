@@ -138,6 +138,8 @@ Download the world glc2000 GeoTIFF file from ["Global Land Cover 2000" - global 
 
 Then run the following :
 
+**Attention** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
+
         $ITAG_HOME/_install/computeLandCover.php -p postgres_user_pass -I path_to_glc2000_tif_image
 
 **Tip** : maybe you have to indicate the location of gdal tools (check -T and -P swich)
@@ -149,6 +151,8 @@ Then run the following :
 Download most recent "Population Count Grid Future" (or "Population Count Grid") product of the whole World from [SEDAC](http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count-future-estimates/data-download) in ASCII Grid format (*.ascii or *.asc). All four resolutions (1°, 1/2°, 1/4° and 2.5′) are needed!
 
 Then run the following :
+
+**Attention** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
 
         $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag60.asc
         $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag30.asc
