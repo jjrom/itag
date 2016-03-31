@@ -45,8 +45,8 @@ if [ -d "$TARGETDIR" ]; then
     fi
 fi
 
-mkdir $TARGETDIR
-echo ' ==> Copy files to $TARGETDIR directory'
-cp -Rf $SRCDIR/index.php $SRCDIR/include $TARGETDIR
-echo ' ==> Successfully install iTag to $TARGETDIR directory'
-echo ' ==> Now, do not forget to check $TARGETDIR/include/config.php configuration !'
+mkdir "$TARGETDIR"
+echo " ==> Copy files to $TARGETDIR directory"
+cp -t "$TARGETDIR" -Rf "$SRCDIR/index.php" "$SRCDIR/include"
+echo " ==> Successfully installed iTag to $TARGETDIR directory"
+echo " ==> Now, do not forget to check $TARGETDIR/include/config.php configuration !"
