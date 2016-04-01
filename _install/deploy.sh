@@ -47,6 +47,6 @@ fi
 
 mkdir "$TARGETDIR"
 echo " ==> Copy files to $TARGETDIR directory"
-cp -t "$TARGETDIR" -Rf "$SRCDIR/index.php" "$SRCDIR/include"
+cp -t "$TARGETDIR" -Rf "$SRCDIR/index.php" "$SRCDIR/include" "$SRCDIR/robots.txt"
 echo " ==> Successfully installed iTag to $TARGETDIR directory"
 echo " ==> Now, do not forget to check $TARGETDIR/include/config.php configuration !"
