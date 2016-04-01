@@ -150,7 +150,7 @@ BEGIN
 
 	RETURN geom_out;
 END
-\$\$ LANGUAGE 'plpgsql';
+\$\$ LANGUAGE 'plpgsql' IMMUTABLE;
 EOF
 
 # Rights
