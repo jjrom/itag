@@ -73,8 +73,8 @@ class Tagger_Toponyms extends Tagger {
                 'name' => $result['name'],
                 'country' => $result['countryname'],
                 'ccode' => $result['country'],
-                'geo:lon' => (integer) $result['longitude'],
-                'geo:lat' => (integer) $result['latitude'],
+                'geo:lon' => (float) $result['longitude'],
+                'geo:lat' => (float) $result['latitude'],
                 'fcode' => $result['fcode'],
                 'population' => (integer) $result['population'],
                 'distanceToCentroid' => (float) $result['distance']
