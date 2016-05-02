@@ -278,8 +278,8 @@ class Tagger_Political extends Tagger {
         while ($result = pg_fetch_assoc($results)) {
             $toponyms[] = array(
                 'name' => $result['name'],
-                'geo:lon' => (integer) $result['longitude'],
-                'geo:lat' => (integer) $result['latitude'],
+                'geo:lon' => (float) $result['longitude'],
+                'geo:lat' => (float) $result['latitude'],
                 'fcode' => $result['fcode'],
                 'population' => (integer) $result['population']
             );      
