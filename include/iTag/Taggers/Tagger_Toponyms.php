@@ -65,12 +65,13 @@ class Tagger_Toponyms extends Tagger {
         $codes = "('PPL', 'PPLC', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'STLMT')";
         
         $prequery = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($footprint) . ' AS corrected_geometry, ST_centroid(' . $this->postgisGeomFromText($footprint) . ') AS corrected_centroid)';
-        $query = $prequery . ' SELECT geonameid, name, country, countryname, longitude, latitude, fcode, population, ST_Distance(geom, corrected_centroid) as distance FROM prequery, gazetteer.geoname WHERE st_intersects(geom, corrected_geometry) AND fcode IN ' . $codes . ' ORDER BY distance ASC';
+        $query = $prequery . ' SELECT geonameid, name, normalize(name) as normalized, country, countryname, longitude, latitude, fcode, population, ST_Distance(geom, corrected_centroid) as distance FROM prequery, gazetteer.geoname WHERE st_intersects(geom, corrected_geometry) AND fcode IN ' . $codes . ' ORDER BY distance ASC';
         $results = $this->query($query);
         while ($result = pg_fetch_assoc($results)) {
             $toponyms[] = array(
                 'id' => (integer) $result['geonameid'],
                 'name' => $result['name'],
+                'normalized' => $result['normalized'],
                 'country' => $result['countryname'],
                 'ccode' => $result['country'],
                 'geo:lon' => (float) $result['longitude'],
