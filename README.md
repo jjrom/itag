@@ -31,7 +31,7 @@ However there is no guaranty of success and unwanted result may occured !
 
 ## Installation
 
-We suppose that : 
+We suppose that :
 
 * $ITAG_HOME is the directory containing this file
 * $ITAG_DATA is the directory containing the datasources file (see below)
@@ -46,7 +46,7 @@ First create the $ITAG_DATA directory
 #### General data
 
 Retrieve coastlines from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/)
-        
+
         cd $ITAG_DATA
         wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_coastline.zip
         unzip ne_10m_coastline.zip
@@ -54,17 +54,17 @@ Retrieve coastlines from [Natural Earth](http://www.naturalearthdata.com/downloa
 #### Political data
 
 Retrieve countries from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/)
-        
+
         cd $ITAG_DATA
         wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip
         unzip ne_10m_admin_0_countries.zip
-        
+
 Retrieve World Administrative Level 1 data from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/)
-        
+
         cd $ITAG_DATA
         wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_1_states_provinces.zip
         unzip ne_10m_admin_1_states_provinces.zip
-        
+
 Retrieve toponyms from [geonames](http://geonames.org)
 
         cd $ITAG_DATA
@@ -72,7 +72,7 @@ Retrieve toponyms from [geonames](http://geonames.org)
         wget http://download.geonames.org/export/dump/alternateNames.zip
         unzip allCountries.zip
         unzip alternateNames.zip
-        
+
 #### Geological data
 
 Retrieve geophysical data from [Mapping Tectonic Hot Spots](http://www.colorado.edu/geography/foote/maps/assign/hotspots/hotspots.html)
@@ -82,21 +82,21 @@ Retrieve geophysical data from [Mapping Tectonic Hot Spots](http://www.colorado.
         unzip hotspots.zip
 
 Retrieve glaciers from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-glaciated-areas/)
-        
+
         cd $ITAG_DATA
         wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_glaciated_areas.zip
         unzip ne_10m_glaciated_areas.zip
-        
+
 #### Hydrological data
 
 Retrieve rivers data from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/)
-        
+
         cd $ITAG_DATA
         wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_rivers_lake_centerlines.zip
         unzip ne_10m_rivers_lake_centerlines.zip
-        
+
 #### Other data (i.e. marine areas, mountains area, etc.)
-        
+
         # Marine areas
         cd $ITAG_DATA
         wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_geography_marine_polys.zip
@@ -104,26 +104,26 @@ Retrieve rivers data from [Natural Earth](http://www.naturalearthdata.com/downlo
 
 ### Install database
 
-        # Note : "password" must be the same as 
+        # Note : "password" must be the same as
         # the value of 'password' parameter in $ITAG_HOME/include/config.php
-        
+
         $ITAG_HOME/_install/installDB.sh -F -d <path_to_postgis_directory> -p password
 
 ### Populate database
-        
+
 **Note** : If you are using Fedora, Red Hat Enterprise Linux, CentOS, scientific Linux, or one of the other
 distros that enable SELinux by default you should run the following commands as root :
 
         setenforce 0
 
-Run the following commands 
+Run the following commands
 
         # General datasources
         $ITAG_HOME/_install/installDatasources.sh -F -D $ITAG_DATA
-        
+
         # Gazetteer
         $ITAG_HOME/_install/installGazetteerDB.sh -F -D $ITAG_DATA
-        
+
         # Wikipedia
         # This step is optional and can only be performed if you have the geolocated wikipedia data (which probably you don't have :)
         # In case of, these are the steps to follow in order to install this database within iTag
@@ -131,20 +131,34 @@ Run the following commands
         # Put the geolocated wikipedia data in $ITAG_DATA/wikipedia directory, then run the command
         #
         $ITAG_HOME/_install/installWikipediaDB.sh -D $ITAG_DATA/wikipedia
-    
+
 ### Install landcover database
 
+Install one of GlobCover2009 or GLC2000. GlobCover2009 is more recent and 300 meters resolution. GLC2000 is older and 1 kilometer resolution
+
+**Note** Process GlobCover2009 would take more time and take more disk space
+
+#### GLC2000
 Download the world glc2000 GeoTIFF file from ["Global Land Cover 2000" - global product](http://forobs.jrc.ec.europa.eu/products/glc2000/products.php)
 
 Then run the following :
 
-**Attention** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
+**Warning** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
 
         $ITAG_HOME/_install/computeLandCover.php -p postgres_user_pass -I path_to_glc2000_tif_image
 
 **Tip** : maybe you have to indicate the location of gdal tools (check -T and -P swich)
 
 **Note** : depending on your server performance, the landcover computation can take a long time (more than two hours)
+
+#### GlobCover2009
+Download the world GlobCover 2009 GeoTIFF file from ["European Space Agency GlobCover Portal"](http://due.esrin.esa.int/files/GLOBCOVER_L4_200901_200912_V2.3.color.tif)
+
+Then run the following :
+
+**Warning** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
+
+        $ITAG_HOME/_install/computeGlobCover2009.php -p postgres_user_pass -f GLOBCOVER_L4_200901_200912_V2.3.color.tif
 
 ### Install Gridded Population of the World database
 
@@ -170,7 +184,7 @@ Then run the following :
 We suppose that $ITAG_TARGET is accessible to http://localhost/itag/ in Apache.
 
 To tag footprint on Toulouse with geological information and all cities with a pretty GeoJSON output, open this url within you browser
-    
+
         http://localhost/itag/?taggers=Political&_pretty=true&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
 
 Available parameters for Web service are :
@@ -182,10 +196,10 @@ You can check this [running instance] (http://mapshup.com/projects/itag/)
 Examples :
 
     Tag footprint on Toulouse with political and geological information and with a pretty GeoJSON output
-    
+
         http://mapshup.com/projects/itag/?taggers=Political,Geology&_pretty=true&footprint=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))
 
 
     Tag footprint intersecting France, Italy and Switzerland with political information. Hierarchical result as pretty GeoJSON output
-    
+
         http://mapshup.com/projects/itag/?taggers=Political&footprint=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))

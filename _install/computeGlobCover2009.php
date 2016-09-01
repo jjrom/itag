@@ -18,13 +18,11 @@
  */
 
 /*
- * iTag - prepare landcover database from GLC2000 TIF image
+ * iTag - prepare landcover database from GlobCover2009 TIF image
  */
 
-$help  = "## iTag Global Land Cover 2000 compute and installation\n\n Usage computeLandCover.php [options] -I <path to GLC2000 TIF file>\n\n";
+$help  = "## iTag GlobCover 2009 compute and installation\n\n Usage computeLandCover.php [options] -f <path to GlobCover TIF file>\n\n";
 $help .= "OPTIONS:\n";
-$help .= "   -P [path] : path to gdal_polygonize.py\n";
-$help .= "   -T [path] : path to gdal_translate\n";
 $help .= "   -H : postgres server hostname (default localhost)\n";
 $help .= "   -d : iTag database name (default itag)\n";
 $help .= "   -s : postgresql superuser (default postgres)\n";
@@ -34,20 +32,14 @@ $hostname = 'localhost';
 $superuser = 'postgres';
 $password = 'postgres';
 $dbname = 'itag';
-$options = getopt("P:T:I:hp:d:s:");
+$options = getopt("f:hp:d:s:");
 foreach ($options as $option => $value) {
     if ($option === "h") {
         echo $help;
         exit;
     }
-    if ($option === "P") {
-        $gdalpolygonize = $value;
-    }
-    if ($option === "T") {
-        $gdaltranslate = $value;
-    }
-    if ($option === "I") {
-        $glc2000 = $value;
+    if ($option === "f") {
+        $globcover = $value;
     }
     if ($option === "H") {
         $hostname = $value;
@@ -63,13 +55,9 @@ foreach ($options as $option => $value) {
     }
 }
 
-if (!isset($gdaltranslate)) {
-    $gdaltranslate = '/usr/local/bin/gdal_translate';
-}
-if (!isset($gdalpolygonize)) {
-    $gdalpolygonize = '/usr/local/bin/gdal_polygonize.py';
-}
-if (!isset($glc2000)) {
+$gdaltranslate = exec('which gdal_translate');
+$gdalpolygonize = exec('which gdal_polygonize.py');
+if (!isset($globcover)) {
     echo $help;
     exit;
 }
@@ -86,7 +74,7 @@ pg_set_client_encoding($dbh, "UTF8");
 $config = array(
     'translate' => $gdaltranslate,
     'polygonize' => $gdalpolygonize,
-    'image' => $glc2000,
+    'image' => $globcover,
     'dbname' => $dbname,
     'host' => $hostname,
     'user' => $superuser,
@@ -125,6 +113,23 @@ function cropOriginGLC2000($bbox) {
 }
 
 /**
+ * Return crop origin from Bounding Box for GlobCover raster
+ *
+ * @param <Array> $bbox : ['ulx', 'uly', 'lrx', 'lry']
+ * @return <Array> ['x','y','xsize','ysize']
+ */
+function cropOriginGlobCover($bbox) {
+
+    // GlobCover full raster info
+    $dx = 0.002777777777778;
+    $dy = -0.002777777777778;
+    $lon0 = -180.001388888888897;
+    $lat0 = 90.001388888888883;
+
+    return cropOrigin($bbox, $lon0, $lat0, $dx, $dy);
+}
+
+/**
  * Return crop origin from Bounding Box
  *
  * @param <Array> $bbox : ['ulx', 'uly', 'lrx', 'lry']
@@ -149,23 +154,23 @@ function polygonize($footprint, $dbh, $config) {
     $tifName = '/tmp/' . md5(microtime()) . '.tif';
     $tmpTable = 'tmptable';
 
-    // Crop GLC2000 raster
-    $cropOrigin = cropOriginGLC2000(bbox($footprint));
+    // Crop GlobCover raster
+    $cropOrigin = cropOriginGlobCover(bbox($footprint));
     $srcWin = $cropOrigin['x'] . ' ' . $cropOrigin['y'] . ' ' . $cropOrigin['xsize'] . ' ' . $cropOrigin['ysize'];
 
-    // Crop GLC2000 raster to $srcWin
+    // Crop GlobCover raster to $srcWin
     exec($config['translate'] . " -of GTiff -srcwin " . $srcWin . " -a_srs EPSG:4326 " . $config['image'] . ' ' . $tifName);
 
     // In case of crashing crop - polygon is outside bounds for example
     if (!file_exists($tifName)) {
-        echo "  --> WARNING : glc2000 crop error\n";
+        echo "  --> WARNING : globcover crop error\n";
         return;
     }
 
     // Polygonize extracted raster within temporary table $tmpTable
     exec($config['polygonize'] . ' ' . $tifName . ' -f "PostgreSQL" PG:"host=' . $config['host'] . ' user=' . $config['user'] . ' password=' . $config['password'] . ' dbname=' . $config['dbname'] . '" ' . $tmpTable . ' 2>&1');
 
-    pg_query($dbh, 'INSERT INTO datasources.landcover(wkb_geometry,dn) SELECT wkb_geometry,dn FROM ' . $tmpTable);
+    pg_query($dbh, 'INSERT INTO datasources.landcover2009(wkb_geometry,dn) SELECT wkb_geometry,dn FROM ' . $tmpTable);
     unlink($tifName);
 
     // Drop tmpTable - bug in gdla_polygonize.py ?
