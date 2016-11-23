@@ -1,0 +1,5 @@
+languages:
+  PHP: true
+exclude_paths:
+- _install/*
+- include/iTag/Taggers/Tagger_LandCover2009.php
