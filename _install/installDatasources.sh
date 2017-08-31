@@ -27,7 +27,7 @@ while getopts "D:d:s:u:H:hF" options; do
         d ) DB=`echo $OPTARG`;;
         u ) USER=`echo $OPTARG`;;
         s ) SUPERUSER=`echo $OPTARG`;;
-        H ) HOSTNAME=`echo "-h "$OPTARG`;;
+        H ) HOSTNAME=`echo "-h "$OPTARG`;;
         h ) echo -e $usage;;
         F ) DROPFIRST=YES;;
         \? ) echo -e $usage

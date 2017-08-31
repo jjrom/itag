@@ -27,7 +27,7 @@ while getopts "d:s:p:hFH:" options; do
         d ) ROOTDIR=`echo $OPTARG`;;
         s ) SUPERUSER=`echo $OPTARG`;;
         p ) PASSWORD=`echo $OPTARG`;;
-        H ) HOSTNAME=`echo $OPTARG`;;
+        H ) HOSTNAME=`echo $OPTARG`;;
         F ) DROPFIRST=YES;;
         h ) echo -e $usage;;
         \? ) echo -e $usage
