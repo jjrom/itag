@@ -21,7 +21,7 @@
  * iTag - prepare landcover database from GlobCover2009 TIF image
  */
 
-$help  = "## iTag GlobCover 2009 compute and installation\n\n Usage computeLandCover.php [options] -f <path to GlobCover TIF file>\n\n";
+$help  = "## iTag GlobCover 2009 compute and installation\n\n Usage computeLandCover2009.php [options] -f <path to GlobCover 2009 TIF file>\n\n";
 $help .= "OPTIONS:\n";
 $help .= "   -H : postgres server hostname (default localhost)\n";
 $help .= "   -d : iTag database name (default itag)\n";
