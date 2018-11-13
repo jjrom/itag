@@ -62,13 +62,13 @@ MARINEAREAS=$DATADIR/ne_10m_geography_marine_polys.shp
 ##### DROP SCHEMA FIRST ######
 if [ "$DROPFIRST" = "YES" ]
 then
-psql -d $DB -U $SUPERUSER << EOF
+psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
 DROP SCHEMA IF EXISTS datasources CASCADE;
 DROP SCHEMA IF EXISTS gpw CASCADE;
 EOF
 fi
 
-psql -d $DB -U $SUPERUSER << EOF
+psql -d $DB -U $SUPERUSER $HOSTNAME << EOF
 CREATE SCHEMA datasources;
 EOF
 

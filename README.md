@@ -31,106 +31,78 @@ However there is no guaranty of success and unwanted result may occured !
 
 ## Installation
 
-We suppose that :
+Create a home directory for the installation files and clone the itag GIT repository:
 
-* $ITAG_HOME is the directory containing this file
-* $ITAG_DATA is the directory containing the datasources file (see below)
+```
+export ITAG_HOME=/opt/src/itag
+cd $ITAG_HOME
+git clone https://github.com/jjrom/itag.git
+```
 
-### Get datasources
+Install the database schema
+```
+$ITAG_HOME/_install/installDB.sh -F -H localhost -p itag
+```
 
-First create the $ITAG_DATA directory
+### Get data sources
 
-    export ITAG_DATA=$ITAG_HOME/data
-    mkdir $ITAG_DATA
+Create a directory for data sources and make it the current directory:
+```
+export ITAG_DATA=$ITAG_HOME/data
+mkdir $ITAG_DATA
+cd $ITAG_DATA
+```
+Execute the following commands to download and uncompress the data sources:
+```
+# Retrieve coastlines from [Natural Earth]
+wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_coastline.zip
+unzip ne_10m_coastline.zip
+[ $? -eq 0 ] && rm ne_10m_coastline.zip
 
-#### General data
+# Retrieve World Administrative Level 1 data from [Natural Earth]
+wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip
+unzip ne_10m_admin_0_countries.zip
+[ $? -eq 0 ] && rm ne_10m_admin_0_countries.zip
 
-Retrieve coastlines from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/)
+# Retrieve World Administrative Level 1 data from [Natural Earth]
+wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_1_states_provinces.zip
+unzip ne_10m_admin_1_states_provinces.zip
+[ $? -eq 0 ] && rm ne_10m_admin_1_states_provinces.zip
 
-        cd $ITAG_DATA
-        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_coastline.zip
-        unzip ne_10m_coastline.zip
+# Retrieve toponyms from [geonames](http://geonames.org)
+wget http://download.geonames.org/export/dump/allCountries.zip
+wget http://download.geonames.org/export/dump/alternateNames.zip
+unzip allCountries.zip
+unzip alternateNames.zip
+[ $? -eq 0 ] && rm allCountries.zip
+[ $? -eq 0 ] && rm alternateNames.zip
 
-#### Political data
+# Retrieve geophysical data from [Mapping Tectonic Hot Spots]
+wget http://www.colorado.edu/geography/foote/maps/assign/hotspots/download/hotspots.zip
+unzip hotspots.zip
+[ $? -eq 0 ] && rm hotspots.zip
 
-Retrieve countries from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/)
+# Retrieve glaciers from [Natural Earth]
+wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_glaciated_areas.zip
+unzip ne_10m_glaciated_areas.zip
+[ $? -eq 0 ] && rm ne_10m_glaciated_areas.zip
 
-        cd $ITAG_DATA
-        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip
-        unzip ne_10m_admin_0_countries.zip
+# Retrieve rivers data from [Natural Earth]
+wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_rivers_lake_centerlines.zip
+unzip ne_10m_rivers_lake_centerlines.zip
+[ $? -eq 0 ] && rm ne_10m_rivers_lake_centerlines.zip
 
-Retrieve World Administrative Level 1 data from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/)
+# Retrieve other data (i.e. marine areas, mountains area, etc.) from [Natural Earth]
+wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_geography_marine_polys.zip
+unzip ne_10m_geography_marine_polys.zip
+[ $? -eq 0 ] && rm ne_10m_geography_marine_polys.zip
+```
 
-        cd $ITAG_DATA
-        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_1_states_provinces.zip
-        unzip ne_10m_admin_1_states_provinces.zip
-
-Retrieve toponyms from [geonames](http://geonames.org)
-
-        cd $ITAG_DATA
-        wget http://download.geonames.org/export/dump/allCountries.zip
-        wget http://download.geonames.org/export/dump/alternateNames.zip
-        unzip allCountries.zip
-        unzip alternateNames.zip
-
-#### Geological data
-
-Retrieve geophysical data from [Mapping Tectonic Hot Spots](http://www.colorado.edu/geography/foote/maps/assign/hotspots/hotspots.html)
-
-        cd $ITAG_DATA
-        wget http://www.colorado.edu/geography/foote/maps/assign/hotspots/download/hotspots.zip
-        unzip hotspots.zip
-
-Retrieve glaciers from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-glaciated-areas/)
-
-        cd $ITAG_DATA
-        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_glaciated_areas.zip
-        unzip ne_10m_glaciated_areas.zip
-
-#### Hydrological data
-
-Retrieve rivers data from [Natural Earth](http://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/)
-
-        cd $ITAG_DATA
-        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_rivers_lake_centerlines.zip
-        unzip ne_10m_rivers_lake_centerlines.zip
-
-#### Other data (i.e. marine areas, mountains area, etc.)
-
-        # Marine areas
-        cd $ITAG_DATA
-        wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_geography_marine_polys.zip
-        unzip ne_10m_geography_marine_polys.zip
-
-### Install database
-
-        # Note : "password" must be the same as
-        # the value of 'password' parameter in $ITAG_HOME/include/config.php
-
-        $ITAG_HOME/_install/installDB.sh -F -d <path_to_postgis_directory> -p password
-
-### Populate database
-
-**Note** : If you are using Fedora, Red Hat Enterprise Linux, CentOS, scientific Linux, or one of the other
-distros that enable SELinux by default you should run the following commands as root :
-
-        setenforce 0
-
-Run the following commands
-
-        # General datasources
-        $ITAG_HOME/_install/installDatasources.sh -F -D $ITAG_DATA
-
-        # Gazetteer
-        $ITAG_HOME/_install/installGazetteerDB.sh -F -D $ITAG_DATA
-
-        # Wikipedia
-        # This step is optional and can only be performed if you have the geolocated wikipedia data (which probably you don't have :)
-        # In case of, these are the steps to follow in order to install this database within iTag
-        #
-        # Put the geolocated wikipedia data in $ITAG_DATA/wikipedia directory, then run the command
-        #
-        $ITAG_HOME/_install/installWikipediaDB.sh -D $ITAG_DATA/wikipedia
+Install the database schema by executing the following commands (gazetteer creation could take several hours):
+```
+$ITAG_HOME/_install/installDatasources.sh -F -D $ITAG_DATA
+$ITAG_HOME/_install/installGazetteerDB.sh -F -D $ITAG_DATA
+```
 
 ### Install landcover database
 
@@ -166,7 +138,7 @@ Download most recent "Population Count Grid Future" (or "Population Count Grid")
 
 Then run the following :
 
-**Attention** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
+**Warning** : this PHP script gets postgres superuser password as command line argument, change password after iTag installation !
 
         $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag60.asc
         $ITAG_HOME/_install/installGPW.php -p postgres_user_pass -f glp15ag30.asc
