@@ -17,7 +17,7 @@ You can access an online instance [here] (http://mapshup.com/projects/itag) as a
 
 See [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597) and access trough [mapshup] (http://mapshup.com/projects/mapshup)
 
-iTag is used by [RESTo - REstful Semantic search Tool for geOspatial] (http://github.com/jjrom/resto)
+iTag is used by [resto - REstful Semantic search Tool for geOspatial] (http://github.com/jjrom/resto)
 
 ## Prerequesites
 

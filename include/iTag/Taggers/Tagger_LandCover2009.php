@@ -223,7 +223,7 @@ class Tagger_LandCover2009 extends Tagger {
             $query = $prequery . ' SELECT dn as dn, ' . $this->postgisArea($this->postgisIntersection('wkb_geometry', 'corrected_geometry')) . ' as area, ' . $this->postgisAsWKT($this->postgisSimplify($this->postgisIntersection('wkb_geometry', 'corrected_geometry'))) . ' as wkt FROM prequery, datasources.landcover2009 WHERE st_intersects(wkb_geometry, corrected_geometry)';
         }
         else {
-            $query = $prequery . ' SELECT dn as dn, ' . $this->postgisArea($this->postgisIntersection('wkb_geometry', 'corrected_geometry')) . ' as area FROM prequery, datasources.landcover WHERE st_intersects(wkb_geometry, corrected_geometry)';
+            $query = $prequery . ' SELECT dn as dn, ' . $this->postgisArea($this->postgisIntersection('wkb_geometry', 'corrected_geometry')) . ' as area FROM prequery, datasources.landcover2009 WHERE st_intersects(wkb_geometry, corrected_geometry)';
         }
         $results = $this->query($query);
         if (!$results) {

@@ -235,6 +235,13 @@ CREATE TABLE datasources.landcover (
 );
 SELECT AddGeometryColumn ('datasources','landcover','wkb_geometry',4326,'POLYGON',2);
 CREATE INDEX landcover_geometry_idx ON datasources.landcover USING gist (wkb_geometry);
+
+CREATE TABLE datasources.landcover2009 (
+    ogc_fid         SERIAL,
+    dn              INTEGER
+);
+SELECT AddGeometryColumn ('datasources','landcover2009','wkb_geometry',4326,'POLYGON',2);
+CREATE INDEX landcover2009_geometry_idx ON datasources.landcover2009 USING gist (wkb_geometry);
 EOF
 
 # =================== GPW ============================
@@ -297,6 +304,7 @@ GRANT SELECT ON datasources.faults_gid_seq TO $USER;
 GRANT SELECT on datasources.volcanoes to $USER;
 GRANT SELECT ON datasources.volcanoes_gid_seq TO $USER;
 GRANT SELECT on datasources.landcover to $USER;
+GRANT SELECT on datasources.landcover2009 to $USER;
 GRANT SELECT on datasources.physical to $USER;
 GRANT SELECT ON datasources.physical_gid_seq TO $USER;
 GRANT ALL ON SCHEMA gpw TO $USER;
