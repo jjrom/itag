@@ -5,12 +5,12 @@ iTag is a web service for the semantic enhancement of Earth Observation products
 
 See [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597)
 
-Test the [service online](https://itag.snapplanet.io?)
+Test the [service online]( https://itag.snapplanet.io?_pretty=1&taggers=political&geometry=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822)) )
 
 **For official support to itag, please contact [jeobrowser](https://mapshup.com)**
 
 ## API
-The API is available [here](https://github.com/jjrom/itag/blob/docker/docs/API.md) 
+The API is available [here](https://github.com/jjrom/itag/blob/master/docs/API.md) 
 
 ## Installation
 
