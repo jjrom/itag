@@ -5,8 +5,16 @@ iTag is a web service for the semantic enhancement of Earth Observation products
 
 See [video capture of itag applied to Pleiades HR and Spot5 images database] (http://vimeo.com/51045597)
 
-## Prerequesites
+Test the [service online](https://itag.snapplanet.io?)
 
+**For official support to itag, please contact [jeobrowser](https://mapshup.com)**
+
+## API
+The API is available [here](https://github.com/jjrom/itag/blob/docker/docs/API.md) 
+
+## Installation
+
+### Prerequesites
 iTag installation and deployment is based on docker-compose. It can run on any OS as long as the following software are up and running:
 
 * bash
@@ -14,25 +22,21 @@ iTag installation and deployment is based on docker-compose. It can run on any O
 * docker engine
 * docker-compose
 
-## Installation
+### Building and deploying
 Run the following script:
 
         ./deploy.sh -e config.env
 
 *On first deployment, the script retrieves all the datasources from internet and populates the database. It can take some time.*
 
-## Configuration
+### Configuration
 All configuration options are defined within the [config.env](https://github.com/jjrom/itag/blob/docker/config.env) file.
 
 For a local installation, you can leave it untouched. Otherwise, just make your own configuration. It's self explanatory (send me an email if not ;)
 
 Note that each time you change the configuration file, you should undeploy then redeploy the service.
 
-
-## API
-The API is available [here](https://github.com/jjrom/itag/blob/docker/docs/API.md) 
-
-## Example
+## Examples
 *Note: The following example are based on the default service endpoint defined in (cf. [config.env](https://github.com/jjrom/itag/blob/docker/config.env))*
 
 Tag a geometry on Toulouse with "Political" information and all cities with a pretty GeoJSON output
@@ -63,4 +67,7 @@ Use docker-compose, e.g.:
 
 ### Where is the configuration of a running itag container ?
 When deployed, all configurations file are stored under .run/config directory
+
+### Why do i have empty result for landcover and population ?
+The Landcover and Population data are available separately from this repository. If you need this data, send an email to jerome.gasperi@gmail.com
 
