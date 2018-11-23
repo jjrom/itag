@@ -1,0 +1,175 @@
+#! /bin/bash
+#
+# Copyright 2018 Jérôme Gasperi
+#
+# Licensed under the Apache License, version 2.0 (the "License");
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Force script to exit on error
+set -e
+
+ENV_FILE=__NULL__
+DATA_DIR=__NULL__
+SCRIPT_PATH=__NULL__
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+function showUsage {
+    echo ""
+    echo "   Install GPW datasources "
+    echo ""
+    echo "   Usage $0 -e config.env"
+    echo ""
+    echo "      -e | --envfile Environnement file (see config.env example)"
+    echo "      -d | --dataDir Directory to download data"
+    echo "      -s | --script Path to gpw2sql.php script"
+    echo "      -h | --help show this help"
+    echo ""
+}
+
+# Parsing arguments
+while [[ $# > 0 ]]
+do
+	key="$1"
+	case $key in
+        -e|--envfile)
+            ENV_FILE="$2"
+            shift # past argument
+            ;;
+        -d|--dataDir)
+            DATA_DIR="$2"
+            shift # past argument
+            ;;
+        -s|--script)
+            SCRIPT_PATH="$2"
+            shift # past argument
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            shift # past argument
+            ;;
+            *)
+        shift # past argument
+        # unknown option
+        ;;
+	esac
+done
+
+if [ ! -f ${ENV_FILE} ]; then
+    showUsage
+    echo -e "${RED}[ERROR]${NC} Missing or invalid config file with -e option"
+    echo ""
+    exit 0
+fi
+
+if [ "${DATA_DIR}" == "__NULL__" ]; then
+    showUsage
+    echo -e "${RED}[ERROR]${NC} You must specify a data directory with -d option!"
+    echo ""
+    exit 0
+fi
+
+if [ "${SCRIPT_PATH}" == "__NULL__" ]; then
+    showUsage
+    echo -e "${RED}[ERROR]${NC} You must specify the path to gpw2sql.php with -s option"
+    echo ""
+    exit 0
+fi
+
+# Source config file
+. ${ENV_FILE}
+
+# Prepare data directory
+if [ -d "${DATA_DIR}" ];
+then
+    echo -e "[INFO] Using existing ${DATA_DIR} directory"
+else
+    echo -e "[INFO] Creating ${DATA_DIR} directory"
+    mkdir -p ${DATA_DIR}
+fi
+
+if [ ! -f ${DATA_DIR}/itag_glp15ag.sql ]; then
+    wget -O ${DATA_DIR}/itag_gpw.zip ${GPW_DATASOURCE_URL}
+    unzip ${DATA_DIR}/itag_gpw.zip -d ${DATA_DIR}
+    [ $? -eq 0 ] && rm ${DATA_DIR}/itag_gpw.zip
+else
+    echo -e "[INFO] Using existing ${GPW_DATASOURCE_URL} data" 
+fi
+
+echo -e "${YELLOW}[WARNING] Population grid insertion can take a loooong time - be patient :)${NC}"
+
+# ===================================================================
+TARGET=glp15ag60
+echo -e "[INFO] Inserting Population grids 2015 1x1 degrees grid"
+
+PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+DELETE FROM gpw.${TARGET};
+DROP INDEX gpw.footprint_${TARGET}_idx;
+DROP INDEX gpw.pcount_${TARGET}_idx;
+EOF
+
+cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
+PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING btree (footprint)
+CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount)
+EOF
+
+# ===================================================================
+TARGET=glp15ag30
+echo -e "[INFO] Inserting Population grids 2015 0.5x0.5 degrees grid"
+
+PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+DELETE FROM gpw.${TARGET};
+DROP INDEX gpw.footprint_${TARGET}_idx;
+DROP INDEX gpw.pcount_${TARGET}_idx;
+EOF
+
+cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
+PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING btree (footprint)
+CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount)
+EOF
+
+# ===================================================================
+TARGET=glp15ag15
+echo -e "[INFO] Inserting Population grids 2015 0.25x0.25 degrees grid"
+
+PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+DELETE FROM gpw.${TARGET};
+DROP INDEX gpw.footprint_${TARGET}_idx;
+DROP INDEX gpw.pcount_${TARGET}_idx;
+EOF
+
+cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
+PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING btree (footprint)
+CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount)
+EOF
+
+# ===================================================================
+TARGET=glp15ag
+echo -e "[INFO] Inserting Population grids 2015 2.5x2.5 arc minutes grid"
+
+PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+DELETE FROM gpw.${TARGET};
+DROP INDEX gpw.footprint_${TARGET}_idx;
+DROP INDEX gpw.pcount_${TARGET}_idx;
+EOF
+
+cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
+PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING btree (footprint)
+CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount)
+EOF

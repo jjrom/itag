@@ -1,0 +1,5 @@
+.env
+.run
+.private
+.DS_Store
+data

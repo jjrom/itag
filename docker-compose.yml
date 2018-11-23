@@ -1,0 +1,49 @@
+version: '2'
+volumes:
+  database_data:
+    driver: local
+networks:
+  default:
+    driver: bridge
+  external:
+    external:
+      name: rnet
+services:
+  itag:
+    image: 'bitnami/nginx:latest'
+    restart: always
+    depends_on:
+      - phpfpm
+      - itagdb
+    networks:
+      - external
+      - default
+    ports:
+      - ${APP_EXPOSED_PORT}:8080
+    volumes:
+      - .run/config/nginx.conf:/opt/bitnami/nginx/conf/vhosts/nginx.conf:ro
+  phpfpm:
+    image: jjrom/itag:5
+    restart: always
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    networks:
+      - default
+    volumes:
+      - ./app:/app:ro
+      - .run/config/config.php:/conf/config.php:ro
+      - .run/config/php.ini:/usr/local/etc/php/php.ini:ro
+  itagdb:
+    image: mdillon/postgis:10-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${DATABASE_USER_NAME}
+      - POSTGRES_PASSWORD=${DATABASE_USER_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    ports:
+      - ${DATABASE_EXPOSED_PORT}:5432
+    networks:
+      - default
+    volumes:
+      - database_data:/var/lib/postgresql/data
