@@ -32,7 +32,7 @@ class iTag {
      *  )
      * )
      */
-    const VERSION = '5.0.0';
+    const VERSION = '5.0.1';
 
     /*
      * Database handler
