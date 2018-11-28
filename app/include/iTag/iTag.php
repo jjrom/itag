@@ -33,6 +33,11 @@ class iTag {
      * )
      */
     const VERSION = '5.0.1';
+    
+    /*
+     * Character separator
+     */
+    const TAG_SEPARATOR = '_';
 
     /*
      * Database handler

@@ -104,9 +104,9 @@ class Tagger_generic extends Tagger {
             if (isset($result['type'])) {
                 $geonameid = '';
                 if (isset($result['geonameid'])) {
-                    $geonameid = ':' . $result['geonameid'];
+                    $geonameid = iTag::TAG_SEPARATOR . $result['geonameid'];
                 }
-                $result['id'] = strtolower($result['type']) . ':' . $result['normalized'] . $geonameid;
+                $result['id'] = strtolower($result['type']) . iTag::TAG_SEPARATOR . $result['normalized'] . $geonameid;
             }
             
             if (isset($result['area'])) {

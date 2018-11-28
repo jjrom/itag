@@ -81,7 +81,7 @@ class Tagger_always extends Tagger {
          * Coastal status
          */
         if ($this->isCoastal($metadata['geometry'])) {
-            $keywords[] = 'location:coastal';
+            $keywords[] = 'location' . iTag::TAG_SEPARATOR . 'coastal';
         }
 
         /*
@@ -126,7 +126,7 @@ class Tagger_always extends Tagger {
         $locations = array();
         foreach ($this->areas as $key => $value) {
             if ($this->isETNS($geometry, $value)) {
-                $locations[] = 'location:' . $key;
+                $locations[] = 'location'. iTag::TAG_SEPARATOR . $key;
             }
         }
         return $locations;
@@ -169,19 +169,19 @@ class Tagger_always extends Tagger {
         $day = intval(substr($timestamp, 8, 2));
 
         if ($this->isSpring($month, $day)) {
-            return $southern ? 'season:autumn' : 'season:spring';
+            return $southern ? 'season' . iTag::TAG_SEPARATOR . 'autumn' : 'season' . iTag::TAG_SEPARATOR . 'spring';
         }
 
         else if ($this->isSummer($month, $day)) {
-            return $southern ? 'season:winter' : 'season:summer';
+            return $southern ? 'season' . iTag::TAG_SEPARATOR . 'winter' : 'season' . iTag::TAG_SEPARATOR . 'summer';
         }
 
         else if ($this->isAutumn($month, $day)) {
-            return $southern ? 'season:spring' : 'season:autumn';
+            return $southern ? 'season' . iTag::TAG_SEPARATOR . 'spring' : 'season' . iTag::TAG_SEPARATOR . 'autumn';
         }
 
         else {
-            return $southern ? 'season:summer' : 'season:winter';
+            return $southern ? 'season' . iTag::TAG_SEPARATOR . 'summer' : 'season' . iTag::TAG_SEPARATOR . 'winter';
         }
 
     }

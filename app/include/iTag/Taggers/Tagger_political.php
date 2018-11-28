@@ -136,10 +136,10 @@ class Tagger_political extends Tagger {
     private function add(&$continents, $geometry, $what) {
         $prequery = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry)';
         if ($what === Tagger_political::COUNTRIES) {
-            $query = $prequery . ' SELECT name as name, concat(normalize(name), \':\', geonameid) as id, continent as continent, normalize(continent) as continentid, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea FROM prequery, datasources.countries WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
+            $query = $prequery . ' SELECT name as name, concat(normalize(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as id, continent as continent, normalize(continent) as continentid, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea FROM prequery, datasources.countries WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
         }
         else {
-            $query = $prequery . ' SELECT region, name as state, concat(normalize(name), \':\', geonameid) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea, ' . $this->postgisIntersection('geom', 'corrected_geometry') . ' as wkb_geom, iso_a2 FROM prequery, datasources.states WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
+            $query = $prequery . ' SELECT region, name as state, concat(normalize(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea, ' . $this->postgisIntersection('geom', 'corrected_geometry') . ' as wkb_geom, iso_a2 FROM prequery, datasources.states WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
         }
         $results = $this->query($query);
         if ($results) {
@@ -152,7 +152,7 @@ class Tagger_political extends Tagger {
                   /*
                    * Get the region area
                    */
-                  $query2 = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry) SELECT concat(normalize(name), \':\', geonameid) as regionid2, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as regionarea, ' . $this->postgisArea('geom') . ' as regionentityarea FROM prequery, datasources.regions WHERE normalize(name)=\'' . $element['regionid'] . '\' AND iso_a2=\'' . $element['iso_a2'] . '\' LIMIT 1';
+                  $query2 = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry) SELECT concat(normalize(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as regionid2, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as regionarea, ' . $this->postgisArea('geom') . ' as regionentityarea FROM prequery, datasources.regions WHERE normalize(name)=\'' . $element['regionid'] . '\' AND iso_a2=\'' . $element['iso_a2'] . '\' LIMIT 1';
                   $results2 = $this->query($query2);
                   if ($results2) {
                     while ($element2 = pg_fetch_assoc($results2)) {
@@ -241,7 +241,7 @@ class Tagger_political extends Tagger {
             $continentGeoname = $this->geonameIdForContinents[$element['continentid']];
             array_push($continents, array(
                 'name' => $element['continent'],
-                'id' => 'continent:' . $element['continentid'] . (isset($continentGeoname) ? ':' . $continentGeoname : ':'),
+                'id' => 'continent'. iTag::TAG_SEPARATOR . $element['continentid'] . (isset($continentGeoname) ? iTag::TAG_SEPARATOR . $continentGeoname : iTag::TAG_SEPARATOR),
                 'countries' => array()
             ));
             $index = count($continents) - 1;
@@ -249,7 +249,7 @@ class Tagger_political extends Tagger {
         $area = $this->toSquareKm($element['area']);
         array_push($continents[$index]['countries'], array(
             'name' => $element['name'],
-            'id' => 'country:' . $element['id'],
+            'id' => 'country'. iTag::TAG_SEPARATOR . $element['id'],
             'pcover' => $this->percentage($area, $this->area),
             'gcover' => $this->percentage($area, $this->toSquareKm($element['entityarea']))
         ));
@@ -272,7 +272,7 @@ class Tagger_political extends Tagger {
                 $area = $this->toSquareKm($element['regionarea']);
                 array_push($regions, array(
                     'name' => $element['region'],
-                    'id' => 'region:' . $element['regionid'],
+                    'id' => 'region'. iTag::TAG_SEPARATOR . $element['regionid'],
                     'pcover' => $this->percentage($area, $this->area),
                     'gcover' => $this->percentage($area, $this->toSquareKm($element['regionentityarea'])),
                     'states' => array()
@@ -281,7 +281,7 @@ class Tagger_political extends Tagger {
             else {
                 array_push($regions, array(
                     'name' => $element['region'],
-                    'id' => 'region:' . $element['regionid'],
+                    'id' => 'region'. iTag::TAG_SEPARATOR . $element['regionid'],
                     'pcover' => -1,
                     'gcover' => -1,
                     'states' => array()
@@ -300,7 +300,7 @@ class Tagger_political extends Tagger {
         $area = $this->toSquareKm($element['area']);
         $state = array(
             'name' => $element['state'],
-            'id' => 'state:' . $element['stateid'],
+            'id' => 'state'. iTag::TAG_SEPARATOR . $element['stateid'],
             'pcover' => $this->percentage($area, $this->area),
             'gcover' => $this->percentage($area, $this->toSquareKm($element['entityarea']))
         );

@@ -171,7 +171,7 @@ class Tagger_landcover2009 extends Tagger {
                 $name = isset($this->clcClassNames[$key]) ? $this->clcClassNames[$key] : 'unknown';
                 array_push($landUse, array(
                     'name' => $name,
-                    'id' => 'landuse:' . strtolower($name),
+                    'id' => 'landuse'. iTag::TAG_SEPARATOR . strtolower($name),
                     'area' => $this->toSquareKm($val),
                     'pcover' => $pcover
                 ));
@@ -195,8 +195,8 @@ class Tagger_landcover2009 extends Tagger {
                 $area = $this->toSquareKm($val['area']);
                 $details = array(
                     'name' => $name,
-                    'id' => 'landuse_details:' . strtolower(str_replace(array('/', ',', ' '), '-', $name)),
-                    'parentId' => 'landuse:' . strtolower($this->getCLCParent($key)),
+                    'id' => 'landuse_details'. iTag::TAG_SEPARATOR . strtolower(str_replace(array('/', ',', ' '), '-', $name)),
+                    'parentId' => 'landuse'. iTag::TAG_SEPARATOR . strtolower($this->getCLCParent($key)),
                     'code' => $key,
                     'area' => $area,
                     'pcover' => $this->percentage($area, $this->area)
