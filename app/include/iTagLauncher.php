@@ -96,30 +96,30 @@ class iTagLauncher {
      *                   "content": {
      *                       "area": 3483.53511,
      *                       "keywords": {
-     *                           "location:northern",
-     *                           "season:winter"
+     *                           "location_northern",
+     *                           "season_winter"
      *                       },
      *                       "political": {
      *                           "continents": {
      *                               {
      *                                   "name": "Europe",
-     *                                   "id": "continent:europe:6255148",
+     *                                   "id": "continent_europe_6255148",
      *                                   "countries": {
      *                                       {
      *                                           "name": "Italy",
-     *                                           "id": "country:italy:3175395",
+     *                                           "id": "country_italy_3175395",
      *                                           "pcover": 37.02,
      *                                           "gcover": 0.42,
      *                                           "regions": {
      *                                               {
      *                                                   "name": "Valle d'Aosta",
-     *                                                   "id": "region:valledaosta:3164857",
+     *                                                   "id": "region_valledaosta_3164857",
      *                                                   "pcover": 37.2,
      *                                                   "gcover": 39.19,
      *                                                   "states": {
      *                                                       {
      *                                                           "name": "Aoste",
-     *                                                           "id": "state:aoste:3182996",
+     *                                                           "id": "state_aoste_3182996",
      *                                                           "pcover": 37.02,
      *                                                           "gcover": 39.13
      *                                                       }
@@ -129,19 +129,19 @@ class iTagLauncher {
      *                                       },
      *                                       {
      *                                           "name": "France",
-     *                                           "id": "country:france:3017382",
+     *                                           "id": "country_france_3017382",
      *                                           "pcover": 32.9,
      *                                           "gcover": 0.18,
      *                                           "regions": {
      *                                               {
      *                                                   "name": "Rh\u00f4ne-Alpes",
-     *                                                   "id": "region:rhonealpes:11071625",
+     *                                                   "id": "region_rhonealpes_11071625",
      *                                                   "pcover": 32.94,
      *                                                   "gcover": 2.56,
      *                                                   "states": {
      *                                                       {
      *                                                           "name": "Haute-Savoie",
-     *                                                           "id": "state:hautesavoie:3013736",
+     *                                                           "id": "state_hautesavoie_3013736",
      *                                                           "pcover": 29.39,
      *                                                           "gcover": 21.86
      *                                                       }
@@ -149,13 +149,13 @@ class iTagLauncher {
      *                                               },
      *                                               {
      *                                                   "name": "Rh\u00f4ne-Alpes",
-     *                                                   "id": "region:rhonealpes:11071625",
+     *                                                   "id": "region_rhonealpes_11071625",
      *                                                   "pcover": 32.94,
      *                                                   "gcover": 2.56,
      *                                                   "states": {
      *                                                       {
      *                                                           "name": "Savoie",
-     *                                                           "id": "state:savoie:2975517",
+     *                                                           "id": "state_savoie_2975517",
      *                                                           "pcover": 3.51,
      *                                                           "gcover": 1.98
      *                                                       }
@@ -165,7 +165,7 @@ class iTagLauncher {
      *                                       },
      *                                       {
      *                                           "name": "Switzerland",
-     *                                           "id": "country:switzerland:2658434",
+     *                                           "id": "country_switzerland_2658434",
      *                                           "pcover": 30.04,
      *                                           "gcover": 2.53,
      *                                           "regions": {
@@ -173,7 +173,7 @@ class iTagLauncher {
      *                                                   "states": {
      *                                                       {
      *                                                           "name": "Valais",
-     *                                                           "id": "state:valais:2658205",
+     *                                                           "id": "state_valais_2658205",
      *                                                           "pcover": 30.04,
      *                                                           "gcover": 19.79
      *                                                       }

@@ -1,5 +1,14 @@
 ---
 title: iTag - Semantic enhancement of Earth Observation data
+language_tabs:
+  - shell: Shell
+  - http: HTTP
+  - javascript: JavaScript
+  - javascript--nodejs: Node.JS
+  - ruby: Ruby
+  - python: Python
+  - java: Java
+  - go: Go
 toc_footers: []
 includes: []
 search: false
@@ -10,7 +19,7 @@ headingLevel: 2
 
 <h1 id="itag-semantic-enhancement-of-earth-observation-data">iTag - Semantic enhancement of Earth Observation data v5.0</h1>
 
-> Scroll down for example requests and responses.
+> Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
 iTag is a web service for the semantic enhancement of Earth Observation products, i.e. the tagging of products with additional information about the covered area, regarding for example geology, water bodies, land use, population, countries, administrative units or names of major settlements.
 
@@ -20,10 +29,140 @@ Base URLs:
 
 Email: <a href="mailto:jerome.gasperi@gmail.com">Support</a> 
 
+<h1 id="itag-semantic-enhancement-of-earth-observation-data-default">Default</h1>
+
 ## Tag a geometry
 
 <a id="opIdiTagLauncher::tag"></a>
 
+> Code samples
+
+```shell
+# You can also use wget
+curl -X GET http://localhost:11211/ \
+  -H 'Accept: application/json'
+
+```
+
+```http
+GET http://localhost:11211/ HTTP/1.1
+Host: localhost:11211
+Accept: application/json
+
+```
+
+```javascript
+var headers = {
+  'Accept':'application/json'
+
+};
+
+$.ajax({
+  url: 'http://localhost:11211/',
+  method: 'get',
+
+  headers: headers,
+  success: function(data) {
+    console.log(JSON.stringify(data));
+  }
+})
+
+```
+
+```javascript--nodejs
+const fetch = require('node-fetch');
+
+const headers = {
+  'Accept':'application/json'
+
+};
+
+fetch('http://localhost:11211/',
+{
+  method: 'GET',
+
+  headers: headers
+})
+.then(function(res) {
+    return res.json();
+}).then(function(body) {
+    console.log(body);
+});
+
+```
+
+```ruby
+require 'rest-client'
+require 'json'
+
+headers = {
+  'Accept' => 'application/json'
+}
+
+result = RestClient.get 'http://localhost:11211/',
+  params: {
+  }, headers: headers
+
+p JSON.parse(result)
+
+```
+
+```python
+import requests
+headers = {
+  'Accept': 'application/json'
+}
+
+r = requests.get('http://localhost:11211/', params={
+
+}, headers = headers)
+
+print r.json()
+
+```
+
+```java
+URL obj = new URL("http://localhost:11211/");
+HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+con.setRequestMethod("GET");
+int responseCode = con.getResponseCode();
+BufferedReader in = new BufferedReader(
+    new InputStreamReader(con.getInputStream()));
+String inputLine;
+StringBuffer response = new StringBuffer();
+while ((inputLine = in.readLine()) != null) {
+    response.append(inputLine);
+}
+in.close();
+System.out.println(response.toString());
+
+```
+
+```go
+package main
+
+import (
+       "bytes"
+       "net/http"
+)
+
+func main() {
+
+    headers := map[string][]string{
+        "Accept": []string{"application/json"},
+        
+    }
+
+    data := bytes.NewBuffer([]byte{jsonReq})
+    req, err := http.NewRequest("GET", "http://localhost:11211/", data)
+    req.Header = headers
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    // ...
+}
+
+```
 
 `GET /`
 
@@ -73,30 +212,30 @@ Returns a list of features intersecting input geometry
   "content": {
     "area": 3483.53511,
     "keywords": [
-      "location:northern",
-      "season:winter"
+      "location_northern",
+      "season_winter"
     ],
     "political": {
       "continents": [
         {
           "name": "Europe",
-          "id": "continent:europe:6255148",
+          "id": "continent_europe_6255148",
           "countries": [
             {
               "name": "Italy",
-              "id": "country:italy:3175395",
+              "id": "country_italy_3175395",
               "pcover": 37.02,
               "gcover": 0.42,
               "regions": [
                 {
                   "name": "Valle d'Aosta",
-                  "id": "region:valledaosta:3164857",
+                  "id": "region_valledaosta_3164857",
                   "pcover": 37.2,
                   "gcover": 39.19,
                   "states": [
                     {
                       "name": "Aoste",
-                      "id": "state:aoste:3182996",
+                      "id": "state_aoste_3182996",
                       "pcover": 37.02,
                       "gcover": 39.13
                     }
@@ -106,19 +245,19 @@ Returns a list of features intersecting input geometry
             },
             {
               "name": "France",
-              "id": "country:france:3017382",
+              "id": "country_france_3017382",
               "pcover": 32.9,
               "gcover": 0.18,
               "regions": [
                 {
                   "name": "Rh\\u00f4ne-Alpes",
-                  "id": "region:rhonealpes:11071625",
+                  "id": "region_rhonealpes_11071625",
                   "pcover": 32.94,
                   "gcover": 2.56,
                   "states": [
                     {
                       "name": "Haute-Savoie",
-                      "id": "state:hautesavoie:3013736",
+                      "id": "state_hautesavoie_3013736",
                       "pcover": 29.39,
                       "gcover": 21.86
                     }
@@ -126,13 +265,13 @@ Returns a list of features intersecting input geometry
                 },
                 {
                   "name": "Rh\\u00f4ne-Alpes",
-                  "id": "region:rhonealpes:11071625",
+                  "id": "region_rhonealpes_11071625",
                   "pcover": 32.94,
                   "gcover": 2.56,
                   "states": [
                     {
                       "name": "Savoie",
-                      "id": "state:savoie:2975517",
+                      "id": "state_savoie_2975517",
                       "pcover": 3.51,
                       "gcover": 1.98
                     }
@@ -142,7 +281,7 @@ Returns a list of features intersecting input geometry
             },
             {
               "name": "Switzerland",
-              "id": "country:switzerland:2658434",
+              "id": "country_switzerland_2658434",
               "pcover": 30.04,
               "gcover": 2.53,
               "regions": [
@@ -150,7 +289,7 @@ Returns a list of features intersecting input geometry
                   "states": [
                     {
                       "name": "Valais",
-                      "id": "state:valais:2658205",
+                      "id": "state_valais_2658205",
                       "pcover": 30.04,
                       "gcover": 19.79
                     }
