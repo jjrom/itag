@@ -26,17 +26,17 @@ return array(
          * Maximum area allowed (in square kilometers)
          * for LandCover computation 
          */
-        "areaLimit" => ${APP_LANDCOVER_MAXIMUM_AREA},
+        "areaLimit" => ${ITAG_LANDCOVER_MAXIMUM_AREA},
         
         /*
          * Return WKT geometries
          */
-        "returnGeometries" => ${APP_RETURN_GEOMETRIES},
+        "returnGeometries" => ${ITAG_RETURN_GEOMETRIES},
         
         /*
          * Tolerance value for simplication (in degrees)
          */
-        "geometryTolerance" => ${APP_SIMPLICATION_TOLERANCE}
+        "geometryTolerance" => ${ITAG_SIMPLICATION_TOLERANCE}
         
     ),
     
@@ -48,7 +48,7 @@ return array(
         /*
          * Database name
          */
-        "dbname" => "${DATABASE_NAME}",
+        "dbname" => "${ITAG_DATABASE_NAME}",
         
         /*
          * Host - if not specified socket connection
@@ -63,8 +63,8 @@ return array(
         /*
          * Database user with READ privileges 
          */
-        "user" => "${DATABASE_USER_NAME}",
-        "password" => "${DATABASE_USER_PASSWORD}"
+        "user" => "${ITAG_DATABASE_USER_NAME}",
+        "password" => "${ITAG_DATABASE_USER_PASSWORD}"
     
     )
 

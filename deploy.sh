@@ -82,24 +82,24 @@ fi
 echo -e "[INFO] Sourcing ${ENV_FILE}"
 . ${ENV_FILE}
 
-echo -e "[INFO] Application status is ${GREEN}${APP_PRODUCTION_STATUS}${NC}"
+echo -e "[INFO] Application status is ${GREEN}${ITAG_PRODUCTION_STATUS}${NC}"
 echo -e "[INFO] Set up .run/config directory to store configuration files"
 mkdir -p .run/config
-cp config/${APP_PRODUCTION_STATUS}/nginx.conf config/${APP_PRODUCTION_STATUS}/php.ini .run/config/
+cp config/${ITAG_PRODUCTION_STATUS}/nginx.conf config/${ITAG_PRODUCTION_STATUS}/php.ini .run/config/
 
-# Extract exposed port from APP_ENDPOINT or 80 if not set
-APP_EXPOSED_PORT="$(echo $APP_ENDPOINT | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
-if [ ${APP_EXPOSED_PORT} == "" ]; then
-    APP_EXPOSED_PORT=80
+# Extract exposed port from ITAG_ENDPOINT or 80 if not set
+ITAG_EXPOSED_PORT="$(echo $ITAG_ENDPOINT | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
+if [ ${ITAG_EXPOSED_PORT} == "" ]; then
+    ITAG_EXPOSED_PORT=80
 fi
 
 echo -e "[INFO] Creating ${GREEN}.env${NC} file for docker-compose"
 cat > .env <<EOL
-APP_EXPOSED_PORT=${APP_EXPOSED_PORT}
-DATABASE_NAME=${DATABASE_NAME}
-DATABASE_USER_NAME=${DATABASE_USER_NAME}
-DATABASE_USER_PASSWORD=${DATABASE_USER_PASSWORD}
-DATABASE_EXPOSED_PORT=${DATABASE_EXPOSED_PORT}
+ITAG_EXPOSED_PORT=${ITAG_EXPOSED_PORT}
+ITAG_DATABASE_NAME=${ITAG_DATABASE_NAME}
+ITAG_DATABASE_USER_NAME=${ITAG_DATABASE_USER_NAME}
+ITAG_DATABASE_USER_PASSWORD=${ITAG_DATABASE_USER_PASSWORD}
+ITAG_DATABASE_EXPOSED_PORT=${ITAG_DATABASE_EXPOSED_PORT}
 EOL
 
 echo -e "[INFO] Generating itag ${GREEN}.run/configure/config.php${NC} file"
@@ -116,9 +116,9 @@ docker-compose up -d
 echo -e "[INFO] Wait 10 seconds for database to be ready"
 sleep 10
 
-DATASOURCES_INSTALL=$(PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "datasources" | wc | awk '{print $1}')
-GPW_INSTALL=$(PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "gpw" | wc | awk '{print $1}')
-LANDCOVER_INSTALL=$(PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "landcover" | wc | awk '{print $1}')
+DATASOURCES_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "datasources" | wc | awk '{print $1}')
+GPW_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "gpw" | wc | awk '{print $1}')
+LANDCOVER_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "landcover" | wc | awk '{print $1}')
 
 if [ "${FORCE_DATASOURCES_INSTALL}" == "1" ]; then
     DATASOURCES_INSTALL="1"
@@ -141,7 +141,7 @@ if [ "${GPW_INSTALL}" != "0" ]; then
         echo -e "${YELLOW}[INFO] Installing population grids${NC}"
         ./scripts/installGPW.sh -e ${ENV_FILE} -d ${PWD}/data -s ${PWD}/scripts/gpw2sql.php
     else
-        echo -e "${RED}[INFO] Population grids installation requested but unavailable - contact ${CONTACT}${NC}"
+        echo -e "[INFO] Population density is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
     fi
 else
     echo -e "[INFO] Population grids are installed"
@@ -152,7 +152,7 @@ if [ "${LANDCOVER_INSTALL}" != "0" ]; then
         echo -e "${YELLOW}[INFO] Installing landcover${NC}"
         ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${PWD}/data
     else
-        echo -e "${RED}[INFO] Landcover installation requested but unavailable - contact ${CONTACT}${NC}"
+        echo -e "[INFO] Landcover is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
     fi
 else
     echo -e "[INFO] Landcover is installed"
@@ -166,7 +166,7 @@ if [[ ! "$OSTYPE" == "darwin"* ]]; then
 else
     echo -e "[INFO] MacOS X - mount point not provided"
 fi
-echo -e "[INFO] itag up and running at ${GREEN}${APP_ENDPOINT}${NC}"
+echo -e "[INFO] itag up and running at ${GREEN}${ITAG_ENDPOINT}${NC}"
 echo ""
 
 

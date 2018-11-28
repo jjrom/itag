@@ -19,7 +19,7 @@ services:
       - external
       - default
     ports:
-      - ${APP_EXPOSED_PORT}:8080
+      - ${ITAG_EXPOSED_PORT}:8080
     volumes:
       - .run/config/nginx.conf:/opt/bitnami/nginx/conf/vhosts/nginx.conf:ro
   phpfpm:
@@ -38,11 +38,11 @@ services:
     image: mdillon/postgis:10-alpine
     restart: always
     environment:
-      - POSTGRES_USER=${DATABASE_USER_NAME}
-      - POSTGRES_PASSWORD=${DATABASE_USER_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${ITAG_DATABASE_USER_NAME}
+      - POSTGRES_PASSWORD=${ITAG_DATABASE_USER_PASSWORD}
+      - POSTGRES_DB=${ITAG_DATABASE_NAME}
     ports:
-      - ${DATABASE_EXPOSED_PORT}:5432
+      - ${ITAG_DATABASE_EXPOSED_PORT}:5432
     networks:
       - default
     volumes:

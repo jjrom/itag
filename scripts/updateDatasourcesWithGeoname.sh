@@ -80,7 +80,7 @@ fi
 . ${ENV_FILE}
 
 echo -e "[INFO] Udpate datasources tables"
-PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
 ALTER TABLE datasources.states ADD COLUMN geonameid INTEGER;
 ALTER TABLE datasources.regions ADD COLUMN geonameid INTEGER;
 ALTER TABLE datasources.countries ADD COLUMN geonameid INTEGER;
@@ -110,9 +110,9 @@ UPDATE datasources.continents SET geonameid=6255152 WHERE continent='Antarctica'
 
 EOF
 
-PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/geoplanet.sql > /dev/null 2>&1
-PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/egg.sql > /dev/null 2>&1
-PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/missing.sql > /dev/null 2>&1
-PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/glaciers.sql > /dev/null 2>&1
-PGPASSWORD=${DATABASE_USER_PASSWORD} psql -U ${DATABASE_USER_NAME} -d ${DATABASE_NAME} -h localhost -p ${DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/volcanoes.sql > /dev/null 2>&1
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/geoplanet.sql > /dev/null 2>&1
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/egg.sql > /dev/null 2>&1
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/missing.sql > /dev/null 2>&1
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/glaciers.sql > /dev/null 2>&1
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -f ${SQL_DIR}/volcanoes.sql > /dev/null 2>&1
 
