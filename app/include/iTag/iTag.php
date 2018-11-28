@@ -32,12 +32,12 @@ class iTag {
      *  )
      * )
      */
-    const VERSION = '5.0.1';
+    const VERSION = '5.0.2';
     
     /*
      * Character separator
      */
-    const TAG_SEPARATOR = '_';
+    const TAG_SEPARATOR = ':';
 
     /*
      * Database handler
