@@ -119,13 +119,18 @@ class Tagger_landcover2009 extends Tagger {
      */
     private function process($geometry, $options) {
 
+        $output = array(
+            'landcover' => array(
+                'main' => array(),
+                'details' => array()
+            )
+        );
+
         /*
          * Superseed areaLimit
          */
         if (isset($options['areaLimit']) && $this->area > $options['areaLimit']) {
-            return array(
-                'landCover' => array()
-            );
+            return $output;
         }
 
         /*
@@ -133,9 +138,7 @@ class Tagger_landcover2009 extends Tagger {
          * than the maximum area allowed
          */
         if (!$this->isValidArea($this->area)) {
-            return array(
-                'landCover' => array()
-            );
+            return $output;
         }
 
         /*
@@ -147,10 +150,12 @@ class Tagger_landcover2009 extends Tagger {
          * Return full land use description
          */
         return array(
-            'landCover' => array(
-                'landCover' => $this->getLandCover($rawLandCover),
-                'landCoverDetails' => $this->getLandCoverDetails($rawLandCover)
-        ));
+            'landcover' => array(
+                'main' => $this->getLandCover($rawLandCover),
+                'details' => $this->getLandCoverDetails($rawLandCover)
+            )
+        );
+        
     }
 
     /**
