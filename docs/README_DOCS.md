@@ -33,7 +33,7 @@ First generate OpenAPI file
 
 Next generate markdown documentation
 
-        widdershins --search false --code false --summary $ITAG_HOME/docs/itag-api.json -o $ITAG_HOME/API.md
+        widdershins --search false --code false --summary $ITAG_HOME/docs/itag-api.json -o $ITAG_HOME/docs/API.md
 
 ### HTML generation
 
