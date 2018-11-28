@@ -118,13 +118,18 @@ class Tagger_landcover extends Tagger {
      */
     private function process($geometry, $options) {
 
+        $output = array(
+            'landcover' => array(
+                'main' => array(),
+                'details' => array()
+            )
+        );
+
         /*
          * Superseed areaLimit
          */
         if (isset($options['areaLimit']) && $this->area > $options['areaLimit']) {
-            return array(
-                'landCover' => array()
-            );
+            return $output;
         }
 
         /*
@@ -132,9 +137,7 @@ class Tagger_landcover extends Tagger {
          * than the maximum area allowed
          */
         if (!$this->isValidArea($this->area)) {
-            return array(
-                'landCover' => array()
-            );
+            return $output;
         }
 
         /*
@@ -146,10 +149,11 @@ class Tagger_landcover extends Tagger {
          * Return full land use description
          */
         return array(
-            'landCover' => array(
-                'landUse' => $this->getLandUse($rawLandCover),
-                'landUseDetails' => $this->getLandUseDetails($rawLandCover)
-        ));
+            'landcover' => array(
+                'main' => $this->getLandCover($rawLandCover),
+                'details' => $this->getLandCoverDetails($rawLandCover)
+            )
+        );
     }
 
     /**
@@ -157,18 +161,18 @@ class Tagger_landcover extends Tagger {
      *
      * @param array $rawLandCover
      */
-    private function getLandUse($rawLandCover) {
+    private function getLandCover($rawLandCover) {
         $sums = array();
         foreach ($this->linkage as $key => $value) {
             $sums[$key] = $this->sum($rawLandCover, $value);
         }
         arsort($sums);
-        $landUse = array();
+        $landCover = array();
         foreach ($sums as $key => $val) {
             $pcover = $this->percentage($this->toSquareKm($val), $this->area);
             if ($val !== 0 && $pcover > 0) {
                 $name = isset($this->clcClassNames[$key]) ? $this->clcClassNames[$key] : 'unknown';
-                array_push($landUse, array(
+                array_push($landCover, array(
                     'name' => $name,
                     'id' => 'landcover'. iTag::TAG_SEPARATOR . strtolower($name),
                     'area' => $this->toSquareKm($val),
@@ -177,7 +181,7 @@ class Tagger_landcover extends Tagger {
             }
         }
 
-        return $landUse;
+        return $landCover;
 
     }
 
@@ -186,8 +190,8 @@ class Tagger_landcover extends Tagger {
      *
      * @param array $rawLandCover
      */
-    private function getLandUseDetails($rawLandCover) {
-        $landUseDetails = array();
+    private function getLandCoverDetails($rawLandCover) {
+        $landCoverDetails = array();
         foreach ($rawLandCover as $key => $val) {
             if ($val['area'] !== 0) {
                 $name = isset($this->glcClassNames[$key]) ? $this->glcClassNames[$key] : 'unknown';
@@ -203,10 +207,10 @@ class Tagger_landcover extends Tagger {
                 if ($this->config['returnGeometries'] && !empty($val['geometries'])) {
                     $details['geometry'] = 'MULTIPOLYGON(' . join(',', $val['geometries']) . ')';
                 }
-                array_push($landUseDetails, $details);
+                array_push($landCoverDetails, $details);
             }
         }
-        return $landUseDetails;
+        return $landCoverDetails;
     }
 
     /**
