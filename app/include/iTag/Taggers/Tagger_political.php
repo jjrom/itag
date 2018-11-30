@@ -21,14 +21,14 @@ class Tagger_political extends Tagger {
     const REGIONS = 2;
 
     private $geonameIdForContinents = array(
-        'australia' => 2077456,
-        'africa'=> 6255146,
-        'asia' => 6255147,
-        'europe' => 6255148,
-        'northamerica' => 6255149,
-        'southamerica' => 6255150,
-        'oceania'  => 6255151,
-        'antartica' => 6255152
+        'Australia' => 2077456,
+        'Africa'=> 6255146,
+        'Asia' => 6255147,
+        'Europe' => 6255148,
+        'NorthAmerica' => 6255149,
+        'SouthAmerica' => 6255150,
+        'Oceania'  => 6255151,
+        'Antartica' => 6255152
     );
 
     /*
@@ -136,10 +136,10 @@ class Tagger_political extends Tagger {
     private function add(&$continents, $geometry, $what) {
         $prequery = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry)';
         if ($what === Tagger_political::COUNTRIES) {
-            $query = $prequery . ' SELECT name as name, concat(normalize(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as id, continent as continent, normalize(continent) as continentid, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea FROM prequery, datasources.countries WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
+            $query = $prequery . ' SELECT name as name, concat(normalize_initcap(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as id, continent as continent, normalize_initcap(continent) as continentid, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea FROM prequery, datasources.countries WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
         }
         else {
-            $query = $prequery . ' SELECT region, name as state, concat(normalize(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as stateid, normalize(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea, ' . $this->postgisIntersection('geom', 'corrected_geometry') . ' as wkb_geom, iso_a2 FROM prequery, datasources.states WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
+            $query = $prequery . ' SELECT region, name as state, concat(normalize_initcap(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as stateid, normalize_initcap(region) as regionid, adm0_a3 as isoa3, ' .  $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea, ' . $this->postgisIntersection('geom', 'corrected_geometry') . ' as wkb_geom, iso_a2 FROM prequery, datasources.states WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
         }
         $results = $this->query($query);
         if ($results) {
@@ -152,7 +152,7 @@ class Tagger_political extends Tagger {
                   /*
                    * Get the region area
                    */
-                  $query2 = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry) SELECT concat(normalize(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as regionid2, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as regionarea, ' . $this->postgisArea('geom') . ' as regionentityarea FROM prequery, datasources.regions WHERE normalize(name)=\'' . $element['regionid'] . '\' AND iso_a2=\'' . $element['iso_a2'] . '\' LIMIT 1';
+                  $query2 = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry) SELECT concat(normalize_initcap(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as regionid2, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as regionarea, ' . $this->postgisArea('geom') . ' as regionentityarea FROM prequery, datasources.regions WHERE normalize_initcap(name)=\'' . $element['regionid'] . '\' AND iso_a2=\'' . $element['iso_a2'] . '\' LIMIT 1';
                   $results2 = $this->query($query2);
                   if ($results2) {
                     while ($element2 = pg_fetch_assoc($results2)) {

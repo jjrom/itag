@@ -151,7 +151,7 @@ class Tagger_generic extends Tagger {
         foreach ($mapping as $asName => $columnName) {
             if ($asName === 'name') {
                 $propertyList[] = 'distinct(' . $columnName . ') as name';
-                $propertyList[] = 'normalize(' . $columnName . ') as normalized';
+                $propertyList[] = 'normalize_initcap(' . $columnName . ') as normalized';
             }
             else if ($asName === 'geometry') {
                 $propertyList[] = $this->postgisAsWKT($this->postgisSimplify($this->postgisIntersection('geom', $geom))) . ' as geometry';
