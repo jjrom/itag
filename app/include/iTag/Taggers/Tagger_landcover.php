@@ -47,28 +47,28 @@ class Tagger_landcover extends Tagger {
      * Global Land Cover class names
      */
     private $glcClassNames = array(
-        1 => 'Tree Cover, broadleaved, evergreen',
-        2 => 'Tree Cover, broadleaved, deciduous, closed',
-        3 => 'Tree Cover, broadleaved, deciduous, open',
-        4 => 'Tree Cover, needle-leaved, evergreen',
-        5 => 'Tree Cover, needle-leaved, deciduous',
-        6 => 'Tree Cover, mixed leaf type',
-        7 => 'Tree Cover, regularly flooded, fresh  water',
-        8 => 'Tree Cover, regularly flooded, saline water',
-        9 => 'Mosaic - Tree cover / Other natural vegetation',
-        10 => 'Tree Cover, burnt',
-        11 => 'Shrub Cover, closed-open, evergreen',
-        12 => 'Shrub Cover, closed-open, deciduous',
-        13 => 'Herbaceous Cover, closed-open',
-        14 => 'Sparse Herbaceous or sparse Shrub Cover',
-        15 => 'Regularly flooded Shrub and/or Herbaceous Cover',
-        16 => 'Cultivated and managed areas',
-        17 => 'Mosaic - Cropland / Tree Cover / Other natural vegetation',
-        18 => 'Mosaic - Cropland / Shrub or Grass Cover',
+        1 => 'Tree Cover, Broadleaved, Evergreen',
+        2 => 'Tree Cover, Broadleaved, Deciduous, Closed',
+        3 => 'Tree Cover, Broadleaved, Feciduous, Open',
+        4 => 'Tree Cover, Needle-leaved, Evergreen',
+        5 => 'Tree Cover, Needle-leaved, Deciduous',
+        6 => 'Tree Cover, Mixed Leaf Type',
+        7 => 'Tree Cover, Regularly Fooded, Fresh  Water',
+        8 => 'Tree Cover, Regularly Flooded, Saline Water',
+        9 => 'Mosaic - Tree Cover / Other Natural Vegetation',
+        10 => 'Tree Cover, Burnt',
+        11 => 'Shrub Cover, Closed-open, Evergreen',
+        12 => 'Shrub Cover, Closed-open, Deciduous',
+        13 => 'Herbaceous Cover, Closed-open',
+        14 => 'Sparse Herbaceous Or Sparse Shrub Cover',
+        15 => 'Regularly Flooded Shrub And/Or Herbaceous Cover',
+        16 => 'Cultivated And Managed Areas',
+        17 => 'Mosaic - Cropland / Tree Cover / Other Natural Vegetation',
+        18 => 'Mosaic - Cropland / Shrub Or Grass Cover',
         19 => 'Bare Areas',
         20 => 'Water Bodies',
-        21 => 'Snow and Ice',
-        22 => 'Artificial surfaces and associated areas'
+        21 => 'Snow And Ice',
+        22 => 'Artificial Surfaces And Associated Areas'
     );
 
     /*
@@ -174,7 +174,7 @@ class Tagger_landcover extends Tagger {
                 $name = isset($this->clcClassNames[$key]) ? $this->clcClassNames[$key] : 'unknown';
                 array_push($landCover, array(
                     'name' => $name,
-                    'id' => 'landcover'. iTag::TAG_SEPARATOR . strtolower($name),
+                    'id' => 'lc'. iTag::TAG_SEPARATOR . $name,
                     'area' => $this->toSquareKm($val),
                     'pcover' => $pcover
                 ));
@@ -198,8 +198,8 @@ class Tagger_landcover extends Tagger {
                 $area = $this->toSquareKm($val['area']);
                 $details = array(
                     'name' => $name,
-                    'id' => 'landcoverdetails'. iTag::TAG_SEPARATOR . strtolower(str_replace(array('/', ',', ' ', '-'), '', $name)),
-                    'parentId' => 'landcover'. iTag::TAG_SEPARATOR . strtolower($this->getCLCParent($key)),
+                    'id' => 'lcd'. iTag::TAG_SEPARATOR . str_replace(array('/', ',', ' ', '-'), '', $name),
+                    'parentId' => 'lc'. iTag::TAG_SEPARATOR . $this->getCLCParent($key),
                     'code' => $key,
                     'area' => $area,
                     'pcover' => $this->percentage($area, $this->area)
