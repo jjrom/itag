@@ -15,7 +15,7 @@
  * under the License.
  */
 
-class Tagger_generic extends Tagger {
+class GenericTagger extends Tagger {
 
     /*
      * Columns mapping per table

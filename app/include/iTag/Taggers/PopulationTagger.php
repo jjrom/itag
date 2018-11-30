@@ -15,7 +15,7 @@
  * under the License.
  */
 
-class Tagger_population extends Tagger {
+class PopulationTagger extends Tagger {
 
     /*
      * Data references

@@ -305,7 +305,7 @@ class iTagLauncher {
         
         $taggers = array();
         foreach (array_values($params['taggersList']) as $value) {
-            $taggers[trim($value)] = array();
+            $taggers[strtolower(trim($value))] = array();
         }
         try {
             $this->answer($this->json_format($this->itag->tag($params['metadata'], $taggers)), 200);

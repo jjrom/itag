@@ -127,7 +127,7 @@ class iTag {
          * Call the 'tag' function of all input taggers
          */
         foreach ($taggers as $name => $options) {
-            $tagger = $this->instantiateTagger($name);
+            $tagger = $this->instantiateTagger(ucfirst(strtolower($name)) . 'Tagger');
             if (isset($tagger)) {
                 $content = array_merge($content, $tagger->tag($metadata, $options));
                 $references = array_merge($references, $tagger->references);
@@ -156,7 +156,7 @@ class iTag {
      * @param array $metadata
      */
     private function always($metadata) {
-        $tagger = new Tagger_always($this->dbh, $this->config);
+        $tagger = new AlwaysTagger($this->dbh, $this->config);
         return $tagger->tag($metadata);
     }
 
@@ -212,7 +212,7 @@ class iTag {
         }
 
         try {
-            $class = new ReflectionClass('Tagger_' . $className);
+            $class = new ReflectionClass($className);
             if (!$class->isInstantiable()) {
                 throw new Exception();
             }

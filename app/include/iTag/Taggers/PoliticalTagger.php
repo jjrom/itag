@@ -15,21 +15,10 @@
  * under the License.
  */
 require 'CountryInfos.php';
-class Tagger_political extends Tagger {
+class PoliticalTagger extends Tagger {
 
     const COUNTRIES = 1;
     const REGIONS = 2;
-
-    private $geonameIdForContinents = array(
-        'Australia' => 2077456,
-        'Africa'=> 6255146,
-        'Asia' => 6255147,
-        'Europe' => 6255148,
-        'NorthAmerica' => 6255149,
-        'SouthAmerica' => 6255150,
-        'Oceania'  => 6255151,
-        'Antartica' => 6255152
-    );
 
     /*
      * Data references
@@ -47,6 +36,20 @@ class Tagger_political extends Tagger {
             'license' => 'Free of Charge',
             'url' => 'http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/'
         )
+    );
+
+    /*
+     * Geonameid for continents
+     */
+    private $geonameIdForContinents = array(
+        'Australia' => 2077456,
+        'Africa'=> 6255146,
+        'Asia' => 6255147,
+        'Europe' => 6255148,
+        'NorthAmerica' => 6255149,
+        'SouthAmerica' => 6255150,
+        'Oceania'  => 6255151,
+        'Antartica' => 6255152
     );
 
     /*
@@ -110,12 +113,12 @@ class Tagger_political extends Tagger {
         /*
          * Add continents and countries
          */
-        $this->add($continents, $geometry, Tagger_political::COUNTRIES);
+        $this->add($continents, $geometry, PoliticalTagger::COUNTRIES);
 
         /*
          * Add regions/states
          */
-        $this->add($continents, $geometry, Tagger_political::REGIONS);
+        $this->add($continents, $geometry, PoliticalTagger::REGIONS);
 
         return array(
             'political' => array(
@@ -135,7 +138,7 @@ class Tagger_political extends Tagger {
      */
     private function add(&$continents, $geometry, $what) {
         $prequery = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry)';
-        if ($what === Tagger_political::COUNTRIES) {
+        if ($what === PoliticalTagger::COUNTRIES) {
             $query = $prequery . ' SELECT name as name, concat(normalize_initcap(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as id, continent as continent, normalize_initcap(continent) as continentid, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as area, ' . $this->postgisArea('geom') . ' as entityarea FROM prequery, datasources.countries WHERE st_intersects(geom, corrected_geometry) ORDER BY area DESC';
         }
         else {
@@ -144,7 +147,7 @@ class Tagger_political extends Tagger {
         $results = $this->query($query);
         if ($results) {
           while ($element = pg_fetch_assoc($results)) {
-              if ($what === Tagger_political::COUNTRIES) {
+              if ($what === PoliticalTagger::COUNTRIES) {
                   $this->addCountriesToContinents($continents, $element);
               }
               else {

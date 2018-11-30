@@ -15,7 +15,7 @@
  * under the License.
  */
 
-class Tagger_geology extends Tagger_generic {
+class GeologyTagger extends GenericTagger {
 
     /*
      * Data references

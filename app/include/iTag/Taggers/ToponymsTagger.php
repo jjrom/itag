@@ -16,7 +16,7 @@
  * under the License.
  */
 
-class Tagger_toponyms extends Tagger {
+class ToponymsTagger extends Tagger {
     /*
      * Data references
      */

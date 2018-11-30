@@ -15,7 +15,7 @@
  * under the License.
  */
 
-class Tagger_always extends Tagger {
+class AlwaysTagger extends Tagger {
 
     /*
      * Data references
