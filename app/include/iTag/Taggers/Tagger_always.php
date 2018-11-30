@@ -81,7 +81,7 @@ class Tagger_always extends Tagger {
          * Coastal status
          */
         if ($this->isCoastal($metadata['geometry'])) {
-            $keywords[] = 'loc' . iTag::TAG_SEPARATOR . 'coastal';
+            $keywords[] = 'location' . iTag::TAG_SEPARATOR . 'coastal';
         }
 
         /*
@@ -126,7 +126,7 @@ class Tagger_always extends Tagger {
         $locations = array();
         foreach ($this->areas as $key => $value) {
             if ($this->isETNS($geometry, $value)) {
-                $locations[] = 'loc'. iTag::TAG_SEPARATOR . $key;
+                $locations[] = 'location'. iTag::TAG_SEPARATOR . $key;
             }
         }
         return $locations;
