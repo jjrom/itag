@@ -61,7 +61,7 @@ abstract class Tagger {
      * @throws Exception
      */
     public function tag($metadata, $options = array()) {
-        $this->area = isset($metadata['area']) ? $metadata['area'] : -1;
+        $this->area = $metadata['area'] ?? -1;
     }
 
     /**

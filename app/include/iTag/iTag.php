@@ -141,7 +141,7 @@ class iTag {
 
         return array(
             'geometry' => $metadata['geometry'],
-            'timestamp' => isset($metadata['timestamp']) ? $metadata['timestamp'] : null,
+            'timestamp' => $metadata['timestamp'] ?? null,
             'area_unit' => 'km2',
             'cover_unit' => '%',
             'content' => $content,
@@ -188,7 +188,7 @@ class iTag {
              */
             if (isset($options['host'])) {
                 $dbInfo[] = 'host=' . $options['host'];
-                $dbInfo[] = 'port=' . (isset($options['port']) ? $options['port'] : '5432');
+                $dbInfo[] = 'port=' . ($options['port'] ?? '5432');
             }
             $dbh = pg_connect(join(' ', $dbInfo));
             if (!$dbh) {
