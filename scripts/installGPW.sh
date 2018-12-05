@@ -122,7 +122,7 @@ EOF
 
 cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
 PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
-CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING btree (footprint)
+CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint)
 CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount)
 EOF
 
@@ -138,7 +138,7 @@ EOF
 
 cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
 PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
-CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING btree (footprint)
+CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint)
 CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount)
 EOF
 
@@ -154,7 +154,7 @@ EOF
 
 cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
 PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
-CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING btree (footprint)
+CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint)
 CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount)
 EOF
 
@@ -170,6 +170,6 @@ EOF
 
 cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
 PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
-CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING btree (footprint)
+CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint)
 CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount)
 EOF
