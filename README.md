@@ -1,3 +1,4 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/367107bc47a1b1b2d58e/maintainability)](https://codeclimate.com/github/jjrom/itag/maintainability)
 # iTag
 Semantic enhancement of Earth Observation data
 
