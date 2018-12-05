@@ -150,29 +150,18 @@ class PoliticalTagger extends Tagger {
 
                 if ($what === PoliticalTagger::COUNTRIES) {
                     $this->addCountriesToContinents($continents, $element);
+                    continue;
                 }
-                else {
-
-                    /*
-                     * Get region info
-                     */
-                    if (isset($element['regionid'])) {
-    
-                        $query2 = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry) SELECT concat(normalize_initcap(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as regionid2, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as regionarea, ' . $this->postgisArea('geom') . ' as regionentityarea FROM prequery, datasources.regions WHERE normalize_initcap(name)=\'' . $element['regionid'] . '\' AND iso_a2=\'' . $element['iso_a2'] . '\' LIMIT 1';
-                        $results2 = $this->query($query2);
-                        if ($results2) {
-                            while ($element2 = pg_fetch_assoc($results2)) {
-                                $element['regionid'] = $element2['regionid2'];
-                                $element['regionarea'] = $element2['regionarea'];
-                                $element['regionentityarea'] = $element2['regionentityarea'];
-                            }
-                        }
-    
-                    }
-                    
-                    $this->addRegionsToCountries($continents, $element);
+            
+                /*
+                 * Get region info
+                 */
+                if (isset($element['regionid'])) {
+                    $element = $this->updateRegionInfo($element, $geometry);
+                }
+                
+                $this->addRegionsToCountries($continents, $element);
                                     
-                }
             }
         }
     }
@@ -359,6 +348,21 @@ class PoliticalTagger extends Tagger {
           }
         }
         return $toponyms;
+    }
+
+    /**
+     * Compute region info and add it to input element
+     */
+    private function updateRegionInfo($element, $geometry) {
+        $results = $this->query('WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry) SELECT concat(normalize_initcap(name), \'' . iTag::TAG_SEPARATOR . '\', geonameid) as regionid2, ' . $this->postgisArea($this->postgisIntersection('geom', 'corrected_geometry')) . ' as regionarea, ' . $this->postgisArea('geom') . ' as regionentityarea FROM prequery, datasources.regions WHERE normalize_initcap(name)=\'' . $element['regionid'] . '\' AND iso_a2=\'' . $element['iso_a2'] . '\' LIMIT 1');
+        if ($results) {
+            while ($element2 = pg_fetch_assoc($results)) {
+                $element['regionid'] = $element2['regionid2'];
+                $element['regionarea'] = $element2['regionarea'];
+                $element['regionentityarea'] = $element2['regionentityarea'];
+            }
+        }
+        return $element;
     }
 
 }
