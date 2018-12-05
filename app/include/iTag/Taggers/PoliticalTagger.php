@@ -55,7 +55,7 @@ class PoliticalTagger extends Tagger {
     /*
      * Compute toponyms : 'main', 'all', null
      */
-    private $addToponyms = 'main';
+    private $addToponyms = null;
 
     /**
      * Constructor
