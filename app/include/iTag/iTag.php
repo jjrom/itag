@@ -223,78 +223,7 @@ class iTag {
         return $class->newInstance($this->dbh, $this->config);
 
     }
-
-    /**
-     * Correct input polygon WKT from -180/180 crossing problem
-     *
-     * @param String $geometry
-     */
-    private function correctWrapDateLine($geometry) {
-
-        /*
-         * Convert WKT POLYGON to array of coordinates
-         */
-        $coordinates = $this->wktToCoordinates($geometry);
-
-        /*
-         * If Delta(lon(i) - lon(i - 1)) is greater than 180 degrees then add 360 to lon
-         */
-        $add360 = false;
-        $lonPrev = $coordinates[0][0];
-        $latPrev = $coordinates[0][1];
-        $newCoordinates = array(array($lonPrev, $latPrev));
-        for ($i = 1, $ii = count($coordinates); $i < $ii; $i++) {
-            $lon = $coordinates[$i][0];
-            if ($lon - $lonPrev >= 180) {
-                $lon = $lon - 360;
-                $add360 = true;
-            }
-            else if ($lon - $lonPrev <= -180) {
-                $lon = $lon + 360;
-                $add360 = true;
-            }
-            $lonPrev = $lon;
-            $latPrev = $coordinates[$i][1];
-            $newCoordinates[] = array($lon, $coordinates[$i][1]);
-        }
-
-        return $this->coordinatesToWkt($newCoordinates, $add360);
-    }
-
-    /**
-     * Convert WKT into an array of coordinates
-     *
-     * @param string $geometry
-     * @return array
-     */
-    private function wktToCoordinates($geometry) {
-        $pairs = explode(',', str_replace('POLYGON((', ' ', str_replace('))', ' ', strtoupper($geometry))));
-        $coordinates = array();
-        for ($i = 0, $ii = count($pairs); $i < $ii; $i++) {
-            $lonlat = explode(' ', trim($pairs[$i]));
-            $coordinates[] = array(floatval($lonlat[0]), floatval($lonlat[1]));
-        }
-        return $coordinates;
-    }
-
-    /**
-     * Convert an array of coordinates into a WKT string
-     *
-     * @param array $coordinates
-     * @param boolean $add360
-     * @return string
-     */
-    private function coordinatesToWkt($coordinates, $add360 = false) {
-        $pairs = array();
-        for ($i = 0, $ii = count($coordinates); $i < $ii; $i++) {
-            if ($add360) {
-                $coordinates[$i][0] = $coordinates[$i][0] + 360;
-            }
-            $pairs[] = join(' ', $coordinates[$i]);
-        }
-        return 'POLYGON((' . join(',', $pairs) . '))';
-    }
-
+    
     /**
      * Return geometry topology analysis
      *
@@ -310,46 +239,48 @@ class iTag {
             );
         }
 
-        $geometryFromText = 'ST_GeomFromText(\'' . $geometry . '\', ' . $srid . ')';
-
+        $check = '[GEOMETRY]';
         try {
-            $results = @pg_query($this->dbh, 'SELECT ST_isValid(' . $geometryFromText . ') as valid');
-            if (!isset($results) || $results === false) {
-                throw new Exception();
-            }
-        }
-        catch (Exception $e) {
-            return array(
-                'isValid' => false,
-                'error' => '[GEOMETRY] ' . pg_last_error($this->dbh)
-            );
-        }
 
-        try {
-            $results = @pg_query($this->dbh, 'SELECT ST_isValid(ST_SplitDateLine(' . $geometryFromText . ')) as valid');
-            if (!isset($results) || $results === false) {
-                throw new Exception();
+            // Check input geometry
+            $this->isTopologyValid('ST_isValid(ST_GeomFromText($1, ' . $srid . '))', $geometry);
+            
+            // Check split geometry
+            $check = '[SPLITTED]';
+            if ( $this->isTopologyValid('ST_isValid(ST_SplitDateLine(ST_GeomFromText($1, ' . $srid . ')))', $geometry) ) {
+                return array(
+                    'isValid' => true
+                );
             }
-        }
-        catch (Exception $e) {
-            return array(
-                'isValid' => false,
-                'error' => '[GEOMETRY][SPLITTED] ' . pg_last_error($this->dbh)
-            );
-        }
-
-        $result = pg_fetch_result($results, 0, 'valid');
-        if ($result === false || $result === 'f') {
-            return array(
-                'isValid' => false,
-                'error' => 'Invalid geometry'
-            );
-        }
         
+        } catch (Exception $e) {
+            return array(
+                'isValid' => false,
+                'error' => $check . ' ' . pg_last_error($this->dbh)
+            );
+        }
+
         return array(
-            'isValid' => true
+            'isValid' => false,
+            'error' => 'Invalid geometry'
         );
 
+    }
+
+    /*
+     * Check $what query against geometry
+     */
+    private function isTopologyValid($what, $geometry) {
+        
+        $results = @pg_query_params($this->dbh, 'SELECT ' . $what . ' as valid', array(
+            $geometry
+        ));
+        if (!isset($results) || $results === false) {
+            throw new Exception();
+        }
+        
+        return pg_fetch_result($results, 0, 'valid');
+        
     }
 
 }

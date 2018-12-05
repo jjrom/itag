@@ -209,40 +209,43 @@ class PoliticalTagger extends Tagger {
         }
 
         // No region => state instead
-        if ( ! isset($element['regionid'])) {
-            $this->mergeState($country['regions'], $element);
-        }
-        else {
-
-            $index = -1;
-            for ($k = count($country['regions']); $k--;) {
-                if (!$element['regionid'] && !isset($country['regions'][$k]['id'])) {
-                    $index = $k;
-                    break;
-                }
-                else if (isset($country['regions'][$k]['id']) && $country['regions'][$k]['id'] === $element['regionid']) {
-                    $index = $k;
-                    break;
-                }
-            }
-
-            /*
-            * Add region
-            */
-            if ($index === -1) {
-                $this->mergeRegion($country['regions'], $element);
-                $index = count($country['regions']) - 1;
-            }
-
-            /*
-            * Add state (and toponyms)
-            */
-            if (isset($country['regions'][$index]['states'])) {
-                $this->mergeState($country['regions'][$index]['states'], $element);
-            }
-            
-        }
+        isset($element['regionid']) ? $this->mergeRegionsAndStates($country, $element) : $this->mergeState($country['regions'], $element);
         
+    }
+
+    /**
+     * Merge regions and states array
+     * 
+     * @param array $country
+     * @param array $element
+     */
+    private function mergeRegionsAndStates(&$country, $element) {
+        $index = -1;
+        for ($k = count($country['regions']); $k--;) {
+            if (!$element['regionid'] && !isset($country['regions'][$k]['id'])) {
+                $index = $k;
+                break;
+            }
+            else if (isset($country['regions'][$k]['id']) && $country['regions'][$k]['id'] === $element['regionid']) {
+                $index = $k;
+                break;
+            }
+        }
+
+        /*
+        * Add region
+        */
+        if ($index === -1) {
+            $this->mergeRegion($country['regions'], $element);
+            $index = count($country['regions']) - 1;
+        }
+
+        /*
+        * Add state (and toponyms)
+        */
+        if (isset($country['regions'][$index]['states'])) {
+            $this->mergeState($country['regions'][$index]['states'], $element);
+        }
     }
 
     /**
