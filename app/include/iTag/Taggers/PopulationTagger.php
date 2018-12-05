@@ -81,7 +81,7 @@ class PopulationTagger extends Tagger {
         }
         return array(
             'population' => array(
-                'count' => $total,
+                'count' => floor($total + 0.5),
                 'densityPerSquareKm' => $this->densityPerSquareKm($total)
         ));
     }
@@ -120,7 +120,7 @@ class PopulationTagger extends Tagger {
      */
     private function densityPerSquareKm($total) {
         if ($this->area && $this->area > 0) {
-          return $total / $this->area;
+          return number_format($total / $this->area, 2);
         }
         return 0;
     }
