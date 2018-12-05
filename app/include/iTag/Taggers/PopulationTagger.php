@@ -120,7 +120,7 @@ class PopulationTagger extends Tagger {
      */
     private function densityPerSquareKm($total) {
         if ($this->area && $this->area > 0) {
-          return number_format($total / $this->area, 2);
+          return floatval(number_format($total / $this->area, 2));
         }
         return 0;
     }
