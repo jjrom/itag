@@ -31,14 +31,14 @@ Run the following script:
 *On first deployment, the script retrieves all the datasources from internet and populates the database. It can take some time.*
 
 ### Configuration
-All configuration options are defined within the [config.env](https://github.com/jjrom/itag/blob/docker/config.env) file.
+All configuration options are defined within the [config.env](https://github.com/jjrom/itag/blob/master/config.env) file.
 
 For a local installation, you can leave it untouched. Otherwise, just make your own configuration. It's self explanatory (send me an email if not ;)
 
 Note that each time you change the configuration file, you should undeploy then redeploy the service.
 
 ## Examples
-*Note: The following example are based on the default service endpoint defined in (cf. [config.env](https://github.com/jjrom/itag/blob/docker/config.env))*
+*Note: The following example are based on the default service endpoint defined in (cf. [config.env](https://github.com/jjrom/itag/blob/master/config.env))*
 
 Tag a geometry on Toulouse with "Political" information and all cities with a pretty GeoJSON output
 ```
