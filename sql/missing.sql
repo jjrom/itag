@@ -57,4 +57,4 @@ UPDATE datasources.states SET geonameid=8337342 WHERE gid=4558;
 UPDATE datasources.states SET geonameid=3381670 WHERE gid=52;
 UPDATE datasources.states SET geonameid=3570311 WHERE gid=2613;
 UPDATE datasources.states SET geonameid=719965 WHERE gid=4297;
-UPDATE countries SET geonameid=4036776 WHERE gid=169;
+UPDATE datasources.countries SET geonameid=4036776 WHERE gid=169;
