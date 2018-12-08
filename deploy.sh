@@ -14,9 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# Force script to exit on error
-set -e
-
 PWD=`pwd`
 ENV_FILE=__NULL__
 FORCE_DATASOURCES_INSTALL=0
@@ -25,6 +22,14 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+
+# Force script to exit on error
+set -e
+err_report() {
+    echo -e "${RED}[ERROR] Error on line $1 - see errors.log file${NC}"
+}
+trap 'err_report $LINENO' ERR
+
 function showUsage {
     echo ""
     echo "   Deploy an itag docker instance "
@@ -78,6 +83,9 @@ if [ "${RNET_EXIST}" == "0" ]; then
 else
     echo -e "[INFO] Using existing network ${GREEN}rnet${NC}"
 fi
+
+# Clean errors.log file
+rm -f errors.log
 
 echo -e "[INFO] Sourcing ${ENV_FILE}"
 . ${ENV_FILE}

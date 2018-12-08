@@ -98,10 +98,10 @@ fi
 echo -e "${YELLOW}[WARNING] Landcover insertion can take a loooong time - be patient :)${NC}"
 
 echo -e "[INFO] Inserting landcover data" 
-cat ${DATA_DIR}/itag_landcover.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1
+cat ${DATA_DIR}/itag_landcover.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
 
 echo -e "[INFO] Preparing index data" 
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>&1 << EOF
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
 CREATE INDEX landcover_geometry_idx ON landcover.landcover USING gist (wkb_geometry);
 CREATE INDEX landcover2009_geometry_idx ON landcover.landcover2009 USING gist (wkb_geometry);
 EOF

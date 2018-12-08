@@ -2,4 +2,5 @@
 .run
 .private
 .DS_Store
+errors.log
 data

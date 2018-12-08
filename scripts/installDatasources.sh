@@ -81,7 +81,7 @@ fi
 . ${ENV_FILE}
 
 echo -e "[INFO] Create datasources schema"
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1 << EOF
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log << EOF
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
 
@@ -250,8 +250,8 @@ if [ ! -f ${DATA_DIR}/${COASTLINES} ]; then
 else
     echo -e "[INFO] Using existing ${COASTLINES} data" 
 fi
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${COASTLINES} datasources.coastlines 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1 << EOF
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${COASTLINES} datasources.coastlines 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log << EOF
 CREATE INDEX idx_coastlines_geom ON datasources.coastlines USING gist(geom);
 EOF
 echo -e "${GREEN}[INFO] Coastlines installed${NC}"
@@ -268,7 +268,7 @@ if [ ! -f ${DATA_DIR}/${CONTINENTS} ]; then
 else
     echo -e "[INFO] Using existing ${CONTINENTS} data" 
 fi
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${CONTINENTS} datasources.continents 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${CONTINENTS} datasources.continents 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
 echo -e "${GREEN}[INFO] Continents installed${NC}"
 
 
@@ -282,8 +282,8 @@ if [ ! -f ${DATA_DIR}/${COUNTRIES} ]; then
 else
     echo -e "[INFO] Using existing ${COUNTRIES} data" 
 fi
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${COUNTRIES} datasources.countries 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1 << EOF
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${COUNTRIES} datasources.countries 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log << EOF
 ALTER TABLE datasources.countries ALTER COLUMN name TYPE TEXT;
 UPDATE datasources.countries set name='Antigua and Barbuda' WHERE iso_a3 = 'ATG';
 UPDATE datasources.countries set name='Ashmore and Cartier Islands' WHERE name = 'Ashmore and Cartier Is.';
@@ -354,8 +354,8 @@ else
     echo -e "[INFO] Using existing ${STATES} data" 
 fi
 
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${STATES} datasources.states 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1 << EOF
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${STATES} datasources.states 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log << EOF
 UPDATE datasources.states SET name='Seine-et-Marne' WHERE name='Seien-et-Marne';
 UPDATE datasources.states SET iso_a2='GF' WHERe gid=52;
 UPDATE datasources.states SET iso_a2='MQ' WHERe gid=2613;
@@ -381,10 +381,10 @@ echo -e "${GREEN}[INFO] Regions and States installed${NC}"
 PLATES=hotspots/plates.shp
 FAULTS=hotspots/FAULTS.shp
 VOLCANOES=hotspots/VOLCANO.SHP
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${STATES} datasources.plates 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${VOLCANOES} datasources.volcanoes 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${FAULTS} datasources.faults 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1 << EOF
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${STATES} datasources.plates 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${VOLCANOES} datasources.volcanoes 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${FAULTS} datasources.faults 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log << EOF
 DELETE FROM datasources.faults WHERE type IS NULL;
 UPDATE datasources.faults set type='Thrust fault' WHERE type='thrust-fault';
 UPDATE datasources.faults set type='step' WHERE type='Step';
@@ -406,7 +406,7 @@ if [ ! -f ${DATA_DIR}/${GLACIERS} ]; then
 else
     echo -e "[INFO] Using existing ${GLACIERS} data" 
 fi
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${GLACIERS} datasources.glaciers 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${GLACIERS} datasources.glaciers 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
 echo -e "${GREEN}[INFO] Glaciers installed${NC}"
 
 # ================================================================================
@@ -419,7 +419,7 @@ if [ ! -f ${DATA_DIR}/${RIVERS} ]; then
 else
     echo -e "[INFO] Using existing ${RIVERS} data" 
 fi
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${RIVERS} datasources.rivers 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${RIVERS} datasources.rivers 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
 echo -e "${GREEN}[INFO] Rivers installed${NC}"
 
 # ================================================================================
@@ -432,8 +432,8 @@ if [ ! -f ${DATA_DIR}/${MARINEAREAS} ]; then
 else
     echo -e "[INFO] Using existing ${MARINEAREAS} data" 
 fi
-${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${MARINEAREAS} datasources.physical 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>&1 << EOF
+${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${MARINEAREAS} datasources.physical 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log << EOF
 DELETE FROM datasources.physical WHERE name IS NULL;
 UPDATE datasources.physical set name='Arctic Ocean',name_fr='Océan Arctique' WHERE name='ARCTIC OCEAN';
 UPDATE datasources.physical set name='Beaufort Sea' WHERE name='Beaufort  Sea';
