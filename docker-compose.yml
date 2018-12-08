@@ -35,7 +35,7 @@ services:
       - .run/config/config.php:/conf/config.php:ro
       - .run/config/php.ini:/usr/local/etc/php/php.ini:ro
   itagdb:
-    image: mdillon/postgis:10-alpine
+    image: mdillon/postgis:11-alpine
     restart: always
     environment:
       - POSTGRES_USER=${ITAG_DATABASE_USER_NAME}

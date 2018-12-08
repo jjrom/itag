@@ -334,6 +334,10 @@ UPDATE datasources.countries set iso_a2='XK', iso_a3='UNK' WHERE name = 'Kosovo'
 UPDATE datasources.countries set iso_a2='NO', iso_a3='NOR' WHERE name = 'Norway';
 UPDATE datasources.countries set iso_a3='CPT' WHERE name = 'Clipperton Island';
 
+-- See http://blog.cleverelephant.ca/2018/09/postgis-external-storage.html
+ALTER TABLE datasources.countries ALTER COLUMN geom SET STORAGE EXTERNAL;
+UPDATE datasources.countries SET geom = ST_SetSRID(geom, 4326);
+
 CREATE INDEX idx_countries_name ON datasources.countries (normalize(name));
 CREATE INDEX idx_countries_geom ON datasources.countries USING gist(geom);
 EOF
