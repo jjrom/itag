@@ -19,7 +19,6 @@ set -e
 
 ENV_FILE=__NULL__
 DATA_DIR=__NULL__
-SCRIPT_PATH=__NULL__
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -33,7 +32,6 @@ function showUsage {
     echo ""
     echo "      -e | --envfile Environnement file (see config.env example)"
     echo "      -d | --dataDir Directory to download data"
-    echo "      -s | --script Path to gpw2sql.php script"
     echo "      -h | --help show this help"
     echo ""
 }
@@ -49,10 +47,6 @@ do
             ;;
         -d|--dataDir)
             DATA_DIR="$2"
-            shift # past argument
-            ;;
-        -s|--script)
-            SCRIPT_PATH="$2"
             shift # past argument
             ;;
         -h|--help)
@@ -77,13 +71,6 @@ fi
 if [ "${DATA_DIR}" == "__NULL__" ]; then
     showUsage
     echo -e "${RED}[ERROR]${NC} You must specify a data directory with -d option!"
-    echo ""
-    exit 0
-fi
-
-if [ "${SCRIPT_PATH}" == "__NULL__" ]; then
-    showUsage
-    echo -e "${RED}[ERROR]${NC} You must specify the path to gpw2sql.php with -s option"
     echo ""
     exit 0
 fi

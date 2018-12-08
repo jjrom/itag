@@ -139,7 +139,7 @@ fi
 if [ "${GPW_INSTALL}" != "0" ]; then
     if [ "${GPW_DATASOURCE_URL}" != "" ]; then
         echo -e "${YELLOW}[INFO] Installing population grids${NC}"
-        ./scripts/installGPW.sh -e ${ENV_FILE} -d ${PWD}/data -s ${PWD}/scripts/gpw2sql.php
+        ./scripts/installGPW.sh -e ${ENV_FILE} -d ${PWD}/data
     else
         echo -e "[INFO] Population density is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
     fi
