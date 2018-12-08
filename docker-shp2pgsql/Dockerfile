@@ -1,3 +1,3 @@
-FROM mdillon/postgis:10-alpine
+FROM mdillon/postgis:11-alpine
 
 ENTRYPOINT ["/usr/local/bin/shp2pgsql"]
