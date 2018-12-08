@@ -179,7 +179,7 @@ CREATE SCHEMA gpw;
 
 CREATE TABLE gpw.glp15ag60 (
     gid                 VARCHAR(8) PRIMARY KEY,
-    pcount              INTEGER
+    pcount              NUMERIC
 );
 SELECT AddGeometryColumn('gpw', 'glp15ag60','footprint','4326','POLYGON',2);
 
@@ -188,7 +188,7 @@ SELECT AddGeometryColumn('gpw', 'glp15ag60','footprint','4326','POLYGON',2);
 -- ===============================
 CREATE TABLE gpw.glp15ag30 (
     gid                 VARCHAR(8) PRIMARY KEY,
-    pcount              INTEGER
+    pcount              NUMERIC
 );
 SELECT AddGeometryColumn('gpw', 'glp15ag30','footprint','4326','POLYGON',2);
 
@@ -197,7 +197,7 @@ SELECT AddGeometryColumn('gpw', 'glp15ag30','footprint','4326','POLYGON',2);
 -- =================================
 CREATE TABLE gpw.glp15ag15 (
     gid                 VARCHAR(8) PRIMARY KEY,
-    pcount              INTEGER
+    pcount              NUMERIC
 );
 SELECT AddGeometryColumn('gpw', 'glp15ag15','footprint','4326','POLYGON',2);
 
@@ -206,7 +206,7 @@ SELECT AddGeometryColumn('gpw', 'glp15ag15','footprint','4326','POLYGON',2);
 -- ===================================
 CREATE TABLE gpw.glp15ag (
     gid                 VARCHAR(8) PRIMARY KEY,
-    pcount              INTEGER
+    pcount              NUMERIC
 );
 SELECT AddGeometryColumn('gpw', 'glp15ag','footprint','4326','POLYGON',2);
 
@@ -214,7 +214,7 @@ CREATE SCHEMA landcover;
 DROP TABLE landcover.landcover CASCADE;
 CREATE TABLE landcover.landcover (
     ogc_fid         SERIAL,
-    dn              INTEGER
+    dn              NUMERIC
 );
 SELECT AddGeometryColumn ('landcover','landcover','wkb_geometry',4326,'POLYGON',2);
 
