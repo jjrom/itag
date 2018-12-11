@@ -58,9 +58,6 @@ fi
 echo "[INFO] Stopping itag docker instance"
 docker-compose down
 
-echo "[INFO] Removing .env file"
-rm .env
-
 echo "[INFO] Done !"
 echo ""
     
