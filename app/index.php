@@ -23,8 +23,8 @@ function autoload($className) {
         'include/',
         'include/iTag/',
         'include/iTag/Taggers/'
-        ) as $current_dir) {
-        $path = $current_dir . sprintf('%s.php', $className);
+        ) as $currentDir) {
+        $path = $currentDir . sprintf('%s.php', $className);
         if (file_exists($path)) {
             include $path;
             return;
