@@ -42,17 +42,17 @@ Note that each time you change the configuration file, you should undeploy then 
 
 Tag a geometry on Toulouse with "Political" information and all cities with a pretty GeoJSON output
 ```
-curl "http://localhost:11211/?taggers=political&_pretty=true&geometry=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))"
+curl "http://localhost:1212/?taggers=political&_pretty=true&geometry=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))"
 ```
 
 Tag geometry intersecting France, Italy and Switzerland with "Political,Geology,Hydrology,Physical" information.
 ```
-curl "http://localhost:11211/?taggers=political,geology,hydrology,physical&geometry=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))"
+curl "http://localhost:1212/?taggers=political,geology,hydrology,physical&geometry=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))"
 ```
 
 Tag geometry intersecting Chile for physical and geology info
 ```
-curl "http://localhost:11211/?taggers=geology,physical&geometry=POLYGON((-74.39875248739082 -46.84194418662555,-72.14655522176582 -46.84194418662555,-72.14655522176582 -48.19957231818611,-74.39875248739082 -48.19957231818611,-74.39875248739082 -46.84194418662555))&_pretty=1"
+curl "http://localhost:1212/?taggers=geology,physical&geometry=POLYGON((-74.39875248739082 -46.84194418662555,-72.14655522176582 -46.84194418662555,-72.14655522176582 -48.19957231818611,-74.39875248739082 -48.19957231818611,-74.39875248739082 -46.84194418662555))&_pretty=1"
 ```
 
 ## FAQ

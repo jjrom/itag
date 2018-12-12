@@ -1116,7 +1116,7 @@ UPDATE datasources.states SET geonameid=1132366 WHERE woe_id=2344564;
 UPDATE datasources.states SET geonameid=1131257 WHERE woe_id=2344567;
 UPDATE datasources.states SET geonameid=1183606 WHERE woe_id=2346496;
 UPDATE datasources.states SET geonameid=1131256 WHERE woe_id=2344574;
-UPDATE datasources.states SET geonameid=1121143 WHERE woe_id=2344573;
+UPDATE datasources.states SET geonameid=121243 WHERE woe_id=2344573;
 UPDATE datasources.states SET geonameid=1520239 WHERE woe_id=2345993;
 UPDATE datasources.states SET geonameid=1496745 WHERE woe_id=2346914;
 UPDATE datasources.states SET geonameid=1508290 WHERE woe_id=2346893;

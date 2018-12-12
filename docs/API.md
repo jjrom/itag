@@ -25,7 +25,7 @@ iTag is a web service for the semantic enhancement of Earth Observation products
 
 Base URLs:
 
-* <a href="http://localhost:11211/">http://localhost:11211/</a>
+* <a href="http://localhost:1212/">http://localhost:1212/</a>
 
 Email: <a href="mailto:jerome.gasperi@gmail.com">Support</a> 
 
@@ -39,14 +39,14 @@ Email: <a href="mailto:jerome.gasperi@gmail.com">Support</a>
 
 ```shell
 # You can also use wget
-curl -X GET http://localhost:11211/ \
+curl -X GET http://localhost:1212/ \
   -H 'Accept: application/json'
 
 ```
 
 ```http
-GET http://localhost:11211/ HTTP/1.1
-Host: localhost:11211
+GET http://localhost:1212/ HTTP/1.1
+Host: localhost:1212
 Accept: application/json
 
 ```
@@ -58,7 +58,7 @@ var headers = {
 };
 
 $.ajax({
-  url: 'http://localhost:11211/',
+  url: 'http://localhost:1212/',
   method: 'get',
 
   headers: headers,
@@ -77,7 +77,7 @@ const headers = {
 
 };
 
-fetch('http://localhost:11211/',
+fetch('http://localhost:1212/',
 {
   method: 'GET',
 
@@ -99,7 +99,7 @@ headers = {
   'Accept' => 'application/json'
 }
 
-result = RestClient.get 'http://localhost:11211/',
+result = RestClient.get 'http://localhost:1212/',
   params: {
   }, headers: headers
 
@@ -113,7 +113,7 @@ headers = {
   'Accept': 'application/json'
 }
 
-r = requests.get('http://localhost:11211/', params={
+r = requests.get('http://localhost:1212/', params={
 
 }, headers = headers)
 
@@ -122,7 +122,7 @@ print r.json()
 ```
 
 ```java
-URL obj = new URL("http://localhost:11211/");
+URL obj = new URL("http://localhost:1212/");
 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 con.setRequestMethod("GET");
 int responseCode = con.getResponseCode();
@@ -154,7 +154,7 @@ func main() {
     }
 
     data := bytes.NewBuffer([]byte{jsonReq})
-    req, err := http.NewRequest("GET", "http://localhost:11211/", data)
+    req, err := http.NewRequest("GET", "http://localhost:1212/", data)
     req.Header = headers
 
     client := &http.Client{}
