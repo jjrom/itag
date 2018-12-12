@@ -14,15 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-STOP=NO
+ENV_FILE=__NULL__
 
 function showUsage {
     echo ""
     echo "   Undeploy itag docker instance "
     echo ""
-    echo "   Usage $0 -s"
+    echo "   Usage $0 -e config.env"
     echo ""
-    echo "      -s | --stop Stop itag docker instance"
+    echo "      -e | --envfile Environnement file (see config.env example)"
     echo "      -h | --help show this help"
     echo ""
     echo "      !!! This script requires docker and docker-compose !!!"
@@ -34,8 +34,8 @@ while [[ $# > 0 ]]
 do
 	key="$1"
 	case $key in
-        -s|--stop)
-            STOP=YES
+        -e|--envfile)
+            ENV_FILE="$2"
             shift # past argument
             ;;
         -h|--help)
@@ -50,10 +50,15 @@ do
 	esac
 done
 
-if [ ${STOP} == 'NO' ]; then
+if [ ! -f ${ENV_FILE} ]; then
     showUsage
+    echo -e "${RED}[ERROR]${NC} Missing or invalid config file!"
+    echo ""
     exit 0
 fi
+
+echo -e "[INFO] Sourcing ${ENV_FILE}"
+. ${ENV_FILE}
 
 echo "[INFO] Stopping itag docker instance"
 docker-compose down
@@ -61,6 +66,4 @@ docker-compose down
 echo "[INFO] Done !"
 echo ""
     
-
-
 
