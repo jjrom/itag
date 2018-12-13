@@ -15,7 +15,8 @@
  * under the License.
  */
 
-class AlwaysTagger extends Tagger {
+class AlwaysTagger extends Tagger
+{
 
     /*
      * Data references
@@ -57,7 +58,8 @@ class AlwaysTagger extends Tagger {
      * @param DatabaseHandler $dbh
      * @param array $config
      */
-    public function __construct($dbh, $config) {
+    public function __construct($dbh, $config)
+    {
         parent::__construct($dbh, $config);
     }
 
@@ -69,7 +71,8 @@ class AlwaysTagger extends Tagger {
      * @return array
      * @throws Exception
      */
-    public function tag($metadata, $options = array()) {
+    public function tag($metadata, $options = array())
+    {
 
         /*
          * Relative location on earth
@@ -87,7 +90,7 @@ class AlwaysTagger extends Tagger {
         /*
          * Season
          */
-        if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp']) ) {
+        if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp'])) {
             $keywords[] = $this->getSeason($metadata['timestamp'], in_array('location:southern', $locations));
         }
 
@@ -95,7 +98,6 @@ class AlwaysTagger extends Tagger {
             'area' => $this->getArea($metadata['geometry']),
             'keywords' => $keywords
         );
-
     }
 
     /**
@@ -103,12 +105,13 @@ class AlwaysTagger extends Tagger {
      *
      * @param string $geometry
      */
-    private function getArea($geometry) {
+    private function getArea($geometry)
+    {
         $query = 'SELECT ' . $this->postgisArea($this->postgisGeomFromText($geometry)) . ' as area';
         $result = $this->query($query);
         if ($result) {
-          $row = pg_fetch_assoc($result);
-          return isset($row) && isset($row['area']) ? $this->toSquareKm($row['area']) : 0;
+            $row = pg_fetch_assoc($result);
+            return isset($row) && isset($row['area']) ? $this->toSquareKm($row['area']) : 0;
         }
         return 0;
     }
@@ -122,7 +125,8 @@ class AlwaysTagger extends Tagger {
      *
      * @param string $geometry
      */
-    private function getLocations($geometry) {
+    private function getLocations($geometry)
+    {
         $locations = array();
         foreach ($this->areas as $key => $value) {
             if ($this->isETNS($geometry, $value)) {
@@ -137,7 +141,8 @@ class AlwaysTagger extends Tagger {
      *
      * @param string $geometry
      */
-    private function isCoastal($geometry) {
+    private function isCoastal($geometry)
+    {
         $geom = $this->postgisGeomFromText($geometry);
         $query = 'SELECT gid FROM datasources.coastlines WHERE ST_Crosses(' . $geom . ', geom) OR ST_Contains(' . $geom . ', geom)';
         return $this->hasResults($query);
@@ -149,7 +154,8 @@ class AlwaysTagger extends Tagger {
      * @param string $geometry
      * @param array $what
      */
-    private function isETNS($geometry, $what) {
+    private function isETNS($geometry, $what)
+    {
         $query = 'SELECT 1 WHERE ' . $what['operator'] . '(' . $what['geometry'] . ',' . $this->postgisGeomFromText($geometry) . ') LIMIT 1';
         return $this->hasResults($query);
     }
@@ -160,7 +166,8 @@ class AlwaysTagger extends Tagger {
      * @param string $timestamp
      * @param boolean $southern
      */
-    private function getSeason($timestamp, $southern = false) {
+    private function getSeason($timestamp, $southern = false)
+    {
 
         /*
          * Get month and day
@@ -170,20 +177,13 @@ class AlwaysTagger extends Tagger {
 
         if ($this->isSpring($month, $day)) {
             return $southern ? 'season' . iTag::TAG_SEPARATOR . 'autumn' : 'season' . iTag::TAG_SEPARATOR . 'spring';
-        }
-
-        else if ($this->isSummer($month, $day)) {
+        } elseif ($this->isSummer($month, $day)) {
             return $southern ? 'season' . iTag::TAG_SEPARATOR . 'winter' : 'season' . iTag::TAG_SEPARATOR . 'summer';
-        }
-
-        else if ($this->isAutumn($month, $day)) {
+        } elseif ($this->isAutumn($month, $day)) {
             return $southern ? 'season' . iTag::TAG_SEPARATOR . 'spring' : 'season' . iTag::TAG_SEPARATOR . 'autumn';
-        }
-
-        else {
+        } else {
             return $southern ? 'season' . iTag::TAG_SEPARATOR . 'summer' : 'season' . iTag::TAG_SEPARATOR . 'winter';
         }
-
     }
 
     /**
@@ -193,7 +193,8 @@ class AlwaysTagger extends Tagger {
      * @param integer $day
      * @return type
      */
-    private function isSpring($month, $day) {
+    private function isSpring($month, $day)
+    {
         return $this->isSeason($month, $day, array(3, 6));
     }
 
@@ -204,7 +205,8 @@ class AlwaysTagger extends Tagger {
      * @param integer $day
      * @return type
      */
-    private function isSummer($month, $day) {
+    private function isSummer($month, $day)
+    {
         return $this->isSeason($month, $day, array(6, 9));
     }
 
@@ -215,7 +217,8 @@ class AlwaysTagger extends Tagger {
      * @param integer $day
      * @return type
      */
-    private function isAutumn($month, $day) {
+    private function isAutumn($month, $day)
+    {
         return $this->isSeason($month, $day, array(9, 12));
     }
 
@@ -226,7 +229,8 @@ class AlwaysTagger extends Tagger {
      * @param integer $day
      * @return type
      */
-    private function isSeason($month, $day, $magics) {
+    private function isSeason($month, $day, $magics)
+    {
         if ($month > $magics[0] && $month < $magics[1]) {
             return true;
         }
@@ -245,10 +249,11 @@ class AlwaysTagger extends Tagger {
      * @param string $query
      * @return boolean
      */
-    private function hasResults($query) {
+    private function hasResults($query)
+    {
         $result = $this->query($query);
         if (!isset($result)) {
-          return false;
+            return false;
         }
         $rows = pg_fetch_all($result);
         if (empty($rows)) {

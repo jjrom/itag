@@ -15,7 +15,8 @@
  * under the License.
  */
 
-class PhysicalTagger extends GenericTagger {
+class PhysicalTagger extends GenericTagger
+{
 
     /*
      * Data references
@@ -42,24 +43,25 @@ class PhysicalTagger extends GenericTagger {
     
     /**
      * Constructor
-     * 
+     *
      * @param DatabaseHandler $dbh
      * @param array $config
      */
-    public function __construct($dbh, $config) {
+    public function __construct($dbh, $config)
+    {
         parent::__construct($dbh, $config);
     }
     
     /**
      * Tag metadata
-     * 
+     *
      * @param array $metadata
      * @param array $options
      * @return array
      * @throws Exception
      */
-    public function tag($metadata, $options = array()) {
+    public function tag($metadata, $options = array())
+    {
         return parent::tag($metadata, array_merge($options, array('computeArea' => true)));
     }
-    
 }

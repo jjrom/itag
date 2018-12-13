@@ -14,14 +14,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-class iTagLauncher {
+class iTagLauncher
+{
     
     /**
      * Constructor
-     * 
+     *
      * @param string $configFile
      */
-    public function __construct($configFile) {
+    public function __construct($configFile)
+    {
         $this->tag($configFile);
     }
     
@@ -49,7 +51,7 @@ class iTagLauncher {
 * geology : Return intersected geological features i.e. faults, glaciers, plates and volcanoes
 * hydrology : Return intersected hydrological features i.e. Lakes and rivers
 * landcover : Compute landcover (based on Global LandCover 2000)
-* physical : Return physical intersected features i.e. marine regions 
+* physical : Return physical intersected features i.e. marine regions
 * political : Return political intersected features i.e. continents, countries, regions and states
 * population : Compute population count and density",
      *         @OA\Schema(
@@ -296,8 +298,8 @@ class iTagLauncher {
      *
      * @param array params
      */
-    private function tag($configFile) {
-
+    private function tag($configFile)
+    {
         $params = $this->getParams();
 
         // Initialize
@@ -311,16 +313,16 @@ class iTagLauncher {
             $this->answer($this->json_format($this->itag->tag($params['metadata'], $taggers)), 200);
         } catch (Exception $e) {
             $this->answer($this->json_format(array('ErrorMessage' => $e->getMessage(), 'ErrorCode' =>  $e->getCode())), $e->getCode());
-        }   
-        
+        }
     }
     /**
      * Read configuration file and set up iTag object
-     * 
+     *
      * @param string $configFile
      * @param array $configFromRequest
      */
-    private function initialize($configFile, $configFromRequest) {
+    private function initialize($configFile, $configFromRequest)
+    {
         try {
             if (!file_exists($configFile)) {
                 throw new Exception(__METHOD__ . 'Missing mandatory configuration file', 500);
@@ -338,7 +340,6 @@ class iTagLauncher {
              * Instantiate iTag
              */
             $this->itag = new iTag($config['database'], $config['general']);
-            
         } catch (Exception $e) {
             $this->answer($this->json_format(array('ErrorMessage' => $e->getMessage(), 'ErrorCode' =>  $e->getCode())), $e->getCode());
         }
@@ -347,7 +348,8 @@ class iTagLauncher {
     /**
      * Return GET params
      */
-    private function getParams() {
+    private function getParams()
+    {
         $this->pretty = filter_input(INPUT_GET, '_pretty', FILTER_VALIDATE_BOOLEAN);
         $params = array(
             'metadata' => array(
@@ -371,7 +373,8 @@ class iTagLauncher {
     /**
      * Stream HTTP result and exit
      */
-    private function answer($response, $responseStatus) {
+    private function answer($response, $responseStatus)
+    {
         
         /*
          * HTTP 1.1 headers
@@ -390,14 +393,13 @@ class iTagLauncher {
          * Stream data
          */
         echo $response;
-        
     }
     
     /**
      * Set CORS headers (HTTP OPTIONS request)
      */
-    private function setCORSHeaders() {
-
+    private function setCORSHeaders()
+    {
         $httpOrigin = filter_input(INPUT_SERVER, 'HTTP_ORIGIN', FILTER_SANITIZE_STRING);
         $httpRequestMethod = filter_input(INPUT_SERVER, 'HTTP_ACCESS_CONTROL_REQUEST_METHOD', FILTER_SANITIZE_STRING);
         $httpRequestHeaders = filter_input(INPUT_SERVER, 'HTTP_ACCESS_CONTROL_REQUEST_HEADERS', FILTER_SANITIZE_STRING);
@@ -426,10 +428,11 @@ class iTagLauncher {
      * Format a flat JSON string to make it more human-readable
      *
      * @param array $json JSON as an array
-     * 
+     *
      * @return string Indented version of the original JSON string
      */
-    private function json_format($json) {
+    private function json_format($json)
+    {
 
         /*
          * No pretty print - easy part
@@ -439,7 +442,6 @@ class iTagLauncher {
         }
         
         return json_encode($json, JSON_PRETTY_PRINT);
-     
     }
 
     /**
@@ -448,8 +450,8 @@ class iTagLauncher {
      *
      * @param {String or Array} $strOrArray
      */
-    private function sanitize($strOrArray) {
-
+    private function sanitize($strOrArray)
+    {
         if (!isset($strOrArray)) {
             return null;
         }
@@ -463,7 +465,6 @@ class iTagLauncher {
         }
 
         return $this->sanitizeString($strOrArray);
-
     }
 
     /**
@@ -472,7 +473,8 @@ class iTagLauncher {
      * @param string $str
      * @return string
      */
-    private function sanitizeString($str) {
+    private function sanitizeString($str)
+    {
 
         /*
          * Remove html tags and NULL (i.e. \0)
@@ -494,5 +496,4 @@ class iTagLauncher {
          */
         return $str;
     }
-
 }

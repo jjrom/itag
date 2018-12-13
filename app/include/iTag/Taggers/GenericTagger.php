@@ -15,7 +15,8 @@
  * under the License.
  */
 
-class GenericTagger extends Tagger {
+class GenericTagger extends Tagger
+{
 
     /*
      * Columns mapping per table
@@ -24,36 +25,38 @@ class GenericTagger extends Tagger {
     
     /**
      * Constructor
-     * 
+     *
      * @param DatabaseHandler $dbh
      * @param array $config
      */
-    public function __construct($dbh, $config) {
+    public function __construct($dbh, $config)
+    {
         parent::__construct($dbh, $config);
     }
     
     /**
      * Tag metadata
-     * 
+     *
      * @param array $metadata
      * @param array $options
      * @return array
      * @throws Exception
      */
-    public function tag($metadata, $options = array()) {
+    public function tag($metadata, $options = array())
+    {
         parent::tag($metadata, $options);
         return $this->process($metadata['geometry'], $options);
     }
     
     /**
      * Compute intersected information from input WKT geometry
-     * 
+     *
      * @param string geometry
      * @param array $options
-     * 
+     *
      */
-    protected function process($geometry, $options) {
-
+    protected function process($geometry, $options)
+    {
         $result = array();
 
         /*
@@ -78,14 +81,15 @@ class GenericTagger extends Tagger {
 
     /**
      * Retrieve content from table that intersects $geometry
-     * 
+     *
      * @param String $tableName
      * @param Array $mapping
      * @param String $geometry
      * @param Array $options
-     * 
+     *
      */
-    private function retrieveContent($tableName, $mapping, $geometry, $options = array()) {
+    private function retrieveContent($tableName, $mapping, $geometry, $options = array())
+    {
         
         /*
          * Return WKT if specified in config file
@@ -117,11 +121,11 @@ class GenericTagger extends Tagger {
                 }
             }
 
-            if ( !isset($result['name']) ) {
+            if (!isset($result['name'])) {
                 unset($result['name']);
             }
 
-            if ( !isset($result['geometry']) ) {
+            if (!isset($result['geometry'])) {
                 unset($result['geometry']);
             }
             unset($result['geonameid'], $result['area'], $result['entityarea'], $result['normalized'], $result['type']);
@@ -129,7 +133,6 @@ class GenericTagger extends Tagger {
             if (count(array_keys($result)) > 0) {
                 $content[] = $result;
             }
-            
         }
 
         return $content;
@@ -137,14 +140,14 @@ class GenericTagger extends Tagger {
     
     /**
      * Return structured results from database
-     * 
+     *
      * @param String $tableName
      * @param Array $mapping
      * @param String $geometry
      * @param Array $options
      */
-    private function getResults($tableName, $mapping, $geometry, $options) {
-  
+    private function getResults($tableName, $mapping, $geometry, $options)
+    {
         $propertyList = array();
         $geom = $this->postgisGeomFromText($geometry);
         $orderBy = '';
@@ -152,11 +155,9 @@ class GenericTagger extends Tagger {
             if ($asName === 'name') {
                 $propertyList[] = 'distinct(' . $columnName . ') as name';
                 $propertyList[] = 'normalize_initcap(' . $columnName . ') as normalized';
-            }
-            else if ($asName === 'geometry') {
+            } elseif ($asName === 'geometry') {
                 $propertyList[] = $this->postgisAsWKT($this->postgisSimplify($this->postgisIntersection('geom', $geom))) . ' as geometry';
-            }
-            else {
+            } else {
                 $propertyList[] = $columnName . ' as ' . $asName;
             }
         }
@@ -171,7 +172,5 @@ class GenericTagger extends Tagger {
         }
         
         return $this->query('WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry) SELECT ' . join(',', $propertyList) .  ' FROM prequery,' . $tableName . ' WHERE st_intersects(geom, corrected_geometry)' . $orderBy);
-        
     }
-    
 }

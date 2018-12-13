@@ -16,8 +16,8 @@
  * under the License.
  */
 
-class CountryInfos {
-
+class CountryInfos
+{
     public static $countryNames = array(
         'ABW' => 'Aruba',
         'AFG' => 'Afghanistan',
@@ -275,5 +275,4 @@ class CountryInfos {
         'UMI' => 'United States Minor Outlying Islands',
         'ESH' => 'Western Sahara'
     );
-
 }

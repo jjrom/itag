@@ -15,7 +15,8 @@
  * under the License.
  */
 
-abstract class Tagger {
+abstract class Tagger
+{
 
     /*
      * Data references description
@@ -43,7 +44,8 @@ abstract class Tagger {
      * @param DatabaseHandler $dbh
      * @param array $config
      */
-    public function __construct($dbh, $config) {
+    public function __construct($dbh, $config)
+    {
         $this->dbh = $dbh;
         $this->config = $config;
     }
@@ -60,7 +62,8 @@ abstract class Tagger {
      * @return array
      * @throws Exception
      */
-    public function tag($metadata, $options = array()) {
+    public function tag($metadata, $options = array())
+    {
         $this->area = $metadata['area'] ?? -1;
     }
 
@@ -69,7 +72,8 @@ abstract class Tagger {
      *
      * @param float $area (in square kilometers)
      */
-    protected function isValidArea($area) {
+    protected function isValidArea($area)
+    {
         return $area > $this->config['areaLimit'] ? false : true;
     }
 
@@ -80,7 +84,8 @@ abstract class Tagger {
      * @param <float> $total
      * @return <float>
      */
-    protected function percentage($part, $total) {
+    protected function percentage($part, $total)
+    {
         if (!isset($total) || $total == 0) {
             return 100;
         }
@@ -92,7 +97,8 @@ abstract class Tagger {
      *
      * @param string $query
      */
-    protected function query($query) {
+    protected function query($query)
+    {
         $results = @@pg_query($this->dbh, $query);
         if (!isset($results)) {
             throw new Exception('Database Connection Error', 500);
@@ -104,7 +110,8 @@ abstract class Tagger {
      * Return postgis area function
      * @param string $geometry
      */
-    protected function postgisArea($geometry) {
+    protected function postgisArea($geometry)
+    {
         return 'st_area(geography(' . $geometry . '), false)';
     }
 
@@ -114,7 +121,8 @@ abstract class Tagger {
      * @param string $geom
      *
      */
-    protected function postgisAsWKT($geom) {
+    protected function postgisAsWKT($geom)
+    {
         return 'st_astext(' . $geom . ')';
     }
 
@@ -125,7 +133,8 @@ abstract class Tagger {
      * @param string $geomB
      *
      */
-    protected function postgisIntersection($geomA, $geomB) {
+    protected function postgisIntersection($geomA, $geomB)
+    {
         return 'st_intersection(' . $geomA . ',' . $geomB . ')';
     }
 
@@ -136,7 +145,8 @@ abstract class Tagger {
      * @param boolean $preserveTopology
      *
      */
-    protected function postgisSimplify($geom, $preserveTopology = false) {
+    protected function postgisSimplify($geom, $preserveTopology = false)
+    {
         return $this->config['geometryTolerance'] > 0 ? 'ST_Simplify' . ($preserveTopology ? 'PreserveTopology' : '') . '(' . $geom . ',' . $this->config['geometryTolerance'] . ')' : $geom;
     }
 
@@ -147,7 +157,8 @@ abstract class Tagger {
      * @param string $srid
      *
      */
-    protected function postgisGeomFromText($geometry, $srid = '4326') {
+    protected function postgisGeomFromText($geometry, $srid = '4326')
+    {
         return 'ST_SplitDateLine(ST_GeomFromText(\'' . $geometry . '\', ' . $srid . '))';
     }
 
@@ -157,14 +168,14 @@ abstract class Tagger {
      * @param string $areaInSquareMeters
      * @param integer $round
      */
-    protected function toSquareKm($areaInSquareMeters, $round = 5) {
+    protected function toSquareKm($areaInSquareMeters, $round = 5)
+    {
         if ($round > -1) {
             return round(floatval($areaInSquareMeters) / 1000000, $round);
-        }
-        else {
+        } else {
             return floatval($areaInSquareMeters) / 1000000;
         }
-    }   
+    }
 
     /**
      *
@@ -185,7 +196,8 @@ abstract class Tagger {
      * @param {String} $dateStr
      *
      */
-    protected function isValidTimeStamp($dateStr) {
+    protected function isValidTimeStamp($dateStr)
+    {
 
         /**
          * Construct the regex to match all ISO 8601 format date case
@@ -207,5 +219,4 @@ abstract class Tagger {
                     '\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}' . '' . '[,|\.]\d+' . '' . '[\+|\-]\d{2}\d{2}' // YYYYMMDDTHHMMSSZ(. or ,)n +HHMM or -HHMM
                 )) . '$/i', $dateStr);
     }
-
 }

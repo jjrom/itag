@@ -18,7 +18,8 @@
 /*
  * Autoload controllers and modules
  */
-function autoload($className) {
+function autoload($className)
+{
     foreach (array(
         'include/',
         'include/iTag/',

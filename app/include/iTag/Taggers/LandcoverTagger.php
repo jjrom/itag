@@ -15,7 +15,8 @@
  * under the License.
  */
 
-class LandcoverTagger extends Tagger {
+class LandcoverTagger extends Tagger
+{
 
     /*
      * Data references
@@ -91,7 +92,8 @@ class LandcoverTagger extends Tagger {
      * @param DatabaseHandler $dbh
      * @param array $config
      */
-    public function __construct($dbh, $config) {
+    public function __construct($dbh, $config)
+    {
         parent::__construct($dbh, $config);
     }
 
@@ -103,7 +105,8 @@ class LandcoverTagger extends Tagger {
      * @return array
      * @throws Exception
      */
-    public function tag($metadata, $options = array()) {
+    public function tag($metadata, $options = array())
+    {
         parent::tag($metadata, $options);
         return $this->process($metadata['geometry'], $options);
     }
@@ -116,8 +119,8 @@ class LandcoverTagger extends Tagger {
      * @param array $options
      *
      */
-    private function process($geometry, $options) {
-
+    private function process($geometry, $options)
+    {
         $output = array(
             'landcover' => array(
                 'main' => array(),
@@ -161,7 +164,8 @@ class LandcoverTagger extends Tagger {
      *
      * @param array $rawLandCover
      */
-    private function getLandCover($rawLandCover) {
+    private function getLandCover($rawLandCover)
+    {
         $sums = array();
         foreach ($this->linkage as $key => $value) {
             $sums[$key] = $this->sum($rawLandCover, $value);
@@ -182,7 +186,6 @@ class LandcoverTagger extends Tagger {
         }
 
         return $landCover;
-
     }
 
     /**
@@ -190,7 +193,8 @@ class LandcoverTagger extends Tagger {
      *
      * @param array $rawLandCover
      */
-    private function getLandCoverDetails($rawLandCover) {
+    private function getLandCoverDetails($rawLandCover)
+    {
         $landCoverDetails = array();
         foreach ($rawLandCover as $key => $val) {
             if ($val['area'] !== 0) {
@@ -219,18 +223,18 @@ class LandcoverTagger extends Tagger {
      * @param string $geometry
      * @return array
      */
-    private function retrieveRawLandCover($geometry) {
+    private function retrieveRawLandCover($geometry)
+    {
         $classes = array();
         $prequery = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry)';
         if ($this->config['returnGeometries']) {
             $query = $prequery . ' SELECT dn as dn, ' . $this->postgisArea($this->postgisIntersection('wkb_geometry', 'corrected_geometry')) . ' as area, ' . $this->postgisAsWKT($this->postgisSimplify($this->postgisIntersection('wkb_geometry', 'corrected_geometry'))) . ' as wkt FROM prequery, landcover.landcover WHERE st_intersects(wkb_geometry, corrected_geometry)';
-        }
-        else {
+        } else {
             $query = $prequery . ' SELECT dn as dn, ' . $this->postgisArea($this->postgisIntersection('wkb_geometry', 'corrected_geometry')) . ' as area FROM prequery, landcover.landcover WHERE st_intersects(wkb_geometry, corrected_geometry)';
         }
         $results = $this->query($query);
         if (!$results) {
-          return $classes;
+            return $classes;
         }
         while ($result = pg_fetch_assoc($results)) {
             if (!isset($classes[$result['dn']])) {
@@ -254,7 +258,8 @@ class LandcoverTagger extends Tagger {
      * @param array $classes
      * @param array $keys
      */
-    private function sum($classes, $keys) {
+    private function sum($classes, $keys)
+    {
         $sum = 0;
         for ($i = count($keys); $i--;) {
             if (isset($classes[$keys[$i]])) {
@@ -269,7 +274,8 @@ class LandcoverTagger extends Tagger {
      *
      * @param integer $code
      */
-    private function getCLCParent($code) {
+    private function getCLCParent($code)
+    {
         foreach ($this->linkage as $key => $value) {
             if (in_array($code, $value) && isset($this->clcClassNames[$key])) {
                 return $this->clcClassNames[$key];
@@ -277,5 +283,4 @@ class LandcoverTagger extends Tagger {
         }
         return 'unknown';
     }
-
 }

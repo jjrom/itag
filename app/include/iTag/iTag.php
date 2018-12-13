@@ -14,7 +14,8 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-class iTag {
+class iTag
+{
 
     /**
      * @OA\OpenApi(
@@ -72,14 +73,13 @@ class iTag {
      * @param array $database : database configuration array
      * @param array $config : configuration
      */
-    public function __construct($database, $config = array()) {
+    public function __construct($database, $config = array())
+    {
         if (isset($database['dbh'])) {
             $this->dbh = $database['dbh'];
-        }
-        else if (isset($database['dbname'])) {
+        } elseif (isset($database['dbname'])) {
             $this->setDatabaseHandler($database);
-        }
-        else {
+        } else {
             throw new Exception('Database connection error', 500);
         }
         $this->setConfig($config);
@@ -94,8 +94,8 @@ class iTag {
      * @return array
      * @throws Exception
      */
-    public function tag($metadata, $taggers = array()) {
-
+    public function tag($metadata, $taggers = array())
+    {
         if (!isset($metadata['geometry'])) {
             throw new Exception('Missing mandatory geometry', 500);
         }
@@ -104,7 +104,7 @@ class iTag {
          * Throws exception if geometry is invalid
          */
         $topologyAnalysis = $this->getTopologyAnalysis($metadata['geometry']);
-        if ( !$topologyAnalysis['isValid'] ) {
+        if (!$topologyAnalysis['isValid']) {
             throw new Exception($topologyAnalysis['error'], 400);
         }
 
@@ -147,7 +147,6 @@ class iTag {
             'content' => $content,
             'references' => $references
         );
-
     }
 
     /**
@@ -155,7 +154,8 @@ class iTag {
      *
      * @param array $metadata
      */
-    private function always($metadata) {
+    private function always($metadata)
+    {
         $tagger = new AlwaysTagger($this->dbh, $this->config);
         return $tagger->tag($metadata);
     }
@@ -165,7 +165,8 @@ class iTag {
      *
      * @param array $config
      */
-    private function setConfig($config) {
+    private function setConfig($config)
+    {
         $this->config = array_merge($this->config, $config);
     }
 
@@ -175,7 +176,8 @@ class iTag {
      * @param array $options
      * @throws Exception
      */
-    private function setDatabaseHandler($options) {
+    private function setDatabaseHandler($options)
+    {
         try {
             $dbInfo = array(
                 'dbname=' . $options['dbname'],
@@ -205,8 +207,8 @@ class iTag {
      *
      * @param string $className : class name to instantiate
      */
-    private function instantiateTagger($className) {
-
+    private function instantiateTagger($className)
+    {
         if (!$className) {
             return null;
         }
@@ -221,7 +223,6 @@ class iTag {
         }
 
         return $class->newInstance($this->dbh, $this->config);
-
     }
     
     /**
@@ -230,9 +231,9 @@ class iTag {
      * @param string $geometry
      * @param string $srid
      */
-    private function getTopologyAnalysis($geometry, $srid = '4326') {
-        
-        if ( !isset($geometry) || $geometry === '') {
+    private function getTopologyAnalysis($geometry, $srid = '4326')
+    {
+        if (!isset($geometry) || $geometry === '') {
             return array(
                 'isValid' => false,
                 'error' => 'Empty geometry'
@@ -247,12 +248,11 @@ class iTag {
             
             // Check split geometry
             $check = '[SPLITTED]';
-            if ( $this->isTopologyValid('ST_isValid(ST_SplitDateLine(ST_GeomFromText($1, ' . $srid . ')))', $geometry) ) {
+            if ($this->isTopologyValid('ST_isValid(ST_SplitDateLine(ST_GeomFromText($1, ' . $srid . ')))', $geometry)) {
                 return array(
                     'isValid' => true
                 );
             }
-        
         } catch (Exception $e) {
             return array(
                 'isValid' => false,
@@ -264,14 +264,13 @@ class iTag {
             'isValid' => false,
             'error' => 'Invalid geometry'
         );
-
     }
 
     /*
      * Check $what query against geometry
      */
-    private function isTopologyValid($what, $geometry) {
-        
+    private function isTopologyValid($what, $geometry)
+    {
         $results = @pg_query_params($this->dbh, 'SELECT ' . $what . ' as valid', array(
             $geometry
         ));
@@ -280,7 +279,5 @@ class iTag {
         }
         
         return pg_fetch_result($results, 0, 'valid');
-        
     }
-
 }

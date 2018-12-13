@@ -16,7 +16,8 @@
  * under the License.
  */
 
-class ToponymsTagger extends Tagger {
+class ToponymsTagger extends Tagger
+{
     /*
      * Data references
      */
@@ -36,7 +37,8 @@ class ToponymsTagger extends Tagger {
      * @param DatabaseHandler $dbh
      * @param array $config
      */
-    public function __construct($dbh, $config) {
+    public function __construct($dbh, $config)
+    {
         parent::__construct($dbh, $config);
     }
 
@@ -48,7 +50,8 @@ class ToponymsTagger extends Tagger {
      * @return array
      * @throws Exception
      */
-    public function tag($metadata, $options = array()) {
+    public function tag($metadata, $options = array())
+    {
         parent::tag($metadata, $options);
         return $this->process($metadata['geometry'], $options);
     }
@@ -60,7 +63,8 @@ class ToponymsTagger extends Tagger {
      * @param array $options
      *
      */
-    private function process($geometry, $options) {
+    private function process($geometry, $options)
+    {
         $toponyms = array();
         $codes = "('PPL', 'PPLC', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'STLMT')";
 
@@ -68,8 +72,8 @@ class ToponymsTagger extends Tagger {
         $query = $prequery . ' SELECT geonameid, name, normalize_initcap(name) as normalized, country, countryname, longitude, latitude, fcode, population, ST_Distance(geom, corrected_centroid) as distance FROM prequery, gazetteer.geoname WHERE st_intersects(geom, corrected_geometry) AND fcode IN ' . $codes . ' ORDER BY distance ASC';
         $results = $this->query($query);
         if ($results) {
-          while ($result = pg_fetch_assoc($results)) {
-              $toponyms[] = array(
+            while ($result = pg_fetch_assoc($results)) {
+                $toponyms[] = array(
                   'id' => (integer) $result['geonameid'],
                   'name' => $result['name'],
                   'normalized' => $result['normalized'],
@@ -81,12 +85,10 @@ class ToponymsTagger extends Tagger {
                   'population' => (integer) $result['population'],
                   'distanceToCentroid' => (float) $result['distance']
               );
-          }
+            }
         }
         return array(
             'toponyms' => $toponyms
         );
-
     }
-
 }

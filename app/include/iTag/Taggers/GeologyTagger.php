@@ -15,7 +15,8 @@
  * under the License.
  */
 
-class GeologyTagger extends GenericTagger {
+class GeologyTagger extends GenericTagger
+{
 
     /*
      * Data references
@@ -75,26 +76,27 @@ class GeologyTagger extends GenericTagger {
     
     /**
      * Constructor
-     * 
+     *
      * @param DatabaseHandler $dbh
      * @param array $config
      */
-    public function __construct($dbh, $config) {
+    public function __construct($dbh, $config)
+    {
         parent::__construct($dbh, $config);
     }
     
     /**
      * Tag metadata
-     * 
+     *
      * @param array $metadata
      * @param array $options
      * @return array
      * @throws Exception
      */
-    public function tag($metadata, $options = array()) {
+    public function tag($metadata, $options = array())
+    {
         return array(
             'geology' => parent::tag($metadata, $options)
         );
     }
-    
 }
