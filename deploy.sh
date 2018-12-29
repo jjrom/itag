@@ -121,8 +121,18 @@ echo -e "[INFO] Starting itag docker instance"
 # This is where everything happens !
 docker-compose up -d
 
-echo -e "[INFO] Wait 10 seconds for database to be ready"
-sleep 10
+# Wait for database to be ready
+echo -e "[INFO] Waiting for database port localhost:${DATABASE_EXPOSED_PORT} to be ready..."
+while ! pg_isready -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} 2>/dev/null
+do
+    let elapsed=elapsed+1
+    if [ "$elapsed" -gt 90 ] 
+    then
+        echo -e "${RED}[ERROR]${NC} Database startup timed out =("
+        exit 0
+    fi  
+    sleep 1;
+done
 
 DATASOURCES_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "datasources" | wc | awk '{print $1}')
 GPW_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "gpw" | wc | awk '{print $1}')
