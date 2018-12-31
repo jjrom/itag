@@ -89,7 +89,7 @@ fi
 
 if [ ! -f ${DATA_DIR}/itag_glp15ag.sql ]; then
     wget -O ${DATA_DIR}/itag_gpw.zip ${GPW_DATASOURCE_URL}
-    unzip ${DATA_DIR}/itag_gpw.zip -d ${DATA_DIR}
+    unzip -q ${DATA_DIR}/itag_gpw.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/itag_gpw.zip
 else
     echo -e "[INFO] Using existing ${GPW_DATASOURCE_URL} data" 

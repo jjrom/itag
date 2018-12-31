@@ -245,7 +245,7 @@ COASTLINES=ne_10m_coastline.shp
 echo -e "[INFO] Retrieve coastlines from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${COASTLINES} ]; then
     wget -O ${DATA_DIR}/ne_10m_coastline.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_coastline.zip
-    unzip ${DATA_DIR}/ne_10m_coastline.zip -d ${DATA_DIR}
+    unzip -q ${DATA_DIR}/ne_10m_coastline.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_coastline.zip
 else
     echo -e "[INFO] Using existing ${COASTLINES} data" 
@@ -263,7 +263,7 @@ echo -e "[INFO] Retrieve geophysical data from [Mapping Tectonic Hot Spots]"
 if [ ! -f ${DATA_DIR}/${CONTINENTS} ]; then
     #wget http://www.colorado.edu/geography/foote/maps/assign/hotspots/download/hotspots.zip
     wget -O ${DATA_DIR}/hotspots.zip https://www.dropbox.com/s/v43nbjgbhw8i2i5/hotspots.zip
-    unzip ${DATA_DIR}/hotspots.zip -d ${DATA_DIR}
+    unzip -q ${DATA_DIR}/hotspots.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/hotspots.zip
 else
     echo -e "[INFO] Using existing ${CONTINENTS} data" 
@@ -277,7 +277,7 @@ COUNTRIES=ne_10m_admin_0_countries.shp
 echo -e "[INFO] Installing World Administrative Level 1 data from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${COUNTRIES} ]; then
     wget -O ${DATA_DIR}/ne_10m_admin_0_countries.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip
-    unzip ${DATA_DIR}/ne_10m_admin_0_countries.zip -d ${DATA_DIR}
+    unzip -q ${DATA_DIR}/ne_10m_admin_0_countries.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_admin_0_countries.zip
 else
     echo -e "[INFO] Using existing ${COUNTRIES} data" 
@@ -348,7 +348,7 @@ STATES=ne_10m_admin_1_states_provinces.shp
 echo -e "[INFO] World administrative level 1 (i.e. states for USA, departements for France)"
 if [ ! -f ${DATA_DIR}/${STATES} ]; then
     wget -O ${DATA_DIR}/ne_10m_admin_1_states_provinces.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_1_states_provinces.zip
-    unzip ${DATA_DIR}/ne_10m_admin_1_states_provinces.zip -d ${DATA_DIR}
+    unzip -q ${DATA_DIR}/ne_10m_admin_1_states_provinces.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_admin_1_states_provinces.zip
 else
     echo -e "[INFO] Using existing ${STATES} data" 
@@ -401,7 +401,7 @@ GLACIERS=ne_10m_glaciated_areas.shp
 echo -e "[INFO] Retrieve glaciers from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${GLACIERS} ]; then
     wget -O ${DATA_DIR}/ne_10m_glaciated_areas.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_glaciated_areas.zip
-    unzip ne_10m_glaciated_areas.zip -d ${DATA_DIR}
+    unzip -q ${DATA_DIR}/ne_10m_glaciated_areas.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_glaciated_areas.zip
 else
     echo -e "[INFO] Using existing ${GLACIERS} data" 
@@ -414,7 +414,7 @@ RIVERS=ne_10m_rivers_lake_centerlines.shp
 echo -e "[INFO] Retrieve rivers from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${RIVERS} ]; then
     wget -O ${DATA_DIR}/ne_10m_rivers_lake_centerlines.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_rivers_lake_centerlines.zip
-    unzip ne_10m_rivers_lake_centerlines.zip -d ${DATA_DIR}
+    unzip -q ${DATA_DIR}/ne_10m_rivers_lake_centerlines.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_rivers_lake_centerlines.zip
 else
     echo -e "[INFO] Using existing ${RIVERS} data" 
@@ -427,7 +427,7 @@ MARINEAREAS=ne_10m_geography_marine_polys.shp
 echo -e "[INFO] Retrieve other data (i.e. marine areas, mountains area, etc.) from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${MARINEAREAS} ]; then
     wget -O ${DATA_DIR}/ne_10m_geography_marine_polys.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_geography_marine_polys.zip
-    unzip ${DATA_DIR}/ne_10m_geography_marine_polys.zip -d ${DATA_DIR}
+    unzip -q ${DATA_DIR}/ne_10m_geography_marine_polys.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_geography_marine_polys.zip
 else
     echo -e "[INFO] Using existing ${MARINEAREAS} data" 
