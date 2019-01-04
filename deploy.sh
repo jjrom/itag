@@ -182,6 +182,8 @@ else
     echo -e "[INFO] Landcover is installed"
 fi
 
+echo ""
+
 # 
 # Display mount point for database  
 # MacOS X is a bit tricky - https://stackoverflow.com/questions/41273514/access-docker-volume-mountpoint-with-docker-for-mac
@@ -191,7 +193,7 @@ if [[ ! "$OSTYPE" == "darwin"* ]]; then
     echo -e "[INFO] Database mount point is ${GREEN}${MOUNT_POINT}${NC}"
 fi
 
-echo -e "[INFO] Application iTag up and running in ${GREEN}${ITAG_PRODUCTION_STATUS}${NC} mode at ${GREEN}${ENDPOINT}${NC}"
+echo -e "[INFO] Application iTag up and running in ${GREEN}${ITAG_PRODUCTION_STATUS}${NC} mode at ${GREEN}${ITAG_ENDPOINT}${NC}"
 echo ""
 
 
