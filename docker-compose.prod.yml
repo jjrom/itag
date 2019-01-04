@@ -32,9 +32,7 @@ services:
     networks:
       - default
     volumes:
-      - ./app:/app:ro
       - .run/config.php:/conf/config.php:ro
-      - .run/php.ini:/usr/local/etc/php/php.ini:ro
   itagdb:
     image: mdillon/postgis:11-alpine
     restart: always
@@ -47,4 +45,4 @@ services:
     networks:
       - default
     volumes:
-      - ${POSTGRES_DATA}:/var/lib/postgresql/data
+      - database_data:/var/lib/postgresql/data

@@ -1,0 +1,51 @@
+<?php
+return array(
+    "general" => array(
+        
+        /*
+         * Maximum area allowed (in square kilometers)
+         * for LandCover computation 
+         */
+        "areaLimit" => ${ITAG_LANDCOVER_MAXIMUM_AREA:-200000},
+        
+        /*
+         * Return WKT geometries
+         */
+        "returnGeometries" => ${ITAG_RETURN_GEOMETRIES:-false},
+        
+        /*
+         * Tolerance value for simplication (in degrees)
+         */
+        "geometryTolerance" => ${ITAG_SIMPLICATION_TOLERANCE:-0.1}
+        
+    ),
+    
+    /*
+     * Database configuration
+     */
+    "database" => array(
+        
+        /*
+         * Database name
+         */
+        "dbname" => "${ITAG_DATABASE_NAME:-itag}",
+        
+        /*
+         * Host - if not specified socket connection
+         */
+        "host" => "itagdb",
+        
+        /*
+         * Port
+         */
+        "port" => 5432,
+        
+        /*
+         * Database user with READ privileges 
+         */
+        "user" => "${ITAG_DATABASE_USER_NAME:-itag}",
+        "password" => "${ITAG_DATABASE_USER_PASSWORD:-itag}"
+    
+    )
+
+);

@@ -22,6 +22,8 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+POSTGRES_DATA=database_data
+ITAG_PRODUCTION_STATUS=prod
 
 # Force script to exit on error
 set -e
@@ -87,22 +89,23 @@ fi
 # Clean errors.log file
 rm -f errors.log
 
-echo -e "[INFO] Sourcing ${ENV_FILE}"
+# Sourcing ${ENV_FILE}"
 . ${ENV_FILE}
 
-echo -e "[INFO] Application status is ${GREEN}${ITAG_PRODUCTION_STATUS}${NC}"
-echo -e "[INFO] Set up .run/config directory to store configuration files"
-mkdir -p .run/config
-cp config/${ITAG_PRODUCTION_STATUS}/nginx.conf config/${ITAG_PRODUCTION_STATUS}/php.ini .run/config/
+echo -e "${YELLOW}[INFO] You're now running resto installation in **${ITAG_PRODUCTION_STATUS}** mode${NC}"
+
+mkdir -p .run
+cp -f ./config/${ITAG_PRODUCTION_STATUS}/* .run/ 2>/dev/null || :
 
 # Extract exposed port from ITAG_ENDPOINT or 80 if not set
 ITAG_EXPOSED_PORT="$(echo $ITAG_ENDPOINT | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
-if [ ${ITAG_EXPOSED_PORT} == "" ]; then
+if [ "${ITAG_EXPOSED_PORT}" == "" ]; then
     ITAG_EXPOSED_PORT=80
 fi
 
-echo -e "[INFO] Creating ${GREEN}.env${NC} file for docker-compose"
+# echo -e "[INFO] Creating ${GREEN}.env${NC} file for docker-compose"
 cat > .env <<EOL
+POSTGRES_DATA=${POSTGRES_DATA}
 ITAG_EXPOSED_PORT=${ITAG_EXPOSED_PORT}
 ITAG_DATABASE_NAME=${ITAG_DATABASE_NAME}
 ITAG_DATABASE_USER_NAME=${ITAG_DATABASE_USER_NAME}
@@ -110,16 +113,19 @@ ITAG_DATABASE_USER_PASSWORD=${ITAG_DATABASE_USER_PASSWORD}
 ITAG_DATABASE_EXPOSED_PORT=${ITAG_DATABASE_EXPOSED_PORT}
 EOL
 
-echo -e "[INFO] Generating itag ${GREEN}.run/configure/config.php${NC} file"
+# echo -e "[INFO] Generating itag ${GREEN}.run/config.php${NC} file"
 eval "cat <<EOF
-$(<config/config.php)
+$(<build/config.php.template)
 EOF
-" 2> /dev/null > .run/config/config.php
-
+" 2> /dev/null > .run/config.php
 echo -e "[INFO] Starting itag docker instance"
 
-# This is where everything happens !
-docker-compose up -d
+# echo -e "[INFO] Starting resto docker instance"
+if [[ "${ITAG_PRODUCTION_STATUS}" == "prod" ]]; then
+    docker-compose -f docker-compose.prod.yml up -d
+else
+    docker-compose up -d
+fi
 
 # Wait for database to be ready
 echo -e "[INFO] Waiting for database port localhost:${DATABASE_EXPOSED_PORT} to be ready..."
@@ -176,16 +182,16 @@ else
     echo -e "[INFO] Landcover is installed"
 fi
 
-# Mount point for database  
+# 
+# Display mount point for database  
 # MacOS X is a bit tricky - https://stackoverflow.com/questions/41273514/access-docker-volume-mountpoint-with-docker-for-mac
+#
 if [[ ! "$OSTYPE" == "darwin"* ]]; then
     MOUNT_POINT=$(docker volume inspect $(basename `pwd`)"_database_data"| grep Mountpoint | awk -F\" '{print $4}')
     echo -e "[INFO] Database mount point is ${GREEN}${MOUNT_POINT}${NC}"
-else
-    echo -e "[INFO] MacOS X - mount point not provided"
 fi
-echo -e "[INFO] itag up and running at ${GREEN}${ITAG_ENDPOINT}${NC}"
-echo ""
 
+echo -e "[INFO] Application iTag up and running in ${GREEN}${ITAG_PRODUCTION_STATUS}${NC} mode at ${GREEN}${ENDPOINT}${NC}"
+echo ""
 
 
