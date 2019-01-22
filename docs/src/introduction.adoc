@@ -1,0 +1,32 @@
+[[introduction]]
+== Introduction
+ifdef::env-github,env-browser[:outfilesuffix: .adoc]
+iTag is a web service for the semantic enhancement of Earth Observation products, i.e. the tagging of products with additional information about the covered area, regarding for example geology, water bodies, land use, population, countries, administrative units or names of major settlements.
+
+See http://vimeo.com/51045597[video capture of itag applied to Pleiades HR and Spot5 images database]
+
+Test the https://itag.snapplanet.io?_pretty=1&taggers=political&geometry=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))[service online]
+
+=== References
+Here are some projects that use resto.
+
+* https://creodias.eu/eo-data-finder-api-manual[CREODIAS]
+* https://peps.cnes.fr/rocket/#/home[French Sentinel Data Processing center]
+* https://theia.cnes.fr/atdistrib/rocket/#/home[French Space Agency, THEIA land data center]
+* http://mapshup.com/projects/rocket/#/home[Rocket - The Earth in your pocket]
+* http://finder.eocloud.eu/www/[Polish EO Data finder]
+* https://copernicus.nci.org.au/sara.client/#/home[Sentinel Australia Regional Access]
+
+If you plan to use iTag and would like to have your project added to this list, feel free to send an email to jerome.gasperi@gmail.com 
+
+=== Support
+iTag is developped and maintained by https://mapshup.com[jeobrowser]. 
+
+For questions, support or anything related to resto feel free to contact 
+```
+jeobrowser
+50 quai de Tounis
+31000 Toulouse
+Tel   : +33 6 19 59 17 35
+email : jerome.gasperi@gmail.com
+```

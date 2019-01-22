@@ -1,0 +1,30 @@
+:copyrightYear: 2019
+:doctype: book
+:encoding: utf-8
+:lang: en
+:toc: macro
+:toclevels: 3
+:numbered:
+:sectanchors:
+:source-highlighter: rouge
+// set media to output format print or screen for pdf export
+:media: screen
+:bibtex-file: resources/bibtex-file.bib
+
+[separator=::]
+= iTag:: Semantic enhancement of Earth Observation data
+
+Published: 2019-01-22
+
+Version: 1.0
+
+Reference URL for this document: http://github.com/jjrom/itag/docs/itag.pdf
+
+Editor: Jérôme Gasperi
+
+Title: iTag - Semantic enhancement of Earth Observation data
+
+''''
+include::introduction.adoc[]
+
+include::installation.adoc[]

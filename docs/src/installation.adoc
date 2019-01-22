@@ -1,0 +1,58 @@
+[[installation]]
+== Installation
+ifdef::env-github,env-browser[:outfilesuffix: .adoc]
+
+iTag installation and deployment is based on docker-compose. It can run on any OS as long as the following software are up and running:
+
+* bash
+* psql client
+* docker engine
+* docker-compose
+
+=== Configuration
+All configuration options are defined within the https://github.com/jjrom/itag/blob/master/config.env[config.env] file.
+
+For a local installation, you can leave it untouched. Otherwise, just make your own configuration. It's self explanatory (send me an email if not ;)
+
+Note that each time you change the configuration file, you should undeploy then redeploy the service.
+
+=== Building and deploying
+After reviewing your _config.env_ file, run the following script:
+....
+    ./deploy.sh -e config.env
+....
+
+=== Undeploy the service ?
+To undeploy the service, run the following scripts:
+....
+    ./undeploy -e config.env
+....
+
+This will stop all containers related to iTag instance
+
+=== Testing the service
+_Note: The following example are based on the default service endpoint defined in (cf. https://github.com/jjrom/itag/blob/master/config.env[config.env])_
+
+Tag a geometry on Toulouse with "Political" information and all cities with a pretty GeoJSON output
+....
+curl "http://localhost:1212/?taggers=political&_pretty=true&geometry=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))"
+....
+
+Tag geometry intersecting France, Italy and Switzerland with "Political,Geology,Hydrology,Physical" information.
+....
+curl "http://localhost:1212/?taggers=political,geology,hydrology,physical&geometry=POLYGON((6.487426757812523%2045.76081241294796,6.487426757812523%2046.06798615804025,7.80578613281244%2046.06798615804025,7.80578613281244%2045.76081241294796,6.487426757812523%2045.76081241294796))"
+....
+
+Tag geometry intersecting Chile for physical and geology info
+....
+curl "http://localhost:1212/?taggers=geology,physical&geometry=POLYGON((-74.39875248739082 -46.84194418662555,-72.14655522176582 -46.84194418662555,-72.14655522176582 -48.19957231818611,-74.39875248739082 -48.19957231818611,-74.39875248739082 -46.84194418662555))&_pretty=1"
+....
+
+==== FAQ
+
+*Why do i have empty result for landcover and population ?*
+
+The Landcover and Population data are available separately from this repository. If you need this data, send an email to jerome.gasperi@gmail.com
+
+
+
