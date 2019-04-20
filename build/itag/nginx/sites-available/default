@@ -1,0 +1,23 @@
+server {
+  
+  listen 80 default_server;
+	listen [::]:80 default_server;
+  server_name _;
+  
+  root /app;
+
+  server_tokens off;
+
+  index index.php;
+  
+  location / {
+    try_files $uri /index.php?_path=$uri&$args;
+  }
+
+  location = /index.php {
+    fastcgi_pass 127.0.0.1:9000;
+    fastcgi_index index.php;
+    include fastcgi.conf;
+  }
+
+}

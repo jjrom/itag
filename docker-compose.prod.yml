@@ -10,27 +10,18 @@ networks:
       name: rnet
 services:
   itag:
-    image: jjrom/itag-nginx:5
+    image: jjrom/itag:5.0
     restart: always
     build:
       context: ./
-      dockerfile: ./build/nginx/Dockerfile
+      dockerfile: ./build/itag/Dockerfile
     depends_on:
-      - phpfpm
       - itagdb
     networks:
       - external
       - default
     ports:
-      - ${ITAG_EXPOSED_PORT}:8080
-  phpfpm:
-    image: jjrom/itag-fpm:5
-    restart: always
-    build:
-      context: ./
-      dockerfile: ./build/phpfpm/Dockerfile
-    networks:
-      - default
+      - ${ITAG_EXPOSED_PORT}:80
     volumes:
       - .run/config.php:/conf/config.php:ro
   itagdb:
