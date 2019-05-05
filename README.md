@@ -26,7 +26,13 @@ iTag installation and deployment is based on docker-compose. It can run on any O
 ### Building and deploying
 Run the following script:
 
-        ./deploy.sh -e config.env
+(for production)
+
+        ./deploy prod
+
+(for development)
+
+        ./deploy dev
 
 *On first deployment, the script retrieves all the datasources from internet and populates the database. It can take some time.*
 
@@ -59,7 +65,7 @@ curl "http://localhost:1212/?taggers=geology,physical&geometry=POLYGON((-74.3987
 
 ### How do i undeploy the service ?
 
-        ./undeploy.sh -s
+        ./undeploy
 
 ### How do i check the logs of a running itag container ?
 Use docker-compose, e.g.:
