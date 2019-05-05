@@ -53,8 +53,12 @@ services:
     volumes:
       - ./app:/app
   itagdb:
-    image: mdillon/postgis:11-alpine
+    image: jjrom/itag-database:5.0
     restart: always
+    build:
+      context: ./
+      dockerfile: ./build/itag-database/Dockerfile
+    command: docker-entrypoint.sh -c config_file=/etc/postgresql.conf
     env_file:
       - ${ENV_FILE:-config.env}
     environment:
