@@ -33,7 +33,7 @@ class iTag
      *  )
      * )
      */
-    const VERSION = '5.0.5';
+    const VERSION = '5.0.6';
     
     /*
      * Character separator

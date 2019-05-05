@@ -17,14 +17,15 @@
 class iTagLauncher
 {
     
+
     /**
      * Constructor
      *
-     * @param string $configFile
+     * @param array $config
      */
-    public function __construct($configFile)
+    public function __construct($config)
     {
-        $this->tag($configFile);
+        $this->tag($config);
     }
     
     /**
@@ -298,51 +299,35 @@ class iTagLauncher
      *
      * @param array params
      */
-    private function tag($configFile)
+    private function tag($config)
     {
         $params = $this->getParams();
 
-        // Initialize
-        $this->initialize($configFile, $params['config']);
-        
-        $taggers = array();
-        foreach (array_values($params['taggersList']) as $value) {
-            $taggers[strtolower(trim($value))] = array();
-        }
         try {
-            $this->answer($this->json_format($this->itag->tag($params['metadata'], $taggers)), 200);
-        } catch (Exception $e) {
-            $this->answer($this->json_format(array('ErrorMessage' => $e->getMessage(), 'ErrorCode' =>  $e->getCode())), $e->getCode());
-        }
-    }
-    /**
-     * Read configuration file and set up iTag object
-     *
-     * @param string $configFile
-     * @param array $configFromRequest
-     */
-    private function initialize($configFile, $configFromRequest)
-    {
-        try {
-            if (!file_exists($configFile)) {
-                throw new Exception(__METHOD__ . 'Missing mandatory configuration file', 500);
-            }
-            $config = include($configFile);
             
             /*
              * Superseed with input params
              */
-            foreach (array_keys($configFromRequest) as $key) {
-                $config['general'][$key] = $configFromRequest[$key];
+            foreach (array_keys($params['config']) as $key) {
+                $config['general'][$key] = $params['config'][$key];
             }
 
             /*
              * Instantiate iTag
              */
             $this->itag = new iTag($config['database'], $config['general']);
+
+            $taggers = array();
+            foreach (array_values($params['taggersList']) as $value) {
+                $taggers[strtolower(trim($value))] = array();
+            }
+
+            $this->answer($this->json_format($this->itag->tag($params['metadata'], $taggers)), 200);
+        
         } catch (Exception $e) {
             $this->answer($this->json_format(array('ErrorMessage' => $e->getMessage(), 'ErrorCode' =>  $e->getCode())), $e->getCode());
         }
+
     }
     
     /**

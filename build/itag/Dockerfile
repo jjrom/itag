@@ -1,9 +1,9 @@
 FROM ubuntu:bionic
 
-ENV BUILD_DIR ./build/itag
-ENV PHP_VERSION 7.2
-ENV ARCH amd64
-ENV JUST_CONTAINERS_VERSION 1.22.1.0
+ENV BUILD_DIR=./build/itag \
+    PHP_VERSION=7.2 \
+    JUST_CONTAINERS_VERSION=1.22.1.0 \
+    ARCH=amd64
 
 # Add wait-for-it
 ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /bin/wait-for-it.sh
@@ -40,20 +40,14 @@ RUN apt-get update && apt-get install -y software-properties-common curl inetuti
     php${PHP_VERSION}-zip \
     php${PHP_VERSION}-sqlite3 \
     #php${PHP_VERSION}-apcu \
+    php-xdebug \
     zip \
     unzip \
+    gettext-base \
     nginx && \
+    phpenmod xdebug && \
     apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /run/php && chmod -R 755 /run/php && \
-    sed -i 's|.*listen =.*|listen=9000|g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's|.*error_log =.*|error_log=/proc/self/fd/2|g' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf && \
-    sed -i 's|.*access.log =.*|access.log=/proc/self/fd/2|g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's|.*user =.*|user=root|g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's|.*group =.*|group=root|g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's#.*variables_order.*#variables_order=GPCS#g' /etc/php/${PHP_VERSION}/fpm/php.ini && \
-    sed -i 's#.*date.timezone.*#date.timezone=UTC#g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's#.*clear_env.*#clear_env=no#g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+    mkdir -p /run/php && chmod -R 755 /run/php
 
 # Copy NGINX service script
 COPY ${BUILD_DIR}/start-nginx.sh /etc/services.d/nginx/run
@@ -64,10 +58,35 @@ COPY ${BUILD_DIR}/start-fpm.sh /etc/services.d/php_fpm/run
 RUN chmod 755 /etc/services.d/php_fpm/run
 
 # Copy NGINX configuration
-COPY ${BUILD_DIR}/nginx /etc/nginx
+COPY ${BUILD_DIR}/container_root/etc/nginx /etc/nginx
+
+# Copy PHP-FPM configuration
+COPY ${BUILD_DIR}/container_root/etc/fpm /etc/php/${PHP_VERSION}/fpm
+
+# Copy PHP mods available
+COPY ${BUILD_DIR}/container_root/etc/php/mods-available /etc/php/${PHP_VERSION}/mods-available
+
+# Copy run.d configuration
+COPY ${BUILD_DIR}/container_root/cont-init.d /etc/cont-init.d
 
 # Create app directory
-RUN mkdir /conf
-COPY ${BUILD_DIR}/config.php /conf/config.php
+RUN mkdir /cfg
+COPY ${BUILD_DIR}/config.php.template /cfg/config.php.template
 RUN mkdir /app
 COPY ./app /app
+
+# Set environment variables
+# opcache https://www.scalingphpbook.com/best-zend-opcache-settings-tuning-config/
+ENV PHP_FPM_MAX_CHILDREN=4096 \
+    PHP_FPM_START_SERVERS=20 \
+    PHP_FPM_MAX_REQUESTS=1024 \
+    PHP_FPM_MIN_SPARE_SERVERS=5 \
+    PHP_FPM_MAX_SPARE_SERVERS=128 \
+    PHP_FPM_MEMORY_LIMIT=256M \
+    PHP_FPM_MAX_EXECUTION_TIME=60 \
+    PHP_FPM_UPLOAD_MAX_FILESIZE=20M \
+    PHP_OPCACHE_MEMORY_CONSUMPTION=128 \
+    PHP_OPCACHE_INTERNED_STRINGS_BUFFER=16 \
+    PHP_OPCACHE_MAX_WASTED_PERCENTAGE=5 \
+    CFG_APP_DEBUG=1
+

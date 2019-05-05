@@ -15,26 +15,45 @@
  * under the License.
  */
 
-/*
- * Autoload controllers and modules
- */
-function autoload($className)
-{
-    foreach (array(
+spl_autoload_register(function ($class) {
+
+    $dirs = array(
         'include/',
         'include/iTag/',
         'include/iTag/Taggers/'
-        ) as $currentDir) {
-        $path = $currentDir . sprintf('%s.php', $className);
-        if (file_exists($path)) {
-            include $path;
-            return;
+    );
+
+    foreach ($dirs as $dir) {
+        $src = $dir . $class . '.php';
+        if (file_exists($src)) {
+            return include $src;
         }
     }
-}
-spl_autoload_register('autoload');
+});
 
 /*
- * Launch iTag
+ * Read configuration from file...
  */
-new iTagLauncher('/conf/config.php');
+$configFile = '/etc/itag/config.php';
+if (file_exists($configFile)) {
+    return new iTagLauncher(include($configFile));
+}
+
+/*
+ * ...or use default if not exist
+ */
+error_log('[WARNING] Config file ' . $configFile . ' not found - using default configuration');
+return new iTagLauncher(array(
+    "general" => array(
+        "areaLimit" => 200000,
+        "returnGeometries" => false,
+        "geometryTolerance" => 0.1
+    ),
+    "database" => array(
+        "dbname" => "itag",
+        "host" => "itagdb",
+        "port" => 5432,
+        "user" => "itag",
+        "password" => "itag"
+    )
+));
