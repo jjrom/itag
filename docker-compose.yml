@@ -46,7 +46,7 @@ services:
       #- NGINX_FASTCGI_SEND_TIMEOUT=60s
       #- NGINX_FASTCGI_READ_TIMEOUT=60s
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1/?geometry=POINT(0 0)"]
       interval: 1m
       timeout: 5s
   itagdb:
