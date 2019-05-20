@@ -116,6 +116,12 @@ class GenericTagger extends Tagger
             if (isset($result['area'])) {
                 $area = $this->toSquareKm($result['area']);
                 $result['pcover'] = $this->percentage($area, $this->area);
+
+                // Break if there is no significative coverage
+                if ($result['pcover'] <= 0) {
+                    continue;
+                }
+
                 if (isset($result['entityarea'])) {
                     $result['gcover'] = $this->percentage($area, $this->toSquareKm($result['entityarea']));
                 }
@@ -133,6 +139,7 @@ class GenericTagger extends Tagger
             if (count(array_keys($result)) > 0) {
                 $content[] = $result;
             }
+
         }
 
         return $content;

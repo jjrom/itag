@@ -262,12 +262,15 @@ class PoliticalTagger extends Tagger
             $index = count($continents) - 1;
         }
         $area = $this->toSquareKm($element['area']);
-        array_push($continents[$index]['countries'], array(
-            'name' => $element['name'],
-            'id' => 'country'. iTag::TAG_SEPARATOR . $element['id'],
-            'pcover' => $this->percentage($area, $this->area),
-            'gcover' => $this->percentage($area, $this->toSquareKm($element['entityarea']))
-        ));
+        $pcover = $this->percentage($area, $this->area);
+        if ($pcover > 0) {
+            array_push($continents[$index]['countries'], array(
+                'name' => $element['name'],
+                'id' => 'country'. iTag::TAG_SEPARATOR . $element['id'],
+                'pcover' => $pcover,
+                'gcover' => $this->percentage($area, $this->toSquareKm($element['entityarea']))
+            ));
+        }
     }
 
     /**
@@ -285,13 +288,16 @@ class PoliticalTagger extends Tagger
         } else {
             if (isset($element['regionarea']) && isset($element['regionentityarea'])) {
                 $area = $this->toSquareKm($element['regionarea']);
-                array_push($regions, array(
-                    'name' => $element['region'],
-                    'id' => 'region'. iTag::TAG_SEPARATOR . $element['regionid'],
-                    'pcover' => $this->percentage($area, $this->area),
-                    'gcover' => $this->percentage($area, $this->toSquareKm($element['regionentityarea'])),
-                    'states' => array()
-                ));
+                $pcover = $this->percentage($area, $this->area);
+                if ($pcover > 0) {
+                    array_push($regions, array(
+                        'name' => $element['region'],
+                        'id' => 'region'. iTag::TAG_SEPARATOR . $element['regionid'],
+                        'pcover' => $pcover,
+                        'gcover' => $this->percentage($area, $this->toSquareKm($element['regionentityarea'])),
+                        'states' => array()
+                    ));
+                }
             } else {
                 array_push($regions, array(
                     'name' => $element['region'],
@@ -313,18 +319,21 @@ class PoliticalTagger extends Tagger
     private function mergeState(&$states, $element)
     {
         $area = $this->toSquareKm($element['area']);
-        $state = array(
-            'name' => $element['state'],
-            'id' => 'state'. iTag::TAG_SEPARATOR . $element['stateid'],
-            'pcover' => $this->percentage($area, $this->area),
-            'gcover' => $this->percentage($area, $this->toSquareKm($element['entityarea']))
-        );
-
-        if ($this->addToponyms) {
-            $state['toponyms'] = $this->getToponyms($element['wkb_geom']);
+        $pcover = $this->percentage($area, $this->area);
+        if ($pcover > 0) {
+            $state = array(
+                'name' => $element['state'],
+                'id' => 'state'. iTag::TAG_SEPARATOR . $element['stateid'],
+                'pcover' => $pcover,
+                'gcover' => $this->percentage($area, $this->toSquareKm($element['entityarea']))
+            );
+    
+            if ($this->addToponyms) {
+                $state['toponyms'] = $this->getToponyms($element['wkb_geom']);
+            }
+    
+            array_push($states, $state);
         }
-
-        array_push($states, $state);
     }
 
     /**
