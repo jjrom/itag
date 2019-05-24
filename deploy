@@ -113,9 +113,9 @@ if [[ ! -f ${ENV_FILE} ]]; then
     exit 0
 fi
 
+export ITAG_EXPOSED_PORT=$(grep ^ITAG_EXPOSED_PORT= ${ENV_FILE} | awk -F= '{print $2}')
+export ITAG_DATABASE_EXPOSED_PORT=$(grep ^ITAG_DATABASE_EXPOSED_PORT= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_ENDPOINT=$(grep ^ITAG_ENDPOINT= ${ENV_FILE} | awk -F= '{print $2}')
-ITAG_EXPOSED_PORT=$(grep ^ITAG_EXPOSED_PORT= ${ENV_FILE} | awk -F= '{print $2}')
-ITAG_DATABASE_EXPOSED_PORT=$(grep ^ITAG_DATABASE_EXPOSED_PORT= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_USER_PASSWORD=$(grep ^ITAG_DATABASE_USER_PASSWORD= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_USER_NAME=$(grep ^ITAG_DATABASE_USER_NAME= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_NAME=$(grep ^ITAG_DATABASE_NAME= ${ENV_FILE} | awk -F= '{print $2}')
