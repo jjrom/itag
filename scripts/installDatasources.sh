@@ -17,7 +17,6 @@
 # Force script to exit on error
 set -e
 
-PWD=`pwd`
 ENV_FILE=__NULL__
 DATA_DIR=__NULL__
 RED='\033[0;31m'

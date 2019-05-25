@@ -20,7 +20,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
-
+MYPWD=$(pwd)
 PROJECT_NAME=itag
 FORCE_DATASOURCES_INSTALL=0
 CONTACT="jerome.gasperi@gmail.com"
@@ -171,9 +171,9 @@ fi
 if [ "${DATASOURCES_INSTALL}" != "0" ]; then
     echo -e "${YELLOW}[INFO] Installing datasources${NC}"
     echo -e "[INFO] Building docker shp2pgsql"
-    docker build -t jjrom/shp2pgsql ${PWD}/docker-shp2pgsql
-    ./scripts/installDatasources.sh -e ${ENV_FILE} -d ${PWD}/data
-    ./scripts/updateDatasourcesWithGeoname.sh -e ${ENV_FILE} -d ${PWD}/sql
+    docker build -t jjrom/shp2pgsql ${MYPWD}/docker-shp2pgsql
+    ./scripts/installDatasources.sh -e ${ENV_FILE} -d ${MYPWD}/data
+    ./scripts/updateDatasourcesWithGeoname.sh -e ${ENV_FILE} -d ${MYPWD}/sql
 else
     echo -e "[INFO] Datasources are installed"
 fi
@@ -181,7 +181,7 @@ fi
 if [ "${GPW_INSTALL}" != "0" ]; then
     if [ "${GPW_DATASOURCE_URL}" != "" ]; then
         echo -e "${YELLOW}[INFO] Installing population grids${NC}"
-        ./scripts/installGPW.sh -e ${ENV_FILE} -d ${PWD}/data
+        ./scripts/installGPW.sh -e ${ENV_FILE} -d ${MYPWD}/data
     else
         echo -e "[INFO] Population density is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
     fi
@@ -195,7 +195,7 @@ fi
 if [ "${LANDCOVER_INSTALL}" != "0" ]; then
     if [ "${LANDCOVER_DATASOURCE_URL}" != "" ]; then
         echo -e "${YELLOW}[INFO] Installing landcover${NC}"
-        ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${PWD}/data
+        ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${MYPWD}/data
     else
         echo -e "[INFO] Landcover is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
     fi
