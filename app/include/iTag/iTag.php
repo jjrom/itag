@@ -33,7 +33,7 @@ class iTag
      *  )
      * )
      */
-    const VERSION = '5.0.7';
+    const VERSION = '5.1.0';
     
     /*
      * Character separator
@@ -101,6 +101,12 @@ class iTag
         }
 
         /*
+         * Convert input geometry to 4326
+         */
+        $originalGeometry = $metadata['geometry'];
+        $metadata['geometry'] = $this->wktTo4326($metadata['geometry']);
+
+        /*
          * Throws exception if geometry is invalid
          */
         $topologyAnalysis = $this->getTopologyAnalysis($metadata['geometry']);
@@ -139,14 +145,18 @@ class iTag
          */
         pg_close($this->dbh);
 
-        return array(
+        $output = array();
+        if ($originalGeometry !== $metadata['geometry']) {
+            $output['originalGeometry'] = $originalGeometry;
+        }
+        return array_merge($output, array(
             'geometry' => $metadata['geometry'],
             'timestamp' => $metadata['timestamp'] ?? null,
             'area_unit' => 'km2',
             'cover_unit' => '%',
             'content' => $content,
             'references' => $references
-        );
+        ));
     }
 
     /**
@@ -280,4 +290,38 @@ class iTag
         
         return pg_fetch_result($results, 0, 'valid');
     }
+
+    /**
+     * Convert input wkt with an explicit SRID to EPSG:4326
+     * 
+     * @param string $wkt
+     */
+    private function wktTo4326($wkt) {
+
+        $exploded = explode(';', $wkt);
+        
+        // No SRID - return untouched WKT
+        if (strrpos(strtolower($exploded[0]), 'srid') === false) {
+            return $wkt;
+        }
+
+        $srid = (integer) substr($exploded[0], 5);
+
+        // SRID is 4326 - return untouched WKT
+        if ($srid === 4326) {
+            return $wkt;
+        }
+
+        $results = @pg_query_params($this->dbh, 'SELECT ST_AsText(ST_Transform(ST_GeomFromText($1, ' . $srid . '), 4326)) as wkt', array(
+            $exploded[1]
+        ));
+
+        if (!isset($results) || $results === false) {
+            throw new Exception();
+        }
+        
+        return pg_fetch_result($results, 0, 'wkt');
+
+    }
+
 }
