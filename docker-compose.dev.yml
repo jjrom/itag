@@ -81,5 +81,9 @@ services:
       - ${ITAG_DATABASE_EXPOSED_PORT:-1213}:5432
     networks:
       - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ITAG_DATABASE_USER_NAME:-itag}"]
+      interval: 1m
+      timeout: 5s
     volumes:
       - database_data:/var/lib/postgresql/data
