@@ -460,7 +460,7 @@ UPDATE datasources.physical set name='White Sea' WHERE name='White  Sea';
 -- Merge polygons
 UPDATE datasources.physical SET geom=(select st_multi(st_union(geom)) FROM datasources.physical WHERE name='Gulf of Anadyr') WHERE gid=159;
 DELETE FROM datasources.physical WHERE gid=271;
-UPDATE datasources.physical SET geom=(select st_multi(st_union(geom)) FROM datasources.physical WHERE name='Mediterranean Sea') WHERE gid=15;
+UPDATE datasources.physical SET geom=(select st_multi(st_union(geom)),geonameid=363196 FROM datasources.physical WHERE name='Mediterranean Sea') WHERE gid=15;
 DELETE FROM datasources.physical WHERE gid=63;
 UPDATE datasources.physical SET geom=(select st_multi(st_union(geom)) FROM datasources.physical where name='Ross Sea') WHERE gid=27;
 DELETE FROM datasources.physical WHERE gid=30;
