@@ -33,12 +33,12 @@ return array(
         /*
          * Host - if not specified socket connection
          */
-        "host" => "itagdb",
+        "host" => "${ITAG_DATABASE_HOST:-toto}",
         
         /*
          * Port
          */
-        "port" => 5432,
+        "port" => ${ITAG_DATABASE_PORT:-5432},
         
         /*
          * Database user with READ privileges 

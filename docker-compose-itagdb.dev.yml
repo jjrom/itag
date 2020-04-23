@@ -1,0 +1,46 @@
+version: '2.1'
+volumes:
+  database_data:
+    driver: local
+networks:
+  default:
+    driver: bridge
+  external:
+    external:
+      name: rnet
+services:
+  itagdb:
+    image: jjrom/itag-database:5.0
+    restart: always
+    build:
+      context: ./
+      dockerfile: ./build/itag-database/Dockerfile
+    command: docker-entrypoint.sh -c config_file=/etc/postgresql.conf
+    env_file:
+      - ${ENV_FILE:-config.env}
+    environment:
+      - POSTGRES_USER=${ITAG_DATABASE_USER_NAME:-itag}
+      - POSTGRES_PASSWORD=${ITAG_DATABASE_USER_PASSWORD:-itag}
+      - POSTGRES_DB=${ITAG_DATABASE_NAME:-itag}
+      ### Server configuration (uncomment to change values)
+      #- POSTGRES_MAX_CONNECTIONS=300
+      #- POSTGRES_DEFAULT_STATISTICS_TARGET=100
+      #- POSTGRES_SHARED_BUFFERS=8GB
+      #- POSTGRES_WORK_MEM=320MB
+      #- POSTGRES_WALL_BUFFERS=32MB
+      #- POSTGRES_MAINTENANCE_WORK_MEM=1GB
+      #- POSTGRES_EFFECTIVE_CACHE_SIZE=32GB
+      #- POSTGRES_RANDOM_PAGE_COST=1.5
+      #- POSTGRES_SYNCHRONOUS_COMMIT=off
+      - POSTGRES_LOG_MIN_DURATION_STATEMENT=0
+      #- POSTGRES_AUTOVACUUM=on
+    ports:
+      - ${ITAG_DATABASE_EXPOSED_PORT:-1213}:5432
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ITAG_DATABASE_USER_NAME:-itag}"]
+      interval: 1m
+      timeout: 5s
+    volumes:
+      - database_data:/var/lib/postgresql/data

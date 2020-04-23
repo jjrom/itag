@@ -119,6 +119,9 @@ ITAG_ENDPOINT=$(grep ^ITAG_ENDPOINT= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_USER_PASSWORD=$(grep ^ITAG_DATABASE_USER_PASSWORD= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_USER_NAME=$(grep ^ITAG_DATABASE_USER_NAME= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_NAME=$(grep ^ITAG_DATABASE_NAME= ${ENV_FILE} | awk -F= '{print $2}')
+ITAG_DATABASE_HOST=$(grep ^ITAG_DATABASE_HOST= ${ENV_FILE} | awk -F= '{print $2}')
+ITAG_DATABASE_PORT=$(grep ^ITAG_DATABASE_PORT= ${ENV_FILE} | awk -F= '{print $2}')
+ITAG_DATABASE_IS_EXTERNAL=$(grep ^ITAG_DATABASE_IS_EXTERNAL= ${ENV_FILE} | awk -F= '{print $2}')
 GPW_DATASOURCE_URL=$(grep ^GPW_DATASOURCE_URL= ${ENV_FILE} | awk -F= '{print $2}')
 LANDCOVER_DATASOURCE_URL=$(grep ^LANDCOVER_DATASOURCE_URL= ${ENV_FILE} | awk -F= '{print $2}')
 
@@ -140,14 +143,31 @@ echo -e "${YELLOW}[INFO] You're now running itag installation in **${TARGET}** m
 
 # echo -e "[INFO] Starting ${PROJECT_NAME} docker instance"
 if [[ "${TARGET}" == "dev" ]]; then
-    ENV_FILE=${ENV_FILE} docker-compose --project-name ${PROJECT_NAME} -f docker-compose.dev.yml up -d
+    if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
+      COMPOSE_FILE=docker-compose.dev.yml
+    else
+      COMPOSE_FILE=docker-compose-itagdb.dev.yml:docker-compose.dev.yml
+    fi
 else
-    ENV_FILE=${ENV_FILE} docker-compose --project-name ${PROJECT_NAME} -f docker-compose.yml up -d
+    if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
+      COMPOSE_FILE=docker-compose.yml
+    else
+      COMPOSE_FILE=docker-compose-itagdb.yml:docker-compose.yml
+    fi
 fi
 
+echo "[debug] using compose files: ${COMPOSE_FILE}"
+COMPOSE_FILE=${COMPOSE_FILE} ENV_FILE=${ENV_FILE} docker-compose --project-name ${PROJECT_NAME}  up -d
+
+if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
+    DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
+else
+    DATABASE_HOST_SEEN_FROM_DOCKERHOST=localhost
+fi
 # Wait for database to be ready
-echo -e "[INFO] Waiting for database port localhost:${ITAG_DATABASE_EXPOSED_PORT} to be ready..."
-while ! pg_isready -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} 2>/dev/null
+echo -e "[INFO] Waiting for database port ${DATABASE_HOST_SEEN_FROM_DOCKERHOST}:${ITAG_DATABASE_EXPOSED_PORT} to be ready..."
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD}
+while ! pg_isready -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p "${ITAG_DATABASE_EXPOSED_PORT}" -U "${ITAG_DATABASE_USER_NAME}" -d "${ITAG_DATABASE_NAME}" 2>/dev/null
 do
     let elapsed=elapsed+1
     if [ "$elapsed" -gt 90 ] 
@@ -157,10 +177,11 @@ do
     fi  
     sleep 1;
 done
+unset PGPASSWORD
 
-DATASOURCES_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "datasources" | wc | awk '{print $1}')
-GPW_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "gpw" | wc | awk '{print $1}')
-LANDCOVER_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "landcover" | wc | awk '{print $1}')
+DATASOURCES_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "datasources" | wc | awk '{print $1}')
+GPW_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "gpw" | wc | awk '{print $1}')
+LANDCOVER_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "landcover" | wc | awk '{print $1}')
 
 if [ "${FORCE_DATASOURCES_INSTALL}" == "1" ]; then
     DATASOURCES_INSTALL="1"
@@ -186,25 +207,25 @@ if [ "${GPW_INSTALL}" != "0" ]; then
         echo -e "[INFO] Population density is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
     fi
 else
-    GPW_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM gpw.glp15ag60 LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
+    GPW_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM gpw.glp15ag60 LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
     if [[ "${GPW_COUNT}" != "0" ]]; then
         echo -e "[INFO] Population grids are installed"
     fi
 fi
 
-if [ "${LANDCOVER_INSTALL}" != "0" ]; then
-    if [ "${LANDCOVER_DATASOURCE_URL}" != "" ]; then
-        echo -e "${YELLOW}[INFO] Installing landcover${NC}"
-        ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${MYPWD}/data
-    else
-        echo -e "[INFO] Landcover is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
-    fi
-else
-    LANDCOVER_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM landcover.landcover LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
-    if [[ "${LANDCOVER_COUNT}" != "0" ]]; then
-        echo -e "[INFO] Landcover is installed"
-    fi
-fi
+#if [ "${LANDCOVER_INSTALL}" != "0" ]; then
+#    if [ "${LANDCOVER_DATASOURCE_URL}" != "" ]; then
+#        echo -e "${YELLOW}[INFO] Installing landcover${NC}"
+#        ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${MYPWD}/data
+#    else
+#        echo -e "[INFO] Landcover is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
+#    fi
+#else
+#    LANDCOVER_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM landcover.landcover LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
+#    if [[ "${LANDCOVER_COUNT}" != "0" ]]; then
+#        echo -e "[INFO] Landcover is installed"
+#    fi
+#fi
 
 echo ""
 
