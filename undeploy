@@ -16,10 +16,18 @@
 
 GREEN='\033[0;32m'
 NC='\033[0m'
+ENV_FILE=./config.env
 PROJECT_NAME=itag
 
+ITAG_DATABASE_IS_EXTERNAL=$(grep ^ITAG_DATABASE_IS_EXTERNAL= ${ENV_FILE} | awk -F= '{print $2}' | sed 's/^"//g' | sed 's/"$//g')
+
+if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
+  COMPOSE_FILE="docker-compose.yml"
+else
+  COMPOSE_FILE="docker-compose-itagdb.yml:docker-compose.yml"
+fi
+
 echo -e "[INFO] Stopping ${GREEN}${PROJECT_NAME}${NC} docker instance"
-docker-compose --project-name ${PROJECT_NAME} down
+COMPOSE_FILE=${COMPOSE_FILE} docker-compose --project-name ${PROJECT_NAME} down
 echo -e "[INFO] Done !"
 echo -e ""
-    
