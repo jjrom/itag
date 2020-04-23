@@ -33,7 +33,7 @@ return array(
         /*
          * Host - if not specified socket connection
          */
-        "host" => "${ITAG_DATABASE_HOST:-toto}",
+        "host" => "${ITAG_DATABASE_HOST:-itagdb}",
         
         /*
          * Port
