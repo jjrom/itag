@@ -167,3 +167,10 @@ PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d 
 CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint);
 CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount);
 EOF
+
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
+vacuum analyze gpw.glp15ag;
+vacuum analyze gpw.glp15ag15;
+vacuum analyze gpw.glp15ag30;
+vacuum analyze gpw.glp15ag60;
+EOF
