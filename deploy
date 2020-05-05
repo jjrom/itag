@@ -233,7 +233,7 @@ echo ""
 # Display mount point for database  
 # MacOS X is a bit tricky - https://stackoverflow.com/questions/41273514/access-docker-volume-mountpoint-with-docker-for-mac
 #
-if [[ ! "$OSTYPE" == "darwin"* ]]; then
+if [[ ! "$OSTYPE" == "darwin"* ]] && [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "no" ]]; then
     MOUNT_POINT=$(docker volume inspect $(basename `pwd`)"_database_data"| grep Mountpoint | awk -F\" '{print $4}')
     echo -e "[INFO] Database mount point is ${GREEN}${MOUNT_POINT}${NC}"
 fi
