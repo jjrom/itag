@@ -213,19 +213,19 @@ else
     fi
 fi
 
-#if [ "${LANDCOVER_INSTALL}" != "0" ]; then
-#    if [ "${LANDCOVER_DATASOURCE_URL}" != "" ]; then
-#        echo -e "${YELLOW}[INFO] Installing landcover${NC}"
-#        ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${MYPWD}/data
-#    else
-#        echo -e "[INFO] Landcover is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
-#    fi
-#else
-#    LANDCOVER_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM landcover.landcover LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
-#    if [[ "${LANDCOVER_COUNT}" != "0" ]]; then
-#        echo -e "[INFO] Landcover is installed"
-#    fi
-#fi
+if [ "${LANDCOVER_INSTALL}" != "0" ]; then
+    if [ "${LANDCOVER_DATASOURCE_URL}" != "" ]; then
+        echo -e "${YELLOW}[INFO] Installing landcover${NC}"
+        ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${MYPWD}/data
+    else
+        echo -e "[INFO] Landcover is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
+    fi
+else
+    LANDCOVER_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM landcover.landcover LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
+    if [[ "${LANDCOVER_COUNT}" != "0" ]]; then
+        echo -e "[INFO] Landcover is installed"
+    fi
+fi
 
 echo ""
 
