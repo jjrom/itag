@@ -78,6 +78,13 @@ fi
 # Source config file
 . ${ENV_FILE}
 
+if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
+    DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
+else
+    DATABASE_HOST_SEEN_FROM_DOCKERHOST=localhost
+fi
+
+
 # Prepare data directory
 if [ -d "${ITAG_DIR}" ];
 then
@@ -98,10 +105,15 @@ fi
 echo -e "${YELLOW}[WARNING] Landcover insertion can take a loooong time - be patient :)${NC}"
 
 echo -e "[INFO] Inserting landcover data" 
-cat ${DATA_DIR}/itag_landcover.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
+cat ${DATA_DIR}/itag_landcover.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
 
 echo -e "[INFO] Preparing index data" 
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h localhost -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
 CREATE INDEX landcover_geometry_idx ON landcover.landcover USING gist (wkb_geometry);
 CREATE INDEX landcover2009_geometry_idx ON landcover.landcover2009 USING gist (wkb_geometry);
+EOF
+
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
+vacuum analyze landcover.landcover;
+vacuum analyze landcover.landcover2009;
 EOF
