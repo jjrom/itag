@@ -191,8 +191,6 @@ fi
 
 if [ "${DATASOURCES_INSTALL}" != "0" ]; then
     echo -e "${YELLOW}[INFO] Installing datasources${NC}"
-    echo -e "[INFO] Building docker shp2pgsql"
-    docker build -t jjrom/shp2pgsql ${MYPWD}/docker-shp2pgsql
     ./scripts/installDatasources.sh -e ${ENV_FILE} -d ${MYPWD}/data
     ./scripts/updateDatasourcesWithGeoname.sh -e ${ENV_FILE} -d ${MYPWD}/sql
 else
