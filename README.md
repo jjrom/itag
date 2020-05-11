@@ -55,18 +55,18 @@ The following extensions must be installed on the target database:
 
 For instance suppose that the external database is "itag" :
 
-        DATABASE_NAME=itag
+        ITAG_DATABASE_NAME=itag
 
-        PGPASSWORD=${DATABASE_SUPERUSER_PASSWORD} createdb -X -v ON_ERROR_STOP=1 -h "${DATABASE_HOST}" -p "${DATABASE_PORT}" -U "${DATABASE_SUPERUSER_NAME}" ${DATABASE_NAME}
+        PGPASSWORD=${ITAG_DATABASE_SUPERUSER_PASSWORD} createdb -X -v ON_ERROR_STOP=1 -h "${ITAG_DATABASE_HOST}" -p "${ITAG_DATABASE_PORT}" -U "${ITAG_DATABASE_SUPERUSER_NAME}" ${ITAG_DATABASE_NAME}
 
-        PGPASSWORD=${DATABASE_SUPERUSER_PASSWORD} psql -X -v ON_ERROR_STOP=1 -h "${DATABASE_HOST}" -p "${DATABASE_PORT}" -U "${DATABASE_SUPERUSER_NAME}" -d "${DATABASE_NAME}" -f ./build/resto-database/sql/00_itag_extensions.sql
+        PGPASSWORD=${ITAG_DATABASE_SUPERUSER_PASSWORD} psql -X -v ON_ERROR_STOP=1 -h "${ITAG_DATABASE_HOST}" -p "${ITAG_DATABASE_PORT}" -U "${ITAG_DATABASE_SUPERUSER_NAME}" -d "${ITAG_DATABASE_NAME}" -f ./build/resto-database/sql/00_itag_extensions.sql
 
-Where DATABASE_SUPERUSER_NAME is a database user with sufficient privileges to install extensions ("postgres" user for instance)
+Where ITAG_DATABASE_SUPERUSER_NAME is a database user with sufficient privileges to install extensions ("postgres" user for instance)
 
 A normal PG user with `create schema` and `insert on spatial_ref_sys` rights is necessary in order for iTag to operate. To give a user the suitable rights, run the following sql commands:
 
-        GRANT CREATE ON DATABASE ${DATABASE_NAME} TO <dbuser>;
-        GRANT INERT ON TABLE spatial_ref_sys TO <dbuser>;
+        GRANT CREATE ON DATABASE ${ITAG_DATABASE_NAME} TO <dbuser>;
+        GRANT INSERT ON TABLE spatial_ref_sys TO <dbuser>;
 
 iTag tables, functions and triggers should be installed by running [scripts/installOnExternalDB.sh](https://github.com/jjrom/itag/blob/scripts/installExternalDB.sh):
 
