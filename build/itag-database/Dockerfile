@@ -14,3 +14,5 @@ ENTRYPOINT [ "/init" ]
 # Copy run.d configuration
 COPY ${BUILD_DIR}/container_root/cont-init.d /etc/cont-init.d
 COPY ${BUILD_DIR}/postgresql.conf /etc/postgresql.conf
+COPY ${BUILD_DIR}/sql /sql
+COPY ${BUILD_DIR}/installDB.sh /docker-entrypoint-initdb.d/10-installDB.sh

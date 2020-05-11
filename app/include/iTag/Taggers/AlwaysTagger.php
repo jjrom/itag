@@ -252,7 +252,7 @@ class AlwaysTagger extends Tagger
     private function hasResults($query)
     {
         $result = $this->query($query);
-        if (!isset($result)) {
+        if (!isset($result) || !$result) {
             return false;
         }
         $rows = pg_fetch_all($result);

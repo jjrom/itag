@@ -24,17 +24,17 @@ iTag installation and deployment is based on docker-compose. It can run on any O
 * docker-compose
 
 ### Building and deploying
-Run the following script:
+On first launch, run the following script:
 
 (for production)
 
-        ./deploy prod
+        ./deploy prod -f
 
 (for development)
 
-        ./deploy dev
+        ./deploy dev -f
 
-*On first deployment, the script retrieves all the datasources from internet and populates the database. It can take some time.*
+*Note* The "-f" option is to force initial datasources installation. This is only needed once. For subsequents deploys, just discard this option
 
 ### Configuration
 All configuration options are defined within the [config.env](https://github.com/jjrom/itag/blob/master/config.env) file.
