@@ -72,6 +72,16 @@ Use docker-compose, e.g.:
 
         docker-compose logs -f
 
+### How to i build locally the docker images
+Use docker-compose:
+
+        # This will build the application server image (i.e. jjrom/itag)
+        docker-compose -f docker-compose.yml build
+
+        # This will build the database server image (i.e. jjrom/itag-database)
+        docker-compose -f docker-compose-itagdb.yml build
+
+
 ### Where is the configuration of a running itag container ?
 When deployed, all configurations file are stored under .run/config directory
 
