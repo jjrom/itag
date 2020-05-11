@@ -43,6 +43,40 @@ For a local installation, you can leave it untouched. Otherwise, just make your 
 
 Note that each time you change the configuration file, you should undeploy then redeploy the service.
 
+### External Database
+By default, iTag will create a local postgres docker image. However, it can also uses an external PostgreSQL database (version 11+). 
+
+To use an external database, set the config.env `ITAG_DATABASE_IS_EXTERNAL` parameter to `yes`.
+
+The following extensions must be installed on the target database:
+ * postgis
+ * postgis_topology
+ * unaccent
+
+For instance suppose that the external database is "itag" :
+
+        DATABASE_NAME=itag
+
+        PGPASSWORD=${DATABASE_SUPERUSER_PASSWORD} createdb -X -v ON_ERROR_STOP=1 -h "${DATABASE_HOST}" -p "${DATABASE_PORT}" -U "${DATABASE_SUPERUSER_NAME}" ${DATABASE_NAME}
+
+        PGPASSWORD=${DATABASE_SUPERUSER_PASSWORD} psql -X -v ON_ERROR_STOP=1 -h "${DATABASE_HOST}" -p "${DATABASE_PORT}" -U "${DATABASE_SUPERUSER_NAME}" -d "${DATABASE_NAME}" -f ./build/resto-database/sql/00_itag_extensions.sql
+
+Where DATABASE_SUPERUSER_NAME is a database user with sufficient privileges to install extensions ("postgres" user for instance)
+
+A normal PG user with `create schema` and `insert on spatial_ref_sys` rights is necessary in order for iTag to operate. To give a user the suitable rights, run the following sql commands:
+
+        GRANT CREATE ON DATABASE ${DATABASE_NAME} TO <dbuser>;
+        GRANT INERT ON TABLE spatial_ref_sys TO <dbuser>;
+
+iTag tables, functions and triggers should be installed by running [scripts/installOnExternalDB.sh](https://github.com/jjrom/itag/blob/scripts/installExternalDB.sh):
+
+        ./scripts/installExternalDB.sh -e <config file>
+        
+Note: The `insert on spatial_ref_sys` right can be revoked once the database is installed (first deploy) by running:
+    
+    REVOKE INSERT ON table spatial_ref_sys FROM <dbuser>; 
+
+
 ## Examples
 *Note: The following example are based on the default service endpoint defined in (cf. [config.env](https://github.com/jjrom/itag/blob/master/config.env))*
 
