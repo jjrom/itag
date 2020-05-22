@@ -164,32 +164,28 @@ if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
 else
     DATABASE_HOST_SEEN_FROM_DOCKERHOST=localhost
 fi
-# Wait for database to be ready
-echo -e "[INFO] Waiting for database port ${DATABASE_HOST_SEEN_FROM_DOCKERHOST}:${ITAG_DATABASE_EXPOSED_PORT} to be ready..."
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD}
-while ! pg_isready -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p "${ITAG_DATABASE_EXPOSED_PORT}" -U "${ITAG_DATABASE_USER_NAME}" -d "${ITAG_DATABASE_NAME}" 2>/dev/null
-do
-    let elapsed=elapsed+1
-    if [ "$elapsed" -gt 90 ] 
-    then
-        echo -e "${RED}[ERROR]${NC} Database startup timed out =("
-        exit 0
-    fi  
-    sleep 1;
-done
-unset PGPASSWORD
-
-DATASOURCES_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "datasources" | wc | awk '{print $1}')
-GPW_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "gpw" | wc | awk '{print $1}')
-LANDCOVER_INSTALL=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "\dn" | paste -sd "," - | grep -v "landcover" | wc | awk '{print $1}')
 
 if [ "${FORCE_DATASOURCES_INSTALL}" == "1" ]; then
     DATASOURCES_INSTALL="1"
     GPW_INSTALL="1"
     LANDCOVER_INSTALL="1"
+
+    # Wait for database to be ready
+    echo -e "[INFO] Waiting for database port ${DATABASE_HOST_SEEN_FROM_DOCKERHOST}:${ITAG_DATABASE_EXPOSED_PORT} to be ready..."
+    while ! PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} pg_isready -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p "${ITAG_DATABASE_EXPOSED_PORT}" -U "${ITAG_DATABASE_USER_NAME}" -d "${ITAG_DATABASE_NAME}" 2>/dev/null
+    do
+        let elapsed=elapsed+1
+        if [ "$elapsed" -gt 90 ] 
+        then
+            echo -e "${RED}[ERROR]${NC} Database startup timed out =("
+            exit 0
+        fi  
+        sleep 1;
+    done
+
 fi
 
-if [ "${DATASOURCES_INSTALL}" != "0" ]; then
+if [ "${DATASOURCES_INSTALL}" == "1" ]; then
     echo -e "${YELLOW}[INFO] Installing datasources${NC}"
     ./scripts/installDatasources.sh -e ${ENV_FILE} -d ${MYPWD}/data
     ./scripts/updateDatasourcesWithGeoname.sh -e ${ENV_FILE} -d ${MYPWD}/sql
@@ -197,7 +193,7 @@ else
     echo -e "[INFO] Datasources are installed"
 fi
 
-if [ "${GPW_INSTALL}" != "0" ]; then
+if [ "${GPW_INSTALL}" == "1" ]; then
     if [ "${GPW_DATASOURCE_URL}" != "" ]; then
         echo -e "${YELLOW}[INFO] Installing population grids${NC}"
         ./scripts/installGPW.sh -e ${ENV_FILE} -d ${MYPWD}/data
@@ -211,7 +207,7 @@ else
     fi
 fi
 
-if [ "${LANDCOVER_INSTALL}" != "0" ]; then
+if [ "${LANDCOVER_INSTALL}" == "1" ]; then
     if [ "${LANDCOVER_DATASOURCE_URL}" != "" ]; then
         echo -e "${YELLOW}[INFO] Installing landcover${NC}"
         ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${MYPWD}/data
