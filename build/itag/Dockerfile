@@ -2,7 +2,7 @@ FROM jjrom/nginx-fpm:latest
 LABEL maintainer="jerome.gasperi@gmail.com"
 
 ENV BUILD_DIR=./build/itag \
-    PHP_VERSION=7.2 \
+    PHP_VERSION=7.4 \
     ITAG_DEBUG=1
 
 # Copy NGINX configuration
