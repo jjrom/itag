@@ -121,7 +121,6 @@ ITAG_DATABASE_USER_NAME=$(grep ^ITAG_DATABASE_USER_NAME= ${ENV_FILE} | awk -F= '
 ITAG_DATABASE_NAME=$(grep ^ITAG_DATABASE_NAME= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_HOST=$(grep ^ITAG_DATABASE_HOST= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_PORT=$(grep ^ITAG_DATABASE_PORT= ${ENV_FILE} | awk -F= '{print $2}')
-ITAG_DATABASE_IS_EXTERNAL=$(grep ^ITAG_DATABASE_IS_EXTERNAL= ${ENV_FILE} | awk -F= '{print $2}')
 GPW_DATASOURCE_URL=$(grep ^GPW_DATASOURCE_URL= ${ENV_FILE} | awk -F= '{print $2}')
 LANDCOVER_DATASOURCE_URL=$(grep ^LANDCOVER_DATASOURCE_URL= ${ENV_FILE} | awk -F= '{print $2}')
 
@@ -143,26 +142,26 @@ echo -e "${YELLOW}[INFO] You're now running itag installation in **${TARGET}** m
 
 # echo -e "[INFO] Starting ${PROJECT_NAME} docker instance"
 if [[ "${TARGET}" == "dev" ]]; then
-    if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
-      COMPOSE_FILE=docker-compose.dev.yml
+    if [[ "${ITAG_DATABASE_HOST}" == "itagdb" ]]; then
+        COMPOSE_FILE=docker-compose-itagdb.dev.yml:docker-compose.dev.yml
     else
-      COMPOSE_FILE=docker-compose-itagdb.dev.yml:docker-compose.dev.yml
+        COMPOSE_FILE=docker-compose.dev.yml
     fi
 else
-    if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
-      COMPOSE_FILE=docker-compose.yml
+    if [[ "${ITAG_DATABASE_HOST}" == "itagdb" ]]; then
+        COMPOSE_FILE=docker-compose-itagdb.yml:docker-compose.yml
     else
-      COMPOSE_FILE=docker-compose-itagdb.yml:docker-compose.yml
+        COMPOSE_FILE=docker-compose.yml
     fi
 fi
 
 echo "[debug] using compose files: ${COMPOSE_FILE}"
 COMPOSE_FILE=${COMPOSE_FILE} ENV_FILE=${ENV_FILE} docker-compose --project-name ${PROJECT_NAME}  up -d
 
-if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
-    DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
-else
+if [ "${ITAG_DATABASE_HOST}" == "itagdb" ] || [ "${ITAG_DATABASE_HOST}" == "host.docker.internal" ]; then
     DATABASE_HOST_SEEN_FROM_DOCKERHOST=localhost
+else
+    DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
 fi
 
 if [ "${FORCE_DATASOURCES_INSTALL}" == "1" ]; then
@@ -227,9 +226,11 @@ echo ""
 # Display mount point for database  
 # MacOS X is a bit tricky - https://stackoverflow.com/questions/41273514/access-docker-volume-mountpoint-with-docker-for-mac
 #
-if [[ ! "$OSTYPE" == "darwin"* ]] && [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "no" ]]; then
+if [[ ! "$OSTYPE" == "darwin"* ]]; then
+  if [[ "${DATABASE_HOST}" == "itagdb" ]]; then
     MOUNT_POINT=$(docker volume inspect $(basename `pwd`)"_database_data"| grep Mountpoint | awk -F\" '{print $4}')
     echo -e "[INFO] Database mount point is ${GREEN}${MOUNT_POINT}${NC}"
+  fi
 fi
 
 echo -e "[INFO] Application iTag up and running in ${GREEN}${TARGET}${NC} mode at ${GREEN}${ITAG_ENDPOINT}${NC}"

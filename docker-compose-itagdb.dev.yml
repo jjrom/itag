@@ -22,6 +22,8 @@ services:
       - POSTGRES_USER=${ITAG_DATABASE_USER_NAME:-itag}
       - POSTGRES_PASSWORD=${ITAG_DATABASE_USER_PASSWORD:-itag}
       - POSTGRES_DB=${ITAG_DATABASE_NAME:-itag}
+      - POSTGRES_HOST=${ITAG_DATABASE_HOST:-itagdb}
+      - POSTGRES_PORT=${ITAG_DATABASE_PORT:-5432}
       ### Server configuration (uncomment to change values)
       #- POSTGRES_MAX_CONNECTIONS=300
       #- POSTGRES_DEFAULT_STATISTICS_TARGET=100
@@ -35,7 +37,7 @@ services:
       - POSTGRES_LOG_MIN_DURATION_STATEMENT=0
       #- POSTGRES_AUTOVACUUM=on
     ports:
-      - ${ITAG_DATABASE_EXPOSED_PORT:-1213}:5432
+      - ${ITAG_DATABASE_EXPOSED_PORT:-1213}:${ITAG_DATABASE_PORT:-5432}
     networks:
       - default
     healthcheck:

@@ -79,10 +79,10 @@ fi
 # Source config file
 . ${ENV_FILE}
 
-if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
-    DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
-else
+if [ "${ITAG_DATABASE_HOST}" == "itagdb" ] || [ "${ITAG_DATABASE_HOST}" == "host.docker.internal" ]; then
     DATABASE_HOST_SEEN_FROM_DOCKERHOST=localhost
+else
+    DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
 fi
 
 # Prepare data directory

@@ -78,12 +78,11 @@ fi
 # Source config file
 . ${ENV_FILE}
 
-if [[ "${ITAG_DATABASE_IS_EXTERNAL}" == "yes" ]]; then
-    DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
-else
+if [ "${ITAG_DATABASE_HOST}" == "itagdb" ] || [ "${ITAG_DATABASE_HOST}" == "host.docker.internal" ]; then
     DATABASE_HOST_SEEN_FROM_DOCKERHOST=localhost
+else
+    DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
 fi
-
 
 echo -e "[INFO] Udpate datasources tables"
 PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF

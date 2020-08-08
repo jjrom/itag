@@ -46,8 +46,6 @@ Note that each time you change the configuration file, you should undeploy then 
 ### External Database
 By default, iTag will create a local postgres docker image. However, it can also uses an external PostgreSQL database (version 11+). 
 
-To use an external database, set the config.env `ITAG_DATABASE_IS_EXTERNAL` parameter to `yes`.
-
 The following extensions must be installed on the target database:
  * postgis
  * postgis_topology
