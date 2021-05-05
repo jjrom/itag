@@ -2259,7 +2259,7 @@ UPDATE datasources.physical SET geonameid=287294 WHERE gid=164;
 UPDATE datasources.physical SET geonameid=9293489 WHERE gid=15;
 UPDATE datasources.physical SET geonameid=3877922 WHERE gid=259;
 UPDATE datasources.physical SET geonameid=5906016 WHERE gid=199;
-UPDATE datasources.physical SET geonameid=1282588 WHERE gid=6;
+UPDATE datasources.physical SET geonameid=1545739 WHERE gid=6;
 UPDATE datasources.physical SET geonameid=5933908 WHERE gid=135;
 UPDATE datasources.volcanoes SET geonameid=3926710 WHERE gid=35;
 UPDATE datasources.volcanoes SET geonameid=3925501 WHERE gid=37;
