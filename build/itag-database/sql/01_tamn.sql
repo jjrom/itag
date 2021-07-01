@@ -21,7 +21,7 @@ INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, proj4text, srtext) VALU
 --   ST_DistanceToNorthPole(geom_in)
 --
 -- DESCRIPTION:
---   Returns distance in meters to South Pole
+--   Returns distance in meters to South Pole - if error occurs returns -1
 --
 -- USAGE:
 --   SELECT ST_DistanceToNorthPole(geom_in geometry);
@@ -45,7 +45,7 @@ BEGIN
                                 text_var2 = PG_EXCEPTION_DETAIL,
                                 text_var3 = PG_EXCEPTION_HINT;
         raise WARNING 'ST_DistanceToNorthPole: exception occured: Msg: %, detail: %, hint: %', text_var1, text_var1, text_var3;
-        RETURN TRUE;
+        RETURN -1;
 
 END
 $$ LANGUAGE 'plpgsql' IMMUTABLE;
@@ -57,7 +57,7 @@ $$ LANGUAGE 'plpgsql' IMMUTABLE;
 --   ST_DistanceToSouthPole(geom_in)
 --
 -- DESCRIPTION:
---   Returns distance in meters to South Pole
+--   Returns distance in meters to South Pole - if error occurs returns -1
 --
 -- USAGE:
 --   SELECT ST_DistanceToSouthPole(geom_in geometry);
@@ -81,7 +81,7 @@ BEGIN
                                 text_var2 = PG_EXCEPTION_DETAIL,
                                 text_var3 = PG_EXCEPTION_HINT;
         raise WARNING 'ST_DistanceToSouthPole: exception occured: Msg: %, detail: %, hint: %', text_var1, text_var1, text_var3;
-        RETURN TRUE;
+        RETURN -1;
 
 END
 $$ LANGUAGE 'plpgsql' IMMUTABLE;
@@ -99,7 +99,7 @@ $$ LANGUAGE 'plpgsql' IMMUTABLE;
 --   SELECT ST_IntersectsAntimeridian(geom_in geometry);
 --
 CREATE OR REPLACE FUNCTION ST_IntersectsAntimeridian(geom_in geometry)
-    RETURNS boolean AS $$
+    RETURNS INTEGER AS $$
 DECLARE
     part        RECORD;
     blade       geography := ST_SetSrid(ST_MakeLine(ARRAY[ST_MakePoint(180, -90), ST_MakePoint(180, 0), ST_MakePoint(180, 90)]), 4326)::geography;
@@ -114,13 +114,13 @@ BEGIN
         FOR part IN SELECT (ST_Dump(geom_in)).geom LOOP
 
             -- AntiMeridian is crossed for sure
-            IF ST_IsPolygonCW(part.geom) AND abs(ST_XMax(part.geom) - ST_XMin(part.geom)) > 180 THEN
-                --RAISE NOTICE 'Polygon is CW and abs > 180';
-                RETURN TRUE;
+            IF ST_IsPolygonCW(part.geom) AND abs(ST_XMax(part.geom) - ST_XMin(part.geom)) > 360 THEN
+                --RAISE NOTICE 'Polygon is CW and abs > 360';
+                RETURN 1;
             -- AntiMeridian is perhaps crossed
             ELSIF ST_Intersects(part.geom::geography, blade) THEN
                 --RAISE NOTICE 'Polygon intersects blade';
-                RETURN TRUE;
+                RETURN 1;
             END IF;
 
         END LOOP;
@@ -128,17 +128,17 @@ BEGIN
     ELSE
 
         -- AntiMeridian is crossed
-        IF ST_IsPolygonCW(geom_in) AND abs(ST_XMax(geom_in) - ST_XMin(geom_in)) > 180 THEN
-            --RAISE NOTICE 'Polygon is CW and abs > 180';
-            RETURN TRUE;
+        IF ST_IsPolygonCW(geom_in) AND abs(ST_XMax(geom_in) - ST_XMin(geom_in)) > 360 THEN
+            --RAISE NOTICE 'Polygon is CW and abs > 360';
+            RETURN 1;
         ELSIF ST_Intersects(geom_in::geography, blade) THEN
             --RAISE NOTICE 'Polygon intersects blade';
-            RETURN TRUE;
+            RETURN 1;
         END IF;
 
     END IF;
     
-    RETURN FALSE; 
+    RETURN 0; 
 
     -- If any of above failed, revert to use original polygon
     -- This prevents ingestion error, but may potentially lead to incorrect spatial query.
@@ -147,7 +147,7 @@ BEGIN
                                 text_var2 = PG_EXCEPTION_DETAIL,
                                 text_var3 = PG_EXCEPTION_HINT;
         raise WARNING 'ST_IntersectsAntimeridian: exception occured: Msg: %, detail: %, hint: %', text_var1, text_var1, text_var3;
-        RETURN TRUE;
+        RETURN -1;
 
 END
 $$ LANGUAGE 'plpgsql' IMMUTABLE;
@@ -188,7 +188,7 @@ BEGIN
                                 text_var2 = PG_EXCEPTION_DETAIL,
                                 text_var3 = PG_EXCEPTION_HINT;
         raise WARNING 'ST_IntersectsNorthPole: exception occured: Msg: %, detail: %, hint: %', text_var1, text_var1, text_var3;
-        RETURN TRUE;
+        RETURN FALSE;
 
 END
 $$ LANGUAGE 'plpgsql' IMMUTABLE;
@@ -229,7 +229,7 @@ BEGIN
                                 text_var2 = PG_EXCEPTION_DETAIL,
                                 text_var3 = PG_EXCEPTION_HINT;
         raise WARNING 'ST_IntersectsSouthPole: exception occured: Msg: %, detail: %, hint: %', text_var1, text_var1, text_var3;
-        RETURN TRUE;
+        RETURN FALSE;
 
 END
 $$ LANGUAGE 'plpgsql' IMMUTABLE;
@@ -286,7 +286,7 @@ BEGIN
     --
     -- [NOTE] Densify over pole to avoid issue in ST_Difference
     distance_to_north := ST_DistanceTonorthPole(geom_in);
-    IF  distance_to_north <= pole_distance THEN
+    IF  distance_to_north > -1 AND distance_to_north <= pole_distance THEN
         pole_geom := ST_Buffer(ST_Transform(ST_Segmentize(geom_in::geography, 50000)::geometry, epsg_code), 0);
     ELSE
         pole_geom := ST_Buffer(ST_Transform(geom_in, epsg_code), 0);
@@ -301,7 +301,7 @@ BEGIN
     
     -- Split polygon to avoid -180/180 crossing issue.
     -- Note: applying negative buffer ensure valid multipolygons that don't share a common edge
-    IF distance_to_north <= pole_distance THEN
+    IF distance_to_north > -1 AND distance_to_north <= pole_distance THEN
         RETURN ST_SimplifyPreserveTopology(ST_Buffer(ST_Transform(ST_Buffer(ST_Split(pole_split, pole_blade), -1), 4326), 0), 0.01);
     ELSE
         RETURN ST_Buffer(ST_Transform(ST_Buffer(ST_Split(pole_split, pole_blade), -1), 4326), 0);
@@ -375,7 +375,7 @@ BEGIN
     -- [NOTE] Densify over pole to avoid issue in ST_Difference
     --
     distance_to_south := ST_DistanceToSouthPole(geom_in);
-    IF  distance_to_south <= pole_distance THEN
+    IF  distance_to_south > -1 AND distance_to_south <= pole_distance THEN
         pole_geom := ST_Buffer(ST_Transform(ST_Segmentize(geom_in::geography, 50000)::geometry, epsg_code), 0);
     ELSE
         pole_geom := ST_Buffer(ST_Transform(geom_in, epsg_code), 0);
@@ -390,7 +390,7 @@ BEGIN
     
     -- Split polygon to avoid -180/180 crossing issue.
     -- Note: applying negative buffer ensure valid multipolygons that don't share a common edge
-    IF distance_to_south <= pole_distance THEN
+    IF distance_to_south > -1 AND distance_to_south <= pole_distance THEN
         RETURN ST_SimplifyPreserveTopology(ST_Buffer(ST_Transform(ST_Buffer(ST_Split(pole_split, pole_blade), -1), 4326), 0), 0.01);
     ELSE
         RETURN ST_Buffer(ST_Transform(ST_Buffer(ST_Split(pole_split, pole_blade), -1), 4326), 0);
@@ -438,7 +438,7 @@ BEGIN
     -- See case test id=S2A_OPER_PRD_MSIL1C_PDMC_20160720T163945_R116_V20160714T235631_20160714T235631
     -- If output geometry still crosses antimeridian - split it again
     -- This case arises if input geometry longitude is outside -180/180 bounds
-    IF ST_IntersectsAntimeridian(geom_out) THEN
+    IF ST_IntersectsAntimeridian(geom_out) = 1 THEN
         geom_out := ST_Buffer(ST_WrapX(ST_ShiftLongitude(geom_out), 180, -360), 0);     
     END IF;
 
@@ -561,10 +561,10 @@ BEGIN
     sp_distance := ST_DistanceToSouthPole(geom_in);
 
     -- Input geometry crosses North Pole
-    IF np_distance <= pole_distance THEN
+    IF np_distance > -1 AND np_distance <= pole_distance THEN
 
         -- Input geometry is even closer to South Pole
-        IF sp_distance < np_distance THEN
+        IF sp_distance > -1 AND sp_distance < np_distance THEN
             RETURN ST_SplitSouthPole(geom_in, radius);
         ELSE
             RETURN ST_SplitNorthPole(geom_in, radius);
@@ -573,10 +573,10 @@ BEGIN
     END IF;
 
     -- Input geometry crosses South Pole
-    IF sp_distance <= pole_distance THEN
+    IF sp_distance > -1 AND sp_distance <= pole_distance THEN
 
          -- Input geometry is even closer to North Pole
-        IF np_distance < sp_distance THEN
+        IF np_distance > -1 AND np_distance < sp_distance THEN
             RETURN ST_SplitNorthPole(geom_in, radius);
         ELSE
             RETURN ST_SplitSouthPole(geom_in, radius);
@@ -585,7 +585,7 @@ BEGIN
     END IF;
 
     -- Input geometry crosses -180/180 but not the poles
-    IF ST_IntersectsAntimeridian(geom_in) THEN
+    IF ST_IntersectsAntimeridian(geom_in) = 1 THEN
         RETURN ST_SplitAntimeridian(geom_in);
     END IF;
 
@@ -603,7 +603,7 @@ BEGIN
                                 text_var2 = PG_EXCEPTION_DETAIL,
                                 text_var3 = PG_EXCEPTION_HINT;
         raise WARNING 'ST_SplitDateLine: exception occured: Msg: %, detail: %, hint: %', text_var1, text_var1, text_var3;
-        RETURN TRUE;
+        RETURN geom_in;
 
 END
 $$ LANGUAGE 'plpgsql' IMMUTABLE;

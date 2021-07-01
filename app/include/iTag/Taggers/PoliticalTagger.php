@@ -94,12 +94,12 @@ class PoliticalTagger extends Tagger
 
         /*
          * Superseed areaLimit
-         */
+         *
         if (isset($options['areaLimit']) && $this->area > $options['areaLimit']) {
             return array(
                 'political' => array()
             );
-        }
+        }*/
 
         /*
          * Toponyms
@@ -125,7 +125,7 @@ class PoliticalTagger extends Tagger
         if ( !$limitToCountries ) {
             $this->add($continents, $geometry, PoliticalTagger::REGIONS);
         }
-        
+
         return array(
             'political' => array(
                 'continents' => $continents
