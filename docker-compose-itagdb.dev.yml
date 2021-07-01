@@ -10,7 +10,7 @@ networks:
       name: rnet
 services:
   itagdb:
-    image: jjrom/itag-database:5.0
+    image: jjrom/itag-database:latest
     restart: always
     build:
       context: ./
