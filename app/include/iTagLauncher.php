@@ -317,12 +317,7 @@ class iTagLauncher
              */
             $this->itag = new iTag($config['database'], $config['general']);
 
-            $taggers = array();
-            foreach (array_values($params['taggersList']) as $value) {
-                $taggers[strtolower(trim($value))] = array();
-            }
-
-            $this->answer($this->json_format($this->itag->tag($params['metadata'], $taggers)), 200);
+            $this->answer($this->json_format($this->itag->tag($params['metadata'], $params['taggers'])), 200);
         
         } catch (Exception $e) {
             $this->answer($this->json_format(array('ErrorMessage' => $e->getMessage(), 'ErrorCode' =>  $e->getCode())), $e->getCode());
@@ -335,23 +330,50 @@ class iTagLauncher
      */
     private function getParams()
     {
-        $this->pretty = filter_input(INPUT_GET, '_pretty', FILTER_VALIDATE_BOOLEAN);
+
+        // Input query
+        $query = $this->sanitize(filter_input_array(INPUT_GET));
+
+        $this->pretty = isset($query['_pretty']) ? filter_var($query['_pretty'], FILTER_VALIDATE_BOOLEAN) : false;
+
+        /*
+         * Taggers
+         */
+        $taggers = array();
+
+        if ( isset($query['taggers']) ) {
+
+            $taggersList = explode(',', rawurldecode($query['taggers']));
+
+            foreach (array_values($taggersList) as $value) {
+
+                $taggerName = strtolower(trim($value));
+                $taggerOptions = array();
+
+                foreach (array_keys($query) as $key ) {
+                    $exploded = explode('_', $key);
+                    if ( count($exploded) === 2 && $exploded[0] === $taggerName ) {
+                        $taggerOptions[$exploded[1]] = $this->formatInput($query[$key]);
+                    }
+                }
+
+                $taggers[$taggerName] = $taggerOptions;
+
+            }
+
+        }
+        
         $params = array(
             'metadata' => array(
                 'geometry' => rawurldecode(filter_input(INPUT_GET, 'geometry', FILTER_SANITIZE_STRING)),
                 'timestamp' => rawurldecode(filter_input(INPUT_GET, 'timestamp', FILTER_SANITIZE_STRING))
             ),
-            'taggersList' => explode(',', rawurldecode(filter_input(INPUT_GET, 'taggers', FILTER_SANITIZE_STRING))),
-            'config' => array()
+            'taggers' => $taggers,
+            'config' => array(
+                'returnGeometries' => isset($query['_wkt']) ? filter_var($query['_wkt'], FILTER_VALIDATE_BOOLEAN) : false
+            )
         );
-
-        // Input query
-        $query = $this->sanitize($_GET);
         
-        if (isset($query['_wkt'])) {
-            $params['config']['returnGeometries'] = filter_input(INPUT_GET, '_wkt', FILTER_VALIDATE_BOOLEAN);
-        }
-
         return $params;
     }
     
@@ -481,4 +503,36 @@ class iTagLauncher
          */
         return $str;
     }
+
+    /**
+     * Format input string
+     *
+     * @param string $str
+     * @return mixed
+     */
+    private function formatInput($str)
+    {
+
+        if ( !$str ) {
+            return $str;
+        }
+
+        if ( ctype_digit($str) ) {
+            return (integer) $str;
+        }
+
+        switch (strtolower($str)) {
+
+            case 'true':
+                return true;
+
+            case 'false':
+                return false;
+
+            default:
+                return $str;
+        }
+
+    }
+
 }
