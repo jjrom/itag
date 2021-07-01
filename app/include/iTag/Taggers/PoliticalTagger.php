@@ -119,10 +119,13 @@ class PoliticalTagger extends Tagger
         $this->add($continents, $geometry, PoliticalTagger::COUNTRIES);
 
         /*
-         * Add regions/states
+         * Add regions/states if requested
          */
-        $this->add($continents, $geometry, PoliticalTagger::REGIONS);
-
+        $limitToCountries = isset($options['limitToCountries']) ? filter_var($options['limitToCountries'], FILTER_VALIDATE_BOOLEAN) : false;
+        if ( !$limitToCountries ) {
+            $this->add($continents, $geometry, PoliticalTagger::REGIONS);
+        }
+        
         return array(
             'political' => array(
                 'continents' => $continents
