@@ -1,4 +1,4 @@
-FROM mdillon/postgis:11-alpine
+FROM postgis/postgis:13-3.1-alpine
 LABEL maintainer="jerome.gasperi@gmail.com"
 
 ENV BUILD_DIR=./build/itag-database \
