@@ -23,6 +23,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+MYPWD=$(pwd)
 
 function showUsage {
     echo ""
@@ -94,83 +95,29 @@ else
     mkdir -p ${DATA_DIR}
 fi
 
-if [ ! -f ${DATA_DIR}/itag_glp15ag.sql ]; then
-    wget -O ${DATA_DIR}/itag_gpw.zip ${GPW_DATASOURCE_URL}
-    unzip -q ${DATA_DIR}/itag_gpw.zip -d ${DATA_DIR}
-    [ $? -eq 0 ] && rm ${DATA_DIR}/itag_gpw.zip
+if [ ! -f ${DATA_DIR}/dump_itag-5.2_gpw.sql ]; then
+    wget -O ${DATA_DIR}/dump_itag-5.2_gpw.sql ${GPW_DATASOURCE_URL}
+    cd ${DATA_DIR}
+    tar -xzf ${DATA_DIR}/dump_itag-5.2_gpw.sql.tgz
+    cd ${MYPWD}
+    [ $? -eq 0 ] && rm ${DATA_DIR}/dump_itag-5.2_gpw.sql.tgz
 else
     echo -e "[INFO] Using existing ${GPW_DATASOURCE_URL} data" 
 fi
 
 echo -e "${YELLOW}[WARNING] Population grid insertion can take a loooong time - be patient :)${NC}"
-
-# ===================================================================
-TARGET=glp15ag60
-echo -e "[INFO] Inserting Population grids 2015 1x1 degrees grid"
+cat ${DATA_DIR}/dump_itag-5.2_gpw.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
 
 PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-DELETE FROM gpw.${TARGET};
-DROP INDEX gpw.footprint_${TARGET}_idx;
-DROP INDEX gpw.pcount_${TARGET}_idx;
-EOF
+CREATE INDEX IF NOT EXISTS footprint_glp15ag60_idx on gpw.glp15ag60 USING GIST (footprint);
+CREATE INDEX IF NOT EXISTS pcount_glp15ag60_idx on gpw.glp15ag60 USING btree (pcount);
 
-cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint);
-CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount);
-EOF
+CREATE INDEX IF NOT EXISTS footprint_glp15ag30_idx on gpw.glp15ag30 USING GIST (footprint);
+CREATE INDEX IF NOT EXISTS pcount_glp15ag30_idx on gpw.glp15ag30 USING btree (pcount);
 
-# ===================================================================
-TARGET=glp15ag30
-echo -e "[INFO] Inserting Population grids 2015 0.5x0.5 degrees grid"
+CREATE INDEX IF NOT EXISTS footprint_glp15ag15_idx on gpw.glp15ag15 USING GIST (footprint);
+CREATE INDEX IF NOT EXISTS pcount_glp15ag15_idx on gpw.glp15ag15 USING btree (pcount);
 
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-DELETE FROM gpw.${TARGET};
-DROP INDEX gpw.footprint_${TARGET}_idx;
-DROP INDEX gpw.pcount_${TARGET}_idx;
-EOF
-
-cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint);
-CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount);
-EOF
-
-# ===================================================================
-TARGET=glp15ag15
-echo -e "[INFO] Inserting Population grids 2015 0.25x0.25 degrees grid"
-
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-DELETE FROM gpw.${TARGET};
-DROP INDEX gpw.footprint_${TARGET}_idx;
-DROP INDEX gpw.pcount_${TARGET}_idx;
-EOF
-
-cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint);
-CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount);
-EOF
-
-# ===================================================================
-TARGET=glp15ag
-echo -e "[INFO] Inserting Population grids 2015 2.5x2.5 arc minutes grid"
-
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-DELETE FROM gpw.${TARGET};
-DROP INDEX gpw.footprint_${TARGET}_idx;
-DROP INDEX gpw.pcount_${TARGET}_idx;
-EOF
-
-cat ${DATA_DIR}/itag_${TARGET}.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-CREATE INDEX footprint_${TARGET}_idx on gpw.${TARGET} USING GIST (footprint);
-CREATE INDEX pcount_${TARGET}_idx on gpw.${TARGET} USING btree (pcount);
-EOF
-
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-vacuum analyze gpw.glp15ag;
-vacuum analyze gpw.glp15ag15;
-vacuum analyze gpw.glp15ag30;
-vacuum analyze gpw.glp15ag60;
+CREATE INDEX IF NOT EXISTS footprint_glp15ag_idx on gpw.glp15ag USING GIST (footprint);
+CREATE INDEX IF NOT EXISTS pcount_glp15ag_idx on gpw.glp15ag USING btree (pcount);
 EOF

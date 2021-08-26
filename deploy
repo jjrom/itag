@@ -44,7 +44,6 @@ function showUsage {
     echo -e "   Options:"
     echo -e ""
     echo -e "      -e | --envfile Environnement file (default is ${GREEN}config.env${NC})"
-    echo -e "      -f | --force Force datasources ingestion"
     echo -e "      -h | --help show this help"
     echo -e ""
     echo -e "      !!! This script requires docker and docker-compose !!!"
@@ -113,8 +112,8 @@ if [[ ! -f ${ENV_FILE} ]]; then
     exit 0
 fi
 
-export ITAG_EXPOSED_PORT=$(grep ^ITAG_EXPOSED_PORT= ${ENV_FILE} | awk -F= '{print $2}')
-export ITAG_DATABASE_EXPOSED_PORT=$(grep ^ITAG_DATABASE_EXPOSED_PORT= ${ENV_FILE} | awk -F= '{print $2}')
+ITAG_EXPOSED_PORT=$(grep ^ITAG_EXPOSED_PORT= ${ENV_FILE} | awk -F= '{print $2}')
+ITAG_DATABASE_EXPOSED_PORT=$(grep ^ITAG_DATABASE_EXPOSED_PORT= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_ENDPOINT=$(grep ^ITAG_ENDPOINT= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_USER_PASSWORD=$(grep ^ITAG_DATABASE_USER_PASSWORD= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_USER_NAME=$(grep ^ITAG_DATABASE_USER_NAME= ${ENV_FILE} | awk -F= '{print $2}')
@@ -164,74 +163,41 @@ else
     DATABASE_HOST_SEEN_FROM_DOCKERHOST=${ITAG_DATABASE_HOST}
 fi
 
-if [ "${FORCE_DATASOURCES_INSTALL}" == "1" ]; then
-    DATASOURCES_INSTALL="1"
-    GPW_INSTALL="1"
-    LANDCOVER_INSTALL="1"
+# Wait for database to be ready
+echo -e "[INFO] Waiting for database: ${DATABASE_HOST_SEEN_FROM_DOCKERHOST}:${ITAG_DATABASE_EXPOSED_PORT} to be ready..."
+while ! pg_isready -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -U ${ITAG_DATABASE_USER_NAME} -p ${ITAG_DATABASE_EXPOSED_PORT} -d ${ITAG_DATABASE_NAME} 2>/dev/null
+do
+    let elapsed=elapsed+1
+    if [ "$elapsed" -gt 90 ] 
+    then
+        echo -e "${RED}[ERROR]${NC} Database startup timed out =("
+        exit 1
+    fi  
+    sleep 1;
+done
 
-    # Wait for database to be ready
-    echo -e "[INFO] Waiting for database port ${DATABASE_HOST_SEEN_FROM_DOCKERHOST}:${ITAG_DATABASE_EXPOSED_PORT} to be ready..."
-    while ! PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} pg_isready -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p "${ITAG_DATABASE_EXPOSED_PORT}" -U "${ITAG_DATABASE_USER_NAME}" -d "${ITAG_DATABASE_NAME}" 2>/dev/null
-    do
-        let elapsed=elapsed+1
-        if [ "$elapsed" -gt 90 ] 
-        then
-            echo -e "${RED}[ERROR]${NC} Database startup timed out =("
-            exit 0
-        fi  
-        sleep 1;
-    done
-
+PHYSICAL_EXISTS=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -XAt -d ${ITAG_DATABASE_NAME} -U ${ITAG_DATABASE_USER_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE  table_schema = 'datasources' AND table_name= 'physical')")
+if [[ "${PHYSICAL_EXISTS}" == "f" ]]; then
+    echo -e "${YELLOW}[WARNING] iTag database is not installed - you should run the *populateDatabase* script${NC}"
+else
+    echo -e "${GREEN}[INFO] iTag database is complete${NC}"
 fi
 
-if [ "${DATASOURCES_INSTALL}" == "1" ]; then
-    echo -e "${YELLOW}[INFO] Installing datasources${NC}"
-    ./scripts/installDatasources.sh -e ${ENV_FILE} -d ${MYPWD}/data
-    ./scripts/updateDatasourcesWithGeoname.sh -e ${ENV_FILE} -d ${MYPWD}/sql
+GPW_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM gpw.glp15ag60 LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
+if [[ "${GPW_COUNT}" == "0" ]]; then
+    echo -e "${YELLOW}[WARNING] Population data is not installed${NC} - please contact ${YELLOW}${CONTACT}${NC} if you need it"
 else
-    echo -e "[INFO] Datasources are installed"
+    echo -e "${GREEN}[INFO] Population data is installed${NC}"
 fi
 
-if [ "${GPW_INSTALL}" == "1" ]; then
-    if [ "${GPW_DATASOURCE_URL}" != "" ]; then
-        echo -e "${YELLOW}[INFO] Installing population grids${NC}"
-        ./scripts/installGPW.sh -e ${ENV_FILE} -d ${MYPWD}/data
-    else
-        echo -e "[INFO] Population density is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
-    fi
+LANDCOVER_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM landcover.landcover LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
+if [[ "${LANDCOVER_COUNT}" == "0" ]]; then
+    echo -e "${YELLOW}[WARNING] Landcover data is not installed${NC} - please contact ${YELLOW}${CONTACT}${NC} if you need it"
 else
-    GPW_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM gpw.glp15ag60 LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
-    if [[ "${GPW_COUNT}" != "0" ]]; then
-        echo -e "[INFO] Population grids are installed"
-    fi
-fi
-
-if [ "${LANDCOVER_INSTALL}" == "1" ]; then
-    if [ "${LANDCOVER_DATASOURCE_URL}" != "" ]; then
-        echo -e "${YELLOW}[INFO] Installing landcover${NC}"
-        ./scripts/installLandcover.sh -e ${ENV_FILE} -d ${MYPWD}/data
-    else
-        echo -e "[INFO] Landcover is not available - contact ${YELLOW}${CONTACT}${NC} if you need it"
-    fi
-else
-    LANDCOVER_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM landcover.landcover LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
-    if [[ "${LANDCOVER_COUNT}" != "0" ]]; then
-        echo -e "[INFO] Landcover is installed"
-    fi
+    echo -e "${GREEN}[INFO] Landcover data is installed${NC}"
 fi
 
 echo ""
-
-# 
-# Display mount point for database  
-# MacOS X is a bit tricky - https://stackoverflow.com/questions/41273514/access-docker-volume-mountpoint-with-docker-for-mac
-#
-if [[ ! "$OSTYPE" == "darwin"* ]]; then
-  if [[ "${DATABASE_HOST}" == "itagdb" ]]; then
-    MOUNT_POINT=$(docker volume inspect $(basename `pwd`)"_database_data"| grep Mountpoint | awk -F\" '{print $4}')
-    echo -e "[INFO] Database mount point is ${GREEN}${MOUNT_POINT}${NC}"
-  fi
-fi
 
 echo -e "[INFO] Application iTag up and running in ${GREEN}${TARGET}${NC} mode at ${GREEN}${ITAG_ENDPOINT}${NC}"
 echo ""
