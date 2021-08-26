@@ -176,8 +176,8 @@ do
     sleep 1;
 done
 
-PHYSICAL_EXISTS=$(PGPASSWORD=${DATABASE_USER_PASSWORD} psql -XAt -d ${DATABASE_NAME} -U ${DATABASE_USER_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${DATABASE_EXPOSED_PORT} -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE  table_schema = 'datasources' AND table_name= 'physical')")
-if [[ "${PHYSICAL_EXISTS}" == "0" ]]; then
+PHYSICAL_EXISTS=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -XAt -d ${ITAG_DATABASE_NAME} -U ${ITAG_DATABASE_USER_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE  table_schema = 'datasources' AND table_name= 'physical')")
+if [[ "${PHYSICAL_EXISTS}" == "f" ]]; then
     echo -e "${YELLOW}[WARNING] iTag database is not installed - you should run the *populateDatabase* script${NC}"
 else
     echo -e "${GREEN}[INFO] iTag database is complete${NC}"
@@ -185,14 +185,14 @@ fi
 
 GPW_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM gpw.glp15ag60 LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
 if [[ "${GPW_COUNT}" == "0" ]]; then
-    echo -e "${YELLOW}[WARNING] Population data is not installed${NC}"
+    echo -e "${YELLOW}[WARNING] Population data is not installed${NC} - please contact ${YELLOW}${CONTACT}${NC} if you need it"
 else
     echo -e "${GREEN}[INFO] Population data is installed${NC}"
 fi
 
 LANDCOVER_COUNT=$(PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} -c "SELECT COUNT(*) FROM landcover.landcover LIMIT 1;" | head -3 | tail -1 | awk '{print $1}')
 if [[ "${LANDCOVER_COUNT}" == "0" ]]; then
-    echo -e "[WARNING] Landcover data is not installed${NC}"
+    echo -e "${YELLOW}[WARNING] Landcover data is not installed${NC} - please contact ${YELLOW}${CONTACT}${NC} if you need it"
 else
     echo -e "${GREEN}[INFO] Landcover data is installed${NC}"
 fi
