@@ -23,6 +23,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+MYPWD=$(pwd)
 
 function showUsage {
     echo ""
@@ -94,26 +95,23 @@ else
     mkdir -p ${DATA_DIR}
 fi
 
-if [ ! -f ${DATA_DIR}/itag_landcover.sql ]; then
-    wget -O ${DATA_DIR}/itag_landcover.zip ${LANDCOVER_DATASOURCE_URL}
-    unzip -q ${DATA_DIR}/itag_landcover.zip -d ${DATA_DIR}
-    [ $? -eq 0 ] && rm ${DATA_DIR}/itag_landcover.zip
+if [ ! -f ${DATA_DIR}/dump_itag-5.2_landcover.sql ]; then
+    wget -O ${DATA_DIR}/dump_itag-5.2_landcover.sql.tgz ${LANDCOVER_DATASOURCE_URL}
+    cd ${DATA_DIR}
+    tar -xzf ${DATA_DIR}/dump_itag-5.2_landcover.sql.tgz
+    cd ${MYPWD}
+    [ $? -eq 0 ] && rm ${DATA_DIR}/dump_itag-5.2_landcover.sql.tgz
 else
-    echo -e "[INFO] Using existing ${DATA_DIR}/itag_landcover.sql data" 
+    echo -e "[INFO] Using existing ${DATA_DIR}/dump_itag-5.2_landcover.sql data" 
 fi
 
 echo -e "${YELLOW}[WARNING] Landcover insertion can take a loooong time - be patient :)${NC}"
 
 echo -e "[INFO] Inserting landcover data" 
-cat ${DATA_DIR}/itag_landcover.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
+cat ${DATA_DIR}/dump_itag-5.2_landcover.sql | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log
 
 echo -e "[INFO] Preparing index data" 
 PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-CREATE INDEX landcover_geometry_idx ON landcover.landcover USING gist (wkb_geometry);
-CREATE INDEX landcover2009_geometry_idx ON landcover.landcover2009 USING gist (wkb_geometry);
-EOF
-
-PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT}  > /dev/null 2>errors.log << EOF
-vacuum analyze landcover.landcover;
-vacuum analyze landcover.landcover2009;
+CREATE INDEX IF NOT EXISTS landcover_geometry_idx ON landcover.landcover USING gist (wkb_geometry);
+CREATE INDEX IF NOT EXISTS landcover2009_geometry_idx ON landcover.landcover2009 USING gist (wkb_geometry);
 EOF

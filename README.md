@@ -119,4 +119,3 @@ When deployed, all configurations file are stored under .run/config directory
 
 ### Why do i have empty result for landcover and population ?
 The Landcover and Population data are available separately from this repository. If you need this data, send an email to jerome.gasperi@gmail.com
-
