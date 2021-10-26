@@ -37,7 +37,7 @@ class iTagLauncher
      *      description="Returns a list of features intersecting input geometry",
      *      @OA\Parameter(
      *         name="geometry",
-     *         in="path",
+     *         in="query",
      *         required=true,
      *         description="Input geometry as a POLYGON WKT",
      *         @OA\Schema(
@@ -46,7 +46,7 @@ class iTagLauncher
      *      ),
      *      @OA\Parameter(
      *         name="taggers",
-     *         in="path",
+     *         in="query",
      *         required=true,
      *         description="List of tagger applied. You can specify multiple taggers comma separated
 * geology : Return intersected geological features i.e. faults, glaciers, plates and volcanoes
@@ -62,7 +62,16 @@ class iTagLauncher
      *      ),
      *      @OA\Parameter(
      *         name="timestamp",
-     *         in="path",
+     *         in="query",
+     *         required=false,
+     *         description="Input timestamp (to compute season based on geometry location) - format ISO 8601 YYYY-MM-DDTHH:MM:SS",
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *      ),
+     *      @OA\Parameter(
+     *         name="planet",
+     *         in="query",
      *         required=false,
      *         description="Input timestamp (to compute season based on geometry location) - format ISO 8601 YYYY-MM-DDTHH:MM:SS",
      *         @OA\Schema(
@@ -71,7 +80,7 @@ class iTagLauncher
      *      ),
      *      @OA\Parameter(
      *         name="_pretty",
-     *         in="path",
+     *         in="query",
      *         required=false,
      *         description="True to return pretty print response",
      *         @OA\Schema(
@@ -80,7 +89,7 @@ class iTagLauncher
      *      ),
      *      @OA\Parameter(
      *         name="_wkt",
-     *         in="path",
+     *         in="query",
      *         required=false,
      *         description="True to return intersected features geometries as WKT",
      *         @OA\Schema(
@@ -93,6 +102,7 @@ class iTagLauncher
      *          @OA\JsonContent(
      *               example={
      *                   "geometry": "POLYGON((6.487426757812523 45.76081241294796,6.487426757812523 46.06798615804025,7.80578613281244 46.06798615804025,7.80578613281244 45.76081241294796,6.487426757812523 45.76081241294796))",
+     *                   "planet": "earth",
      *                   "timestamp": "2018-01-13",
      *                   "area_unit": "km2",
      *                   "cover_unit": "%",
@@ -363,12 +373,16 @@ class iTagLauncher
 
         }
         
+        $planet = rawurldecode(filter_input(INPUT_GET, 'planet', FILTER_SANITIZE_STRING));
+        if ( !isset($planet) || $planet === '' ) {
+            $planet = 'earth';
+        }
         $params = array(
             'metadata' => array(
                 'geometry' => rawurldecode(filter_input(INPUT_GET, 'geometry', FILTER_SANITIZE_STRING)),
                 'timestamp' => rawurldecode(filter_input(INPUT_GET, 'timestamp', FILTER_SANITIZE_STRING)),
                 // New - default planet is earth
-                'planet' => rawurldecode(filter_input(INPUT_GET, 'planet', FILTER_SANITIZE_STRING)) ?? 'earth'
+                'planet' => $planet
             ),
             'taggers' => $taggers,
             'config' => array(
