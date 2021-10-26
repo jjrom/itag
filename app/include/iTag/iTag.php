@@ -33,7 +33,7 @@ class iTag
      *  )
      * )
      */
-    const VERSION = '5.2.0';
+    const VERSION = '5.3.0';
     
     /*
      * Character separator
@@ -115,14 +115,11 @@ class iTag
         }
 
         /*
-         * Datasources reference information
+         * Initialize Always tags and datasources reference information
          */
-        $references = array();
-
-        /*
-         * These tag are always performed
-         */
-        $content = $this->always($metadata);
+        $tagger = new AlwaysTagger($this->dbh, $this->config);
+        $content = $tagger->tag($metadata);
+        $references = $tagger->references;
 
         /*
          * Add geometry area to metadata
@@ -133,11 +130,20 @@ class iTag
          * Call the 'tag' function of all input taggers
          */
         foreach ($taggers as $name => $options) {
+
             $tagger = $this->instantiateTagger(ucfirst(strtolower($name)) . 'Tagger');
+
             if (isset($tagger)) {
+
+                // Try to apply a Tagger specific to a planet to another planet - silently do nothing
+                if ( isset($tagger->planet) && strtolower($tagger->planet) !== strtolower($metadata['planet']) ) {
+                    continue;
+                }
+
                 $content = array_merge($content, $tagger->tag($metadata, $options));
                 $references = array_merge($references, $tagger->references);
             }
+
         }
 
         /*
@@ -151,23 +157,13 @@ class iTag
         }
         return array_merge($output, array(
             'geometry' => $metadata['geometry'],
+            'planet' => $metadata['planet'],
             'timestamp' => $metadata['timestamp'] ?? null,
             'area_unit' => 'km2',
             'cover_unit' => '%',
             'content' => $content,
             'references' => $references
         ));
-    }
-
-    /**
-     * Always performed tags
-     *
-     * @param array $metadata
-     */
-    private function always($metadata)
-    {
-        $tagger = new AlwaysTagger($this->dbh, $this->config);
-        return $tagger->tag($metadata);
     }
 
     /**

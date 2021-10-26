@@ -18,6 +18,12 @@
 abstract class Tagger
 {
 
+
+    /* 
+     * Specific planet to which a Tagger apply
+     */
+    public $planet;
+
     /*
      * Data references description
      */
@@ -193,7 +199,7 @@ abstract class Tagger
      *      YYYY-MM-DDTHH:MM:SS.sssss+HHMM
      *      YYYY-MM-DDTHH:MM:SS.sssss-HHMM
      *
-     * @param {String} $dateStr
+     * @param String $dateStr
      *
      */
     protected function isValidTimeStamp($dateStr)

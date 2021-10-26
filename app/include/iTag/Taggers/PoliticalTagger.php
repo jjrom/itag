@@ -21,6 +21,11 @@ class PoliticalTagger extends Tagger
     const REGIONS = 2;
 
     /*
+     * This Tagger is specific to Earth
+     */
+    public $planet = 'earth';
+    
+    /*
      * Data references
      */
     public $references = array(

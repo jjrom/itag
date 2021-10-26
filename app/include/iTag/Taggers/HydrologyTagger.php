@@ -19,6 +19,11 @@ class HydrologyTagger extends GenericTagger
 {
 
     /*
+     * This Tagger is specific to Earth
+     */
+    public $planet = 'earth';
+    
+    /*
      * Data references
      */
     public $references = array(
