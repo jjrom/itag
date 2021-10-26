@@ -22,7 +22,6 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 MYPWD=$(pwd)
 PROJECT_NAME=itag
-FORCE_DATASOURCES_INSTALL=0
 CONTACT="jerome.gasperi@gmail.com"
 ################################
 
@@ -64,10 +63,6 @@ do
             fi
             ENV_FILE="$2"
             shift 2 # past argument
-            ;;
-        -f|--force)
-            FORCE_DATASOURCES_INSTALL=1
-            shift # past argument
             ;;
         -h|--help)
             showUsage
