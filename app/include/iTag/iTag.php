@@ -118,8 +118,8 @@ class iTag
          * Initialize Always tags and datasources reference information
          */
         $tagger = new AlwaysTagger($this->dbh, $this->config);
-        $references = $tagger->references;
         $content = $tagger->tag($metadata);
+        $references = $tagger->references;
 
         /*
          * Add geometry area to metadata
