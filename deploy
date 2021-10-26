@@ -134,18 +134,18 @@ rm -f errors.log
 
 echo -e "${YELLOW}[INFO] You're now running itag installation in **${TARGET}** mode${NC}"
 
+if [[ "${ITAG_DATABASE_HOST}" == "itagdb" ]]; then
+    COMPOSE_FILE=docker-compose-itagdb.yml:docker-compose.yml
+else
+    COMPOSE_FILE=docker-compose.yml
+fi
+
 # echo -e "[INFO] Starting ${PROJECT_NAME} docker instance"
 if [[ "${TARGET}" == "dev" ]]; then
     if [[ "${ITAG_DATABASE_HOST}" == "itagdb" ]]; then
-        COMPOSE_FILE=docker-compose-itagdb.dev.yml:docker-compose.dev.yml
+        COMPOSE_FILE=${COMPOSE_FILE}:docker-compose-itagdb.dev.yml:docker-compose.dev.yml
     else
-        COMPOSE_FILE=docker-compose.dev.yml
-    fi
-else
-    if [[ "${ITAG_DATABASE_HOST}" == "itagdb" ]]; then
-        COMPOSE_FILE=docker-compose-itagdb.yml:docker-compose.yml
-    else
-        COMPOSE_FILE=docker-compose.yml
+        COMPOSE_FILE=${COMPOSE_FILE}:docker-compose.dev.yml
     fi
 fi
 

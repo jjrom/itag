@@ -101,7 +101,7 @@ class GeologyTagger extends GenericTagger
     public function tag($metadata, $options = array())
     {
         return array(
-            'geology' => parent::tag($metadata, $options)
+            'geology' => parent::tag($metadata, array_merge($options, array('schema' => 'datasources')))
         );
     }
 }

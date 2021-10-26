@@ -70,7 +70,7 @@ class GenericTagger extends Tagger
          * Process required classes
          */
         foreach ($this->columnsMapping as $tableName => $mapping) {
-            $content = $this->retrieveContent('datasources.' . $tableName, $mapping, $geometry, $options);
+            $content = $this->retrieveContent( (isset($options['schema']) ? $options['schema'] . '.' : '') . $tableName, $mapping, $geometry, $options);
             if (count($content) > 0) {
                 $result[$tableName] = $content;
             }

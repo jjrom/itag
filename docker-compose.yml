@@ -6,8 +6,8 @@ networks:
   default:
     driver: bridge
   external:
-    external:
-      name: rnet
+    external: true
+    name: rnet 
 services:
   itag:
     image: jjrom/itag:latest
@@ -25,6 +25,8 @@ services:
     environment: 
       ### Set to 0 in production environment to activate opcache
       - ITAG_DEBUG=0
+      ### Set to 1 in production environment to activate opcache preloading
+      - PHP_OPCACHE_ENABLE_PRELOADING=1
       ### Server configuration (uncomment to change values) 
       #- PHP_FPM_MAX_CHILDREN=4096
       #- PHP_FPM_START_SERVERS=20

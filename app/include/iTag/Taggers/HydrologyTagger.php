@@ -66,7 +66,7 @@ class HydrologyTagger extends GenericTagger
     public function tag($metadata, $options = array())
     {
         return array(
-            'hydrology' => parent::tag($metadata, $options)
+            'hydrology' => parent::tag($metadata, array_merge($options, array('schema' => 'datasources')))
         );
     }
 }
