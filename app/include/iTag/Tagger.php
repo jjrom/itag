@@ -18,6 +18,12 @@
 abstract class Tagger
 {
 
+
+    /* 
+     * Specific planet to which a Tagger apply
+     */
+    public $planet;
+
     /*
      * Data references description
      */

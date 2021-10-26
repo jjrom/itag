@@ -366,7 +366,9 @@ class iTagLauncher
         $params = array(
             'metadata' => array(
                 'geometry' => rawurldecode(filter_input(INPUT_GET, 'geometry', FILTER_SANITIZE_STRING)),
-                'timestamp' => rawurldecode(filter_input(INPUT_GET, 'timestamp', FILTER_SANITIZE_STRING))
+                'timestamp' => rawurldecode(filter_input(INPUT_GET, 'timestamp', FILTER_SANITIZE_STRING)),
+                // New - default planet is earth
+                'planet' => rawurldecode(filter_input(INPUT_GET, 'planet', FILTER_SANITIZE_STRING)) ?? 'earth'
             ),
             'taggers' => $taggers,
             'config' => array(

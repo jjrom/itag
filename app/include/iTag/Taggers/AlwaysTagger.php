@@ -77,21 +77,27 @@ class AlwaysTagger extends Tagger
         /*
          * Relative location on earth
          */
-        $locations = $this->getLocations($metadata['geometry']);
+        $locations = $this->getLocations($metadata['geometry'], $metadata['planet']);
         $keywords = $locations;
 
         /*
-         * Coastal status
+         * Coastal and seasons are Earth only
          */
-        if ($this->isCoastal($metadata['geometry'])) {
-            $keywords[] = 'location' . iTag::TAG_SEPARATOR . 'coastal';
+        if ( $metadata['planet'] !== 'earth' ) {
+            $this->references = array();
         }
+        else {
+        
+            if ($this->isCoastal($metadata['geometry'])) {
+                $keywords[] = 'location' . iTag::TAG_SEPARATOR . 'coastal';
+            }
 
-        /*
-         * Season
-         */
-        if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp'])) {
-            $keywords[] = $this->getSeason($metadata['timestamp'], in_array('location:southern', $locations));
+            /*
+            * Season
+            */
+            if (isset($metadata['timestamp']) && $this->isValidTimeStamp($metadata['timestamp'])) {
+                $keywords[] = $this->getSeason($metadata['timestamp'], in_array('location:southern', $locations));
+            }
         }
 
         return array(
@@ -124,11 +130,18 @@ class AlwaysTagger extends Tagger
      *  - location:southern
      *
      * @param string $geometry
+     * @param string $planet
      */
-    private function getLocations($geometry)
+    private function getLocations($geometry, $planet)
     {
         $locations = array();
         foreach ($this->areas as $key => $value) {
+
+            // Tropical tag is for Earth only
+            if ($key === 'tropical' && $planet !== 'earth') {
+                continue;
+            }
+
             if ($this->isETNS($geometry, $value)) {
                 $locations[] = 'location'. iTag::TAG_SEPARATOR . $key;
             }

@@ -18,6 +18,12 @@
 
 class ToponymsTagger extends Tagger
 {
+
+    /*
+     * This Tagger is specific to Earth
+     */
+    public $planet = 'earth';
+    
     /*
      * Data references
      */
