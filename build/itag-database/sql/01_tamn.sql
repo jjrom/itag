@@ -1,6 +1,5 @@
 
 -- Clean old functions
--- Clean old functions
 DROP FUNCTION IF EXISTS public.ST_DistanceToNorthPole(geometry);
 DROP FUNCTION IF EXISTS public.ST_DistanceToSouthPole(geometry);
 
@@ -150,8 +149,7 @@ BEGIN
     
     RETURN 0; 
 
-    -- If any of above failed, revert to use original polygon
-    -- This prevents ingestion error, but may potentially lead to incorrect spatial query.
+    -- If any of above failed, raise error and return -1
     EXCEPTION WHEN OTHERS THEN
         GET STACKED DIAGNOSTICS text_var1 = MESSAGE_TEXT,
                                 text_var2 = PG_EXCEPTION_DETAIL,
@@ -214,6 +212,7 @@ BEGIN
     -- [NOTE] Densify over pole to avoid issue in ST_Difference
     distance_to_north := ST_DistanceTonorthPole(geom_in);
     IF  distance_to_north > -1 AND distance_to_north <= pole_distance THEN
+        --RAISE NOTICE 'ST_SplitSouthPole : Segmentize and simplify topology';
         pole_geom := ST_Buffer(ST_Transform(ST_Segmentize(geom_in::geography, 50000)::geometry, epsg_code), 0);
     ELSE
         pole_geom := ST_Buffer(ST_Transform(geom_in, epsg_code), 0);
@@ -302,7 +301,7 @@ BEGIN
     --
     distance_to_south := ST_DistanceToSouthPole(geom_in);
     IF  distance_to_south > -1 AND distance_to_south <= pole_distance THEN
-        RAISE NOTICE 'ST_SplitNorthPole : Segmentize';
+        --RAISE NOTICE 'ST_SplitNorthPole : Segmentize';
         pole_geom := ST_Buffer(ST_Transform(ST_Segmentize(geom_in::geography, 50000)::geometry, epsg_code), 0.0);
     ELSE
         pole_geom := ST_Buffer(ST_Transform(geom_in, epsg_code), 0.0);
@@ -316,7 +315,7 @@ BEGIN
     -- Split polygon to avoid -180/180 crossing issue.
     -- Note: applying negative buffer ensure valid multipolygons that don't share a common edge
     IF distance_to_south > -1 AND distance_to_south <= pole_distance THEN
-        RAISE NOTICE 'ST_SplitNorthPole : Simplify topology';
+        --RAISE NOTICE 'ST_SplitNorthPole : Simplify topology';
         pole_geom := ST_SimplifyPreserveTopology(ST_Buffer(ST_Transform(ST_Buffer( ST_ForcePolygonCCW(ST_Split(pole_geom, pole_blade)) , trans_buffer), 4326), 0.0), 0.01);
     ELSE
         pole_geom := ST_Buffer(ST_Transform(ST_Buffer(ST_Split(pole_geom, pole_blade), trans_buffer), 4326), 0.0);
