@@ -15,6 +15,8 @@ services:
     build:
       context: ./
       dockerfile: ./build/itag-database/Dockerfile
+    # Upgrade shared_memory for complex queries
+    shm_size: '2gb'
     command: docker-entrypoint.sh -c config_file=/etc/postgresql.conf
     env_file:
       - ${ENV_FILE:-config.env}
