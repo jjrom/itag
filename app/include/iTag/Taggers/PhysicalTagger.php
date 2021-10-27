@@ -67,6 +67,9 @@ class PhysicalTagger extends GenericTagger
      */
     public function tag($metadata, $options = array())
     {
-        return parent::tag($metadata, array_merge($options, array('computeArea' => true)));
+        return parent::tag($metadata, array_merge($options, array(
+            'schema' => 'datasources',
+            'computeArea' => true
+        )));
     }
 }

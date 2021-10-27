@@ -113,13 +113,14 @@ class AlwaysTagger extends Tagger
      */
     private function getArea($geometry)
     {
+        
         $query = 'SELECT ' . $this->postgisArea($this->postgisGeomFromText($geometry)) . ' as area';
         $result = $this->query($query);
         if ($result) {
             $row = pg_fetch_assoc($result);
-            return isset($row) && isset($row['area']) ? $this->toSquareKm($row['area']) : 0;
         }
-        return 0;
+        return isset($row) && isset($row['area']) ? $this->toSquareKm($row['area']) : 0;
+
     }
 
     /**

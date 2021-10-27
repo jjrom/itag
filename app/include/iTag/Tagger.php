@@ -105,10 +105,13 @@ abstract class Tagger
      */
     protected function query($query)
     {
-        $results = @pg_query($this->dbh, $query);
-        if (!isset($results)) {
-            throw new Exception('Database Connection Error', 500);
+        try {
+            $results = @pg_query($this->dbh, $query);
+            if (!isset($results)) {
+                throw new Exception('Database Connection Error', 500);
+            }    
         }
+        catch (Exception $e) {}
         return $results;
     }
 
