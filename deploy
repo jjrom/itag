@@ -115,8 +115,7 @@ ITAG_DATABASE_USER_NAME=$(grep ^ITAG_DATABASE_USER_NAME= ${ENV_FILE} | awk -F= '
 ITAG_DATABASE_NAME=$(grep ^ITAG_DATABASE_NAME= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_HOST=$(grep ^ITAG_DATABASE_HOST= ${ENV_FILE} | awk -F= '{print $2}')
 ITAG_DATABASE_PORT=$(grep ^ITAG_DATABASE_PORT= ${ENV_FILE} | awk -F= '{print $2}')
-GPW_DATASOURCE_URL=$(grep ^GPW_DATASOURCE_URL= ${ENV_FILE} | awk -F= '{print $2}')
-LANDCOVER_DATASOURCE_URL=$(grep ^LANDCOVER_DATASOURCE_URL= ${ENV_FILE} | awk -F= '{print $2}')
+POSTGRES_DATA=$(grep ^POSTGRES_DATA= ${ENV_FILE} | awk -F= '{for (i=2; i<=NF; i++) print $i}'| xargs echo -n)
 
 #
 # Containers are part of the external network "rnet" (resto network)
@@ -150,7 +149,17 @@ if [[ "${TARGET}" == "dev" ]]; then
 fi
 
 echo "[debug] using compose files: ${COMPOSE_FILE}"
-COMPOSE_FILE=${COMPOSE_FILE} ENV_FILE=${ENV_FILE} docker-compose --project-name ${PROJECT_NAME}  up -d
+COMPOSE_FILE=${COMPOSE_FILE} \
+ITAG_EXPOSED_PORT=${ITAG_EXPOSED_PORT} \
+POSTGRES_DATA=${POSTGRES_DATA}
+ITAG_DATABASE_EXPOSED_PORT=${ITAG_DATABASE_EXPOSED_PORT} \
+ITAG_DATABASE_HOST=${ITAG_DATABASE_HOST} \
+ITAG_DATABASE_PORT=${ITAG_DATABASE_PORT} \
+ITAG_DATABASE_NAME=${ITAG_DATABASE_NAME} \
+ITAG_DATABASE_USER_NAME=${ITAG_DATABASE_USER_NAME} \
+ITAG_DATABASE_USER_PASSWORD=${ITAG_DATABASE_USER_PASSWORD} \
+ENV_FILE=${ENV_FILE} \
+docker-compose --project-name ${PROJECT_NAME} up -d
 
 if [ "${ITAG_DATABASE_HOST}" == "itagdb" ] || [ "${ITAG_DATABASE_HOST}" == "host.docker.internal" ]; then
     DATABASE_HOST_SEEN_FROM_DOCKERHOST=localhost
