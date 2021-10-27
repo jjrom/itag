@@ -359,7 +359,7 @@ class iTagLauncher
 
             foreach (array_values($taggersList) as $value) {
 
-                $taggerName = strtolower(trim($value));
+                $taggerName = ucfirst(trim($value));
                 $taggerOptions = array();
 
                 foreach (array_keys($query) as $key ) {
