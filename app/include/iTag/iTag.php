@@ -104,8 +104,14 @@ class iTag
          * Convert input geometry to 4326
          */
         $originalGeometry = $metadata['geometry'];
-        $metadata['geometry'] = $this->wktTo4326($metadata['geometry']);
-
+        
+        try {
+            $metadata['geometry'] = $this->wktTo4326($metadata['geometry']);
+        }
+        catch (Exception $e) {
+            throw new Exception('WKT transformation error', 500);
+        }
+        
         /*
          * Throws exception if geometry is invalid
          */
@@ -131,7 +137,7 @@ class iTag
          */
         foreach ($taggers as $name => $options) {
 
-            $tagger = $this->instantiateTagger(ucfirst(strtolower($name)) . 'Tagger');
+            $tagger = $this->instantiateTagger(ucfirst($name) . 'Tagger');
 
             if (isset($tagger)) {
 
