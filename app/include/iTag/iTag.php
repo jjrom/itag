@@ -33,7 +33,7 @@ class iTag
      *  )
      * )
      */
-    const VERSION = '5.3.1';
+    const VERSION = '5.3.2';
     
     /*
      * Character separator
@@ -142,7 +142,7 @@ class iTag
             if (isset($tagger)) {
 
                 // Try to apply a Tagger specific to a planet to another planet - silently do nothing
-                if ( isset($tagger->planet) && strtolower($tagger->planet) !== strtolower($metadata['planet']) ) {
+                if ( isset($tagger->planet) && strtolower($tagger->planet) !== strtolower($this->config['planet']) ) {
                     continue;
                 }
 
@@ -163,7 +163,7 @@ class iTag
         }
         return array_merge($output, array(
             'geometry' => $metadata['geometry'],
-            'planet' => $metadata['planet'],
+            'planet' => $this->config['planet'],
             'timestamp' => $metadata['timestamp'] ?? null,
             'area_unit' => 'km2',
             'cover_unit' => '%',

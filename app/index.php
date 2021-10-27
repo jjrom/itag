@@ -47,7 +47,8 @@ return new iTagLauncher(array(
     "general" => array(
         "areaLimit" => 200000,
         "returnGeometries" => false,
-        "geometryTolerance" => 0.1
+        "geometryTolerance" => 0.1,
+        "planet" => "earth"
     ),
     "database" => array(
         "dbname" => "itag",

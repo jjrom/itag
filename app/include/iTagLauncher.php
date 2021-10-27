@@ -319,7 +319,9 @@ class iTagLauncher
              * Superseed with input params
              */
             foreach (array_keys($params['config']) as $key) {
-                $config['general'][$key] = $params['config'][$key];
+                if ( isset($params['config'][$key]) && $params['config'][$key] !== '' ) {
+                    $config['general'][$key] = $params['config'][$key];
+                }
             }
 
             /*
@@ -373,20 +375,15 @@ class iTagLauncher
 
         }
         
-        $planet = rawurldecode(filter_input(INPUT_GET, 'planet', FILTER_SANITIZE_STRING));
-        if ( !isset($planet) || $planet === '' ) {
-            $planet = 'earth';
-        }
         $params = array(
             'metadata' => array(
                 'geometry' => rawurldecode(filter_input(INPUT_GET, 'geometry', FILTER_SANITIZE_STRING)),
-                'timestamp' => rawurldecode(filter_input(INPUT_GET, 'timestamp', FILTER_SANITIZE_STRING)),
-                // New - default planet is earth
-                'planet' => $planet
+                'timestamp' => rawurldecode(filter_input(INPUT_GET, 'timestamp', FILTER_SANITIZE_STRING))
             ),
             'taggers' => $taggers,
             'config' => array(
-                'returnGeometries' => isset($query['_wkt']) ? filter_var($query['_wkt'], FILTER_VALIDATE_BOOLEAN) : false
+                'returnGeometries' => isset($query['_wkt']) ? filter_var($query['_wkt'], FILTER_VALIDATE_BOOLEAN) : false,
+                'planet' => rawurldecode(filter_input(INPUT_GET, 'planet', FILTER_SANITIZE_STRING))
             )
         );
         

@@ -16,7 +16,12 @@ return array(
         /*
          * Tolerance value for simplication (in degrees)
          */
-        "geometryTolerance" => ${ITAG_SIMPLICATION_TOLERANCE:-0.1}
+        "geometryTolerance" => ${ITAG_SIMPLICATION_TOLERANCE:-0.1},
+
+        /*
+         * Default planet
+         */
+        "planet" => "${ITAG_DEFAULT_PLANET:-earth}"
         
     ),
     

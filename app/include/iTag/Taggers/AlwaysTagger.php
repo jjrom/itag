@@ -77,13 +77,13 @@ class AlwaysTagger extends Tagger
         /*
          * Relative location on earth
          */
-        $locations = $this->getLocations($metadata['geometry'], $metadata['planet']);
+        $locations = $this->getLocations($metadata['geometry'], $this->config['planet']);
         $keywords = $locations;
 
         /*
          * Coastal and seasons are Earth only
          */
-        if ( $metadata['planet'] !== 'earth' ) {
+        if ( $this->config['planet'] !== 'earth' ) {
             $this->references = array();
         }
         else {
