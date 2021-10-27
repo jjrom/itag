@@ -5,12 +5,6 @@ CONF_POSTGRESQL=/etc/postgresql.conf
 if [[ $POSTGRES_MAX_CONNECTIONS ]]
 then
   echo "[postgresql] setting max_connections ${POSTGRES_MAX_CONNECTIONS}"
-  sed -i "s/\max_connections=.*/max_connections=${NGINX_FASTCGI_BUFFERS}/" $CONF_POSTGRESQL
-fi
-
-if [[ $POSTGRES_MAX_CONNECTIONS ]]
-then
-  echo "[postgresql] setting max_connections ${POSTGRES_MAX_CONNECTIONS}"
   sed -i "s/\max_connections=.*/max_connections=${POSTGRES_MAX_CONNECTIONS}/" $CONF_POSTGRESQL
 fi
 
@@ -24,6 +18,12 @@ if [[ $POSTGRES_SHARED_BUFFERS ]]
 then
   echo "[postgresql] setting shared_buffers ${POSTGRES_SHARED_BUFFERS}"
   sed -i "s/\shared_buffers=.*/shared_buffers=${POSTGRES_SHARED_BUFFERS}/" $CONF_POSTGRESQL
+fi
+
+if [[ $POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER ]]
+then
+  echo "[postgresql] setting max_parallel_workers_per_gather ${POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER}"
+  sed -i "s/\max_parallel_workers_per_gather=.*/max_parallel_workers_per_gather=${POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER}/" $CONF_POSTGRESQL
 fi
 
 if [[ $POSTGRES_WORK_MEM ]]
