@@ -27,7 +27,7 @@ abstract class Tagger
     /*
      * Data references description
      */
-    public $references;
+    public $references = array();
 
     /*
      * Database Handler reference
