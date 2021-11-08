@@ -111,7 +111,9 @@ abstract class Tagger
                 throw new Exception('Database Connection Error', 500);
             }    
         }
-        catch (Exception $e) {}
+        catch (Exception $e) {
+            $results = null;
+        }
         return $results;
     }
 
