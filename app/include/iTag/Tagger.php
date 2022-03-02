@@ -27,7 +27,7 @@ abstract class Tagger
     /*
      * Data references description
      */
-    public $references;
+    public $references = array();
 
     /*
      * Database Handler reference
@@ -111,7 +111,9 @@ abstract class Tagger
                 throw new Exception('Database Connection Error', 500);
             }    
         }
-        catch (Exception $e) {}
+        catch (Exception $e) {
+            $results = null;
+        }
         return $results;
     }
 

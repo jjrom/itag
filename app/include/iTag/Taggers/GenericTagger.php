@@ -100,6 +100,10 @@ class GenericTagger extends Tagger
         
         $content = array();
         $results = $this->getResults($tableName, $mapping, $geometry, $options);
+        if ( empty($results) ) {
+            return $content;
+        }
+
         while ($result = pg_fetch_assoc($results)) {
             
             /*
