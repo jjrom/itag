@@ -19,6 +19,7 @@ class PoliticalTagger extends Tagger
 {
     const COUNTRIES = 1;
     const REGIONS = 2;
+    const CONTINENTS = 3;
 
     /*
      * This Tagger is specific to Earth
@@ -113,6 +114,9 @@ class PoliticalTagger extends Tagger
             $this->addToponyms = $options['toponyms'];
         }
 
+        $limitToCountries = isset($options['limitToCountries']) ? filter_var($options['limitToCountries'], FILTER_VALIDATE_BOOLEAN) : false;
+        $limitToContinents = isset($options['limitToContinents']) ? filter_var($options['limitToContinents'], FILTER_VALIDATE_BOOLEAN) : false;
+
         /*
          * Initialize empty array
          */
@@ -121,13 +125,14 @@ class PoliticalTagger extends Tagger
         /*
          * Add continents and countries
          */
-        $this->add($continents, $geometry, PoliticalTagger::COUNTRIES);
+        $this->add($continents, $geometry, PoliticalTagger::COUNTRIES, array(
+            'limitToContinents' => $limitToContinents
+        ));    
 
         /*
          * Add regions/states if requested
          */
-        $limitToCountries = isset($options['limitToCountries']) ? filter_var($options['limitToCountries'], FILTER_VALIDATE_BOOLEAN) : false;
-        if ( !$limitToCountries ) {
+        if ( !$limitToContinents && !$limitToCountries ) {
             $this->add($continents, $geometry, PoliticalTagger::REGIONS);
         }
 
@@ -144,9 +149,10 @@ class PoliticalTagger extends Tagger
      * @param array $continents
      * @param string $geometry
      * @param integer $what
+     * @param array $options
      *
      */
-    private function add(&$continents, $geometry, $what)
+    private function add(&$continents, $geometry, $what, $options = array())
     {
         $prequery = 'WITH prequery AS (SELECT ' . $this->postgisGeomFromText($geometry) . ' AS corrected_geometry)';
         if ($what === PoliticalTagger::COUNTRIES) {
@@ -158,7 +164,7 @@ class PoliticalTagger extends Tagger
         if ($results) {
             while ($element = pg_fetch_assoc($results)) {
                 if ($what === PoliticalTagger::COUNTRIES) {
-                    $this->addCountriesToContinents($continents, $element);
+                    $this->addCountriesToContinents($continents, $element, $options['limitToContinents'] ?? false);
                     continue;
                 }
             
@@ -250,8 +256,9 @@ class PoliticalTagger extends Tagger
      *
      * @param array $continents
      * @param array $element
+     * @param boolean $limitToContinents
      */
-    private function addCountriesToContinents(&$continents, $element)
+    private function addCountriesToContinents(&$continents, $element, $limitToContinents)
     {
         $index = -1;
         for ($i = count($continents); $i--;) {
@@ -269,16 +276,21 @@ class PoliticalTagger extends Tagger
             ));
             $index = count($continents) - 1;
         }
-        $area = $this->toSquareKm($element['area']);
-        $pcover = $this->percentage($area, $this->area);
-        if ($pcover > 0) {
-            array_push($continents[$index]['countries'], array(
-                'name' => $element['name'],
-                'id' => 'country'. iTag::TAG_SEPARATOR . $element['id'],
-                'pcover' => $pcover,
-                'gcover' => $this->percentage($area, $this->toSquareKm($element['entityarea']))
-            ));
+
+        // Skip countries
+        if ( $limitToContinents ) {
+            $area = $this->toSquareKm($element['area']);
+            $pcover = $this->percentage($area, $this->area);
+            if ($pcover > 0) {
+                array_push($continents[$index]['countries'], array(
+                    'name' => $element['name'],
+                    'id' => 'country'. iTag::TAG_SEPARATOR . $element['id'],
+                    'pcover' => $pcover,
+                    'gcover' => $this->percentage($area, $this->toSquareKm($element['entityarea']))
+                ));
+            }
         }
+        
     }
 
     /**
