@@ -278,7 +278,7 @@ class PoliticalTagger extends Tagger
         }
 
         // Skip countries
-        if ( $limitToContinents ) {
+        if ( !$limitToContinents ) {
             $area = $this->toSquareKm($element['area']);
             $pcover = $this->percentage($area, $this->area);
             if ($pcover > 0) {
