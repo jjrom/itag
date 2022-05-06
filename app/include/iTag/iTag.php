@@ -33,7 +33,7 @@ class iTag
      *  )
      * )
      */
-    const VERSION = '5.3.3';
+    const VERSION = '5.3.5';
     
     /*
      * Character separator
@@ -137,7 +137,7 @@ class iTag
          */
         foreach ($taggers as $name => $options) {
 
-            $tagger = $this->instantiateTagger(ucfirst($name) . 'Tagger');
+            $tagger = $this->instantiateTagger(ucfirst(strtolower(trim($name))) . 'Tagger');
 
             if (isset($tagger)) {
 
