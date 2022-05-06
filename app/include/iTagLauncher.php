@@ -359,12 +359,12 @@ class iTagLauncher
 
             foreach (array_values($taggersList) as $value) {
 
-                $taggerName = ucfirst(trim($value));
+                $taggerName = ucfirst(strtolower(trim($value)));
                 $taggerOptions = array();
 
                 foreach (array_keys($query) as $key ) {
                     $exploded = explode('_', $key);
-                    if ( count($exploded) === 2 && $exploded[0] === $taggerName ) {
+                    if ( count($exploded) === 2 && ucfirst(strtolower(trim($exploded[0]))) === $taggerName ) {
                         $taggerOptions[$exploded[1]] = $this->formatInput($query[$key]);
                     }
                 }
@@ -377,13 +377,13 @@ class iTagLauncher
         
         $params = array(
             'metadata' => array(
-                'geometry' => rawurldecode(filter_input(INPUT_GET, 'geometry', FILTER_SANITIZE_STRING)),
-                'timestamp' => rawurldecode(filter_input(INPUT_GET, 'timestamp', FILTER_SANITIZE_STRING))
+                'geometry' => rawurldecode(filter_input(INPUT_GET, 'geometry', FILTER_UNSAFE_RAW)),
+                'timestamp' => rawurldecode(filter_input(INPUT_GET, 'timestamp', FILTER_UNSAFE_RAW))
             ),
             'taggers' => $taggers,
             'config' => array(
                 'returnGeometries' => isset($query['_wkt']) ? filter_var($query['_wkt'], FILTER_VALIDATE_BOOLEAN) : false,
-                'planet' => rawurldecode(filter_input(INPUT_GET, 'planet', FILTER_SANITIZE_STRING))
+                'planet' => rawurldecode(filter_input(INPUT_GET, 'planet', FILTER_UNSAFE_RAW))
             )
         );
         
@@ -420,9 +420,9 @@ class iTagLauncher
      */
     private function setCORSHeaders()
     {
-        $httpOrigin = filter_input(INPUT_SERVER, 'HTTP_ORIGIN', FILTER_SANITIZE_STRING);
-        $httpRequestMethod = filter_input(INPUT_SERVER, 'HTTP_ACCESS_CONTROL_REQUEST_METHOD', FILTER_SANITIZE_STRING);
-        $httpRequestHeaders = filter_input(INPUT_SERVER, 'HTTP_ACCESS_CONTROL_REQUEST_HEADERS', FILTER_SANITIZE_STRING);
+        $httpOrigin = filter_input(INPUT_SERVER, 'HTTP_ORIGIN', FILTER_UNSAFE_RAW);
+        $httpRequestMethod = filter_input(INPUT_SERVER, 'HTTP_ACCESS_CONTROL_REQUEST_METHOD', FILTER_UNSAFE_RAW);
+        $httpRequestHeaders = filter_input(INPUT_SERVER, 'HTTP_ACCESS_CONTROL_REQUEST_HEADERS', FILTER_UNSAFE_RAW);
         
         /*
          * Only set access to known servers
