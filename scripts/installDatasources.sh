@@ -125,6 +125,11 @@ else
     echo -e "[INFO] Using existing ${CONTINENTS} data" 
 fi
 ${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${CONTINENTS} datasources.continents 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
+PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log << EOF
+ALTER TABLE datasources.continents ALTER COLUMN geom_simple TYPE GEOMETRY(MultiPolygon, 4326);
+UPDATE datasources.continents SET geom_simple=ST_Simplify(geom, 0.2);
+CREATE INDEX IF NOT EXISTS continents_geom_simple_idx ON datasources.continents USING gist (geom_simple);
+EOF
 echo -e "${GREEN}[INFO] Continents installed${NC}"
 
 
