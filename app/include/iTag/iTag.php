@@ -33,7 +33,7 @@ class iTag
      *  )
      * )
      */
-    const VERSION = '5.3.5';
+    const VERSION = '5.3.6';
     
     /*
      * Character separator
@@ -64,7 +64,12 @@ class iTag
         /*
          * Tolerance value for simplication (in degrees)
          */
-        'geometryTolerance' => 0.1
+        'geometryTolerance' => 0.1,
+
+        /*
+         * Default planet
+         */
+        'planet' => 'earth'
     );
 
     /**
