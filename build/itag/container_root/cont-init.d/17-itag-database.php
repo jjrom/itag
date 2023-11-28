@@ -37,9 +37,9 @@
         }
         
         $dbh = @pg_connect(join(' ', $dbInfo));
-        while (!$dbh) {
+        if (!$dbh) {
             echo "[WAIT] Database...";
-            sleep(1);
+            sleep(2);
             $dbh = @pg_connect(join(' ', $dbInfo));
         }
         
