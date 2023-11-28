@@ -15,6 +15,8 @@ services:
     build:
       context: ./
       dockerfile: ./build/itag/Dockerfile
+    depends_on:
+      - itagdb
     networks:
       - external
       - default
@@ -49,3 +51,26 @@ services:
       test: ["CMD", "curl", "-f", "http://127.0.0.1/?geometry=POINT(0 0)"]
       interval: 1m
       timeout: 5s
+
+  itagdb:
+    image: postgis/postgis:14-master
+    restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/etc/postgresql.conf"]
+    # Upgrade shared_memory for complex queries
+    shm_size: '2gb'
+    networks:
+      - default
+      - external
+    environment:
+      - POSTGRES_USER=${ITAG_DATABASE_USER_NAME:-itag}
+      - POSTGRES_PASSWORD=${ITAG_DATABASE_USER_PASSWORD:-itag}
+      - POSTGRES_DB=${ITAG_DATABASE_NAME:-itag}
+      - POSTGRES_HOST=${ITAG_DATABASE_HOST:-itagdb}
+      - POSTGRES_PORT=${ITAG_DATABASE_PORT:-5432}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER_NAME:-itag}"]
+      interval: 1m
+      timeout: 5s
+    volumes:
+      - database_data:/var/lib/postgresql/data
+      - ./postgresql-conf/postgresql.conf:/etc/postgresql.conf

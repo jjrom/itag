@@ -6,3 +6,10 @@ services:
       - PHP_ENABLE_XDEBUG=1
     volumes:
       - ./app:/app:ro
+      - ./build/itag/container_root/cont-init.d/17-itag-database.php:/etc/cont-init.d/17-itag-database.php
+      
+  itagdb:
+    ports:
+      - ${ITAG_DATABASE_EXPOSED_PORT:-1213}:${ITAG_DATABASE_PORT:-5432}
+    volumes:
+      - ./postgresql-conf/postgresql-dev.conf:/etc/postgresql.conf

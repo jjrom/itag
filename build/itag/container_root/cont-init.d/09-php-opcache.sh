@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/command/with-contenv bash
 
 if [[ $ITAG_DEBUG = 1 || $ITAG_DEBUG = '1' || $ITAG_DEBUG = 'true' ]]
 then

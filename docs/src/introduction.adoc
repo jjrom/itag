@@ -8,7 +8,7 @@ See http://vimeo.com/51045597[video capture of itag applied to Pleiades HR and S
 Test the https://itag.snapplanet.io?_pretty=1&taggers=political&geometry=POLYGON((1.350360%2043.532822,1.350360%2043.668522,1.515350%2043.668522,1.515350%2043.532822,1.350360%2043.532822))[service online]
 
 === References
-Here are some projects that use resto.
+Here are some projects that use itag.
 
 * https://creodias.eu/eo-data-finder-api-manual[CREODIAS]
 * https://peps.cnes.fr/rocket/#/home[French Sentinel Data Processing center]
@@ -22,7 +22,7 @@ If you plan to use iTag and would like to have your project added to this list, 
 === Support
 iTag is developped and maintained by https://mapshup.com[jeobrowser]. 
 
-For questions, support or anything related to resto feel free to contact 
+For questions, support or anything related to itag feel free to contact 
 ```
 jeobrowser
 50 quai de Tounis

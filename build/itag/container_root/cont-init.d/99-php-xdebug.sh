@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/command/with-contenv bash
 
 if [[ ($ITAG_DEBUG = 1 || $ITAG_DEBUG = '1' || $ITAG_DEBUG = 'true') && ($PHP_ENABLE_XDEBUG = 1 || $PHP_ENABLE_XDEBUG = '1' || $PHP_ENABLE_XDEBUG = 'true') ]]
 then

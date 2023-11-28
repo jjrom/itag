@@ -1,4 +1,4 @@
-#resto documentation
+#itag documentation
 
 OpenAPI 3.O API document is generated from PHP annotation using swagger-php
 
