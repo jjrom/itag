@@ -1,8 +1,8 @@
-FROM jjrom/nginx-fpm:8.0
+FROM jjrom/nginx-fpm:8.2
 LABEL maintainer="jerome.gasperi@gmail.com"
 
 ENV BUILD_DIR=./build/itag \
-    PHP_VERSION=8.0 \
+    PHP_VERSION=8.2 \
     ITAG_DEBUG=1
 
 # Copy NGINX configuration
@@ -16,6 +16,9 @@ COPY ${BUILD_DIR}/container_root/etc/php/mods-available /etc/php/${PHP_VERSION}/
 
 # Copy run.d configuration
 COPY ${BUILD_DIR}/container_root/cont-init.d /etc/cont-init.d
+
+# Copy source code in app directory
+COPY ./itag-database-model /itag-database-model
 
 # Create app directory
 RUN mkdir /cfg

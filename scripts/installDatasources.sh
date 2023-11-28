@@ -100,11 +100,11 @@ SHP2PGSQL="docker run --rm -v ${DATA_DIR}:/data:ro jjrom/shp2pgsql"
 COASTLINES=ne_10m_coastline.shp
 echo -e "[INFO] Retrieve coastlines from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${COASTLINES} ]; then
-    wget -O ${DATA_DIR}/ne_10m_coastline.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_coastline.zip
+    wget -O ${DATA_DIR}/ne_10m_coastline.zip https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_coastline.zip
     unzip -q ${DATA_DIR}/ne_10m_coastline.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_coastline.zip
 else
-    echo -e "[INFO] Using existing ${COASTLINES} data" 
+    echo -e "[INFO] Using existing ${COASTLINES} data"
 fi
 ${SHP2PGSQL} -g geom -d -W ${ENCODING} -s 4326 -I /data/${COASTLINES} datasources.coastlines 2> /dev/null | PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log
 PGPASSWORD=${ITAG_DATABASE_USER_PASSWORD} psql -U ${ITAG_DATABASE_USER_NAME} -d ${ITAG_DATABASE_NAME} -h ${DATABASE_HOST_SEEN_FROM_DOCKERHOST} -p ${ITAG_DATABASE_EXPOSED_PORT} > /dev/null 2>errors.log << EOF
@@ -137,7 +137,7 @@ echo -e "${GREEN}[INFO] Continents installed${NC}"
 COUNTRIES=ne_10m_admin_0_countries.shp
 echo -e "[INFO] Installing World Administrative Level 1 data from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${COUNTRIES} ]; then
-    wget -O ${DATA_DIR}/ne_10m_admin_0_countries.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip
+    wget -O ${DATA_DIR}/ne_10m_admin_0_countries.zip https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip
     unzip -q ${DATA_DIR}/ne_10m_admin_0_countries.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_admin_0_countries.zip
 else
@@ -208,7 +208,7 @@ echo -e "${GREEN}[INFO] Countries installed${NC}"
 STATES=ne_10m_admin_1_states_provinces.shp
 echo -e "[INFO] World administrative level 1 (i.e. states for USA, departements for France)"
 if [ ! -f ${DATA_DIR}/${STATES} ]; then
-    wget -O ${DATA_DIR}/ne_10m_admin_1_states_provinces.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_1_states_provinces.zip
+    wget -O ${DATA_DIR}/ne_10m_admin_1_states_provinces.zip https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_1_states_provinces.zip
     unzip -q ${DATA_DIR}/ne_10m_admin_1_states_provinces.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_admin_1_states_provinces.zip
 else
@@ -261,7 +261,7 @@ echo -e "${GREEN}[INFO] Plates, faults and volcanoes installed${NC}"
 GLACIERS=ne_10m_glaciated_areas.shp
 echo -e "[INFO] Retrieve glaciers from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${GLACIERS} ]; then
-    wget -O ${DATA_DIR}/ne_10m_glaciated_areas.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_glaciated_areas.zip
+    wget -O ${DATA_DIR}/ne_10m_glaciated_areas.zip https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_glaciated_areas.zip
     unzip -q ${DATA_DIR}/ne_10m_glaciated_areas.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_glaciated_areas.zip
 else
@@ -274,7 +274,7 @@ echo -e "${GREEN}[INFO] Glaciers installed${NC}"
 RIVERS=ne_10m_rivers_lake_centerlines.shp
 echo -e "[INFO] Retrieve rivers from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${RIVERS} ]; then
-    wget -O ${DATA_DIR}/ne_10m_rivers_lake_centerlines.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_rivers_lake_centerlines.zip
+    wget -O ${DATA_DIR}/ne_10m_rivers_lake_centerlines.zip https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_rivers_lake_centerlines.zip
     unzip -q ${DATA_DIR}/ne_10m_rivers_lake_centerlines.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_rivers_lake_centerlines.zip
 else
@@ -287,7 +287,7 @@ echo -e "${GREEN}[INFO] Rivers installed${NC}"
 MARINEAREAS=ne_10m_geography_marine_polys.shp
 echo -e "[INFO] Retrieve other data (i.e. marine areas, mountains area, etc.) from [Natural Earth]"
 if [ ! -f ${DATA_DIR}/${MARINEAREAS} ]; then
-    wget -O ${DATA_DIR}/ne_10m_geography_marine_polys.zip http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_geography_marine_polys.zip
+    wget -O ${DATA_DIR}/ne_10m_geography_marine_polys.zip https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_geography_marine_polys.zip
     unzip -q ${DATA_DIR}/ne_10m_geography_marine_polys.zip -d ${DATA_DIR}
     [ $? -eq 0 ] && rm ${DATA_DIR}/ne_10m_geography_marine_polys.zip
 else

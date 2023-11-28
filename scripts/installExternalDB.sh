@@ -63,7 +63,7 @@ do
 done
 
 # The environement file is mandatory
-# It contains all configuration to build and run resto images
+# It contains all configuration to build and run itag images
 #
 if [[ ! -f "${ENV_FILE}" ]]; then
     showUsage

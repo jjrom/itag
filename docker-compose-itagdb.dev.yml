@@ -1,5 +1,0 @@
-version: '3'
-services:
-  itagdb:
-    environment:
-      - POSTGRES_LOG_MIN_DURATION_STATEMENT=0

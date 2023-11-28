@@ -21,11 +21,7 @@ PROJECT_NAME=itag
 
 ITAG_DATABASE_HOST=$(grep ^ITAG_DATABASE_HOST= ${ENV_FILE} | awk -F= '{print $2}' | sed 's/^"//g' | sed 's/"$//g')
 
-if [ "${ITAG_DATABASE_HOST}" == "itagdb" ]; then
-  COMPOSE_FILE="docker-compose-itagdb.yml:docker-compose.yml"
-else
-  COMPOSE_FILE="docker-compose.yml"
-fi
+COMPOSE_FILE="docker-compose.yml"
 
 echo -e "[INFO] Stopping ${GREEN}${PROJECT_NAME}${NC} docker instance"
 COMPOSE_FILE=${COMPOSE_FILE} docker-compose --project-name ${PROJECT_NAME} down
